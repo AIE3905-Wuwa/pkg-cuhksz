@@ -28,8 +28,8 @@ python -m venv .venv
 | `whoami` / `status` / `terms` | 身份、会话状态、学期表 |
 | `courses [--term 子串]` | 我的课程（`--format text` 一行一课） |
 | `tree <课程> [--depth N] [--no-attachments]` | 内容树（folder/lesson/assignment，叶带附件名） |
-| `files <课程> [--match 正则]` | 课件清单（全路径 + 附件 id/文件名/mime） |
-| `fetch <课程> [--match 正则] [--since YYYY-MM-DD] [-o 目录] [--dry-run]` | 下载课件，保留 `课程/目录树` 结构；已存在跳过；同名附件尾缀附件 id |
+| `files <课程> [--match 正则]` | 课件清单（全路径 + 附件 id/文件名/mime；`--match` 作用路径与文件名） |
+| `fetch <课程> [--match 正则] [--since YYYY-MM-DD] [-o 目录] [--dry-run]` | 下载课件，保留 `课程/目录树` 结构；`--match` 作用路径与文件名；已存在跳过；同名附件尾缀附件 id |
 | `announcements [--course 子串\|all] [--limit N] [--html]` | 公告（默认扫全部课程，正文转纯文本） |
 | `dues [--from D] [--to D] [--course C]` | 跨课程截止（日历端点，一份拿全） |
 | `assignments <课程>` | 作业清单：截止 × 满分 × 我的提交状态（NeedsGrading/Graded/None） |

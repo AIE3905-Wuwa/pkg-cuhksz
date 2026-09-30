@@ -175,14 +175,23 @@ def _walk_files(c: BBClient, cid: str, depth: int):
                                     "mime": a.get("mimeType")} for a in atts]}
 
 
+def _match_rows(rows: list[dict], pattern: str) -> list[dict]:
+    """--match 同时作用于内容路径与附件文件名（不区分大小写）。"""
+    rx = re.compile(pattern, re.I)
+
+    def hay(r: dict) -> str:
+        return r["path"] + " " + " ".join(a.get("fileName") or "" for a in r["attachments"])
+
+    return [r for r in rows if rx.search(hay(r))]
+
+
 def cmd_files(args):
     c, _, _ = build_client()
     need_auth(c)
     course = c.resolve_course(args.course)
     rows = list(_walk_files(c, course["id"], args.depth))
     if args.match:
-        rx = re.compile(args.match, re.I)
-        rows = [r for r in rows if rx.search(r["path"])]
+        rows = _match_rows(rows, args.match)
     emit({"course": course.get("name"), "count": len(rows), "files": rows}, args.format,
           lambda o: [f"{r['path']}  [{', '.join(a['fileName'] or '' for a in r['attachments'])}]" for r in o["files"]])
 
@@ -193,8 +202,7 @@ def cmd_fetch(args):
     course = c.resolve_course(args.course)
     rows = list(_walk_files(c, course["id"], 12))
     if args.match:
-        rx = re.compile(args.match, re.I)
-        rows = [r for r in rows if rx.search(r["path"])]
+        rows = _match_rows(rows, args.match)
     if args.since:
         rows = [r for r in rows if _date_part(r.get("modified")) >= args.since]
     plan = []
