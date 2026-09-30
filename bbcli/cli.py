@@ -6,6 +6,7 @@ import argparse
 import json
 import re
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from . import __version__, auth, config
@@ -32,8 +33,30 @@ def _sanitize(name: str) -> str:
     return s[:80] or "_"
 
 
+def _local_dt(iso: str | None) -> datetime | None:
+    """API 原值为 UTC ISO（…Z）；无时区标记亦按 UTC。解析失败返回 None。"""
+    if not iso:
+        return None
+    s = iso.strip()
+    if s.endswith(("Z", "z")):
+        s = s[:-1] + "+00:00"
+    try:
+        dt = datetime.fromisoformat(s)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone()  # 本机时区
+
+
 def _date_part(iso: str | None) -> str:
-    return (iso or "")[:10]
+    dt = _local_dt(iso)
+    return dt.strftime("%Y-%m-%d") if dt else (iso or "")[:10]
+
+
+def _dt_part(iso: str | None) -> str:
+    dt = _local_dt(iso)
+    return dt.strftime("%Y-%m-%dT%H:%M") if dt else (iso or "")[:16]
 
 
 # ---- 会话装配 ----
@@ -291,7 +314,7 @@ def cmd_assignments(args):
                      "content_id": col.get("contentId")})
     rows.sort(key=lambda r: r.get("due") or "")
     emit({"course": course.get("name"), "assignments": rows}, args.format,
-          lambda o: [f"{r['due'][:16]}  {r['name']}  [{r['status'] or '-'}]" for r in o["assignments"]])
+         lambda o: [f"{_dt_part(r['due'])}  {r['name']}  [{r['status'] or '-'}]" for r in o["assignments"]])
 
 
 def cmd_grades(args):

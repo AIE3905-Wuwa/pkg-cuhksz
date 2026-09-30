@@ -39,6 +39,8 @@ python -m venv .venv
 
 课程参数接受：课程 id（`_18030_1`）、课程代码或名称子串（`AIE3005`）；歧义时报候选清单。
 
+**时刻处理**（0.1.1）：Learn REST 原值为 UTC ISO（`…Z`）；`--format text` 的时间展示与 `--from` / `--to` / `--since` 日期过滤均换算为本机时区，JSON 输出保持 API 原值。
+
 **Git Bash 注意**：以 `/` 开头的 raw 路径会被 MSYS 改写，用 `MSYS_NO_PATHCONV=1` 前缀或去掉首斜杠（相对路径）。
 
 ## 已知边界（2026-09-29 实测）
