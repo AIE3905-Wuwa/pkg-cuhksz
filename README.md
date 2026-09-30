@@ -33,6 +33,7 @@ python -m venv .venv
 | `announcements [--course 子串\|all] [--limit N] [--html]` | 公告（默认扫全部课程，正文转纯文本；单课拉取失败跳过并在结果报 `skipped` 清单） |
 | `dues [--from D] [--to D] [--course C]` | 跨课程截止：日历端点 + 每课成绩册列**双源合并去重**（日历会漏项，成绩册兜底；条目带 `source`，同课同题保留日历条目；请求量 ≈ 课程数） |
 | `assignments <课程>` | 作业清单：截止 × 满分 × 我的提交状态（NeedsGrading/Graded/None） |
+| `submission <课程> [--match 正则] [--download] [-o 目录]` | 我的提交明细：状态 × 提交时刻 × 文件清单；`--download` 落盘 `课程/submissions/作业/文件`（Classic 路由） |
 | `grades [课程] [--due-only]` | 成绩册列 × 我的状态（默认全部课程） |
 | `roster <课程>` | 课程成员（含 lastAccessed，注意隐私） |
 | `raw GET <路径> [--q k=v]...` | 任意 REST GET 透传——新需求先走这里，验证后再封命令 |
@@ -48,7 +49,7 @@ python -m venv .venv
 ## 已知边界（2026-09-29 实测）
 
 - 学生会话下 404：`gradebook/attempts`（平铺列表）、`discussion/forums`、`users/me/memberships`、`tasks`、`gradebook/grades`。
-- 例外已实证（2026-09-30）：`gradebook/columns/{col}/attempts` 返回自己的 attempt（含提交时刻）；`attempts/{id}/files` 可列文件名；REST `/download` 仍 404，但 Classic 视图页（`/webapps/assignment/uploadAssignment?…&mode=view`）内的 `/webapps/assignment/download?course_id=…&attempt_id=…&file_id=…&fileName=…` 可下载——拉提交文件的可行链路（暂未封命令，`raw` + transport 可达）。
+- 例外已实证（2026-09-30）：`gradebook/columns/{col}/attempts` 返回自己的 attempt（含提交时刻）；`attempts/{id}/files` 可列文件名；REST `/download` 仍 404，但 Classic 视图页（`/webapps/assignment/uploadAssignment?…&mode=view`）内的 `/webapps/assignment/download?course_id=…&attempt_id=…&file_id=…&fileName=…` 可下载——已封为 `submission` 命令（v0.1.3）。
 - 讨论板若要做须走 DOM 路线（参考 bb-mcp），v1 不含。
 - 仅 Classic（JSP）课程；Ultra 课程未验证。
 - 写操作（提交作业/发公告）刻意不提供——上层如需，须用户明示并另行设计。

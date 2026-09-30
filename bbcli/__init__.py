@@ -5,4 +5,4 @@ auth（ADFS OAuth2 登录）/ api（Learn REST 封装）/ cli（命令面）。
 纪律：只读——不出任何写操作请求；凭据与会话只落用户目录，不进任何仓库。
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"

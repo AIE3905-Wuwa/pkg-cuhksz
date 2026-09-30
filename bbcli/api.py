@@ -6,7 +6,7 @@
 
 from __future__ import annotations
 
-from urllib.parse import urljoin
+from urllib.parse import quote, urljoin
 
 from . import config
 from .transport import ApiError, Transport, TransportError
@@ -151,6 +151,19 @@ class BBClient:
             return r.json()
         except ValueError:
             return None
+
+    def column_attempts(self, cid: str, col_id: str) -> list[dict]:
+        """按列拉 attempt（学生会话只返回自己的）。"""
+        return self._paginate(f"{API}/courses/{cid}/gradebook/columns/{col_id}/attempts")
+
+    def attempt_files(self, cid: str, attempt_id: str) -> list[dict]:
+        return self._paginate(f"{API}/courses/{cid}/gradebook/attempts/{attempt_id}/files")
+
+    @staticmethod
+    def attempt_download_url(cid: str, attempt_id: str, file_id: str, file_name: str) -> str:
+        # REST /download 404（学生会话），Classic 路由可达（2026-09-30 实证）
+        return (f"/webapps/assignment/download?course_id={cid}&attempt_id={attempt_id}"
+                f"&file_id={file_id}&fileName={quote(file_name)}")
 
     # ---- 日历 / 花名册 ----
     def calendar_items(self) -> list[dict]:

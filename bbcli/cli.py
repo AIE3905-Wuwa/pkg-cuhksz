@@ -357,6 +357,50 @@ def cmd_assignments(args):
          lambda o: [f"{_dt_part(r['due'])}  {r['name']}  [{r['status'] or '-'}]" for r in o["assignments"]])
 
 
+def cmd_submission(args):
+    c, _, _ = build_client()
+    need_auth(c)
+    course = c.resolve_course(args.course)
+    uid = c.me()["id"]
+    rows = []
+    for col in c.grade_columns(course["id"]):
+        name = col.get("name") or ""
+        if args.match and not re.search(args.match, name, re.I):
+            continue
+        att = next((a for a in c.column_attempts(course["id"], col["id"])
+                    if a.get("userId") == uid), None)
+        files = c.attempt_files(course["id"], att["id"]) if att else []
+        rows.append({"name": name,
+                     "due": (col.get("grading") or {}).get("due"),
+                     "status": (att or {}).get("status") or "None",
+                     "submitted_at": (att or {}).get("created"),
+                     "column_id": col.get("id"), "attempt_id": (att or {}).get("id"),
+                     "files": [{"id": f.get("id"), "name": f.get("name")} for f in files]})
+    rows.sort(key=lambda r: r.get("due") or "")
+    dl = []
+    if args.download:
+        outdir = Path(args.out or ".").expanduser()
+        root = outdir / _sanitize(course.get("name") or course["id"]) / "submissions"
+        for r in rows:
+            if not r["attempt_id"]:
+                continue
+            for f in r["files"]:
+                dest = root / _sanitize(r["name"] or r["column_id"]) / _sanitize(f["name"] or f["id"])
+                if dest.exists():
+                    dl.append({"path": str(dest.relative_to(outdir)), "bytes": "exists"})
+                    continue
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    n = c.t.download(c.attempt_download_url(course["id"], r["attempt_id"], f["id"], f["name"]), dest)
+                    dl.append({"path": str(dest.relative_to(outdir)), "bytes": n})
+                except (ApiError, TransportError) as e:
+                    dl.append({"file": f.get("name"), "error": str(e)[:200]})
+    emit({"course": course.get("name"), "submissions": rows, "downloaded": dl}, args.format,
+         lambda o: [f"{_dt_part(r['due']) or '-'}  {r['name']}  [{r['status']}]  "
+                    f"提交于 {_dt_part(r['submitted_at']) or '-'}  "
+                    f"{', '.join(f['name'] or '' for f in r['files'])}" for r in o["submissions"]])
+
+
 def cmd_grades(args):
     c, _, _ = build_client()
     need_auth(c)
@@ -461,6 +505,13 @@ def build_parser() -> argparse.ArgumentParser:
     s = cmd("assignments", "作业清单（列×我的状态）")
     s.add_argument("course")
     s.set_defaults(fn=cmd_assignments)
+
+    s = cmd("submission", "我的提交：状态×时刻×文件（--download 落盘）")
+    s.add_argument("course")
+    s.add_argument("--match", help="作业名正则过滤（不区分大小写）")
+    s.add_argument("--download", action="store_true", help="下载提交文件至 课程/submissions/作业/")
+    s.add_argument("-o", "--out", default=".")
+    s.set_defaults(fn=cmd_submission)
 
     s = cmd("grades", "成绩册（默认全部课程）")
     s.add_argument("course", nargs="?")
