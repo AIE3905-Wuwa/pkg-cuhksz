@@ -47,7 +47,9 @@ python -m venv .venv
 
 ## 已知边界（2026-09-29 实测）
 
-- 学生会话下 404：`gradebook/attempts`、`discussion/forums`、`users/me/memberships`、`tasks`、`gradebook/grades`——讨论板与作业提交若要做须走 DOM 路线（参考 bb-mcp），v1 不含。
+- 学生会话下 404：`gradebook/attempts`（平铺列表）、`discussion/forums`、`users/me/memberships`、`tasks`、`gradebook/grades`。
+- 例外已实证（2026-09-30）：`gradebook/columns/{col}/attempts` 返回自己的 attempt（含提交时刻）；`attempts/{id}/files` 可列文件名；REST `/download` 仍 404，但 Classic 视图页（`/webapps/assignment/uploadAssignment?…&mode=view`）内的 `/webapps/assignment/download?course_id=…&attempt_id=…&file_id=…&fileName=…` 可下载——拉提交文件的可行链路（暂未封命令，`raw` + transport 可达）。
+- 讨论板若要做须走 DOM 路线（参考 bb-mcp），v1 不含。
 - 仅 Classic（JSP）课程；Ultra 课程未验证。
 - 写操作（提交作业/发公告）刻意不提供——上层如需，须用户明示并另行设计。
 - 登录失败页的错误文案常驻 HTML 模板，判定只能靠状态推进；若学校改版登录页，带 `BB_CLI_DEBUG=<目录>` 重跑可留现场。
