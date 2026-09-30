@@ -17,7 +17,8 @@ from .transport import ApiError, Transport, TransportError
 # ---- 输出 ----
 def emit(obj, fmt: str, text_fn=None):
     if fmt == "text" and text_fn:
-        for line in text_fn(obj):
+        lines = list(text_fn(obj)) or ["（无结果）"]
+        for line in lines:
             print(line)
     else:
         print(json.dumps(obj, ensure_ascii=False, indent=2))
@@ -267,35 +268,74 @@ def cmd_announcements(args):
         rows = c.announcements(course["id"])
         for r in rows:
             r["courseName"] = course.get("name")
+        skipped = []
     else:
-        rows = c.course_announcements_all()
+        rows, skipped = c.course_announcements_all()
     rows.sort(key=lambda r: r.get("created") or "", reverse=True)
     if args.limit:
         rows = rows[: args.limit]
     if not args.html:
         for r in rows:
             r["bodyText"] = strip_html(r.get("body") or "")
-    emit({"count": len(rows), "announcements": rows}, args.format,
-          lambda o: [f"{_date_part(r.get('created'))}  {r.get('courseName', '(机构)')}  {r.get('title')}" for r in o["announcements"]])
+
+    def _lines(o):
+        out = [f"{_date_part(r.get('created'))}  {r.get('courseName', '(机构)')}  {r.get('title')}" for r in o["announcements"]]
+        if o.get("skipped"):
+            names = "、".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
+            out.append(f"!! 跳过 {len(o['skipped'])} 课（拉取失败）：{names}")
+        return out
+
+    emit({"count": len(rows), "announcements": rows, "skipped": skipped}, args.format, _lines)
 
 
 def cmd_dues(args):
     c, _, _ = build_client()
     need_auth(c)
-    rows = c.calendar_items()
+    # 双源合并：日历端点 + 每课成绩册列（日历会漏项，成绩册兜底；同课同题保留日历条目）
+    items = [{"course": r.get("calendarName"), "title": r.get("title"), "source": "calendar",
+              "due": r.get("start"), "end": r.get("end"), "type": r.get("type")}
+             for r in c.calendar_items()]
+    skipped = []
     if args.course:
         course = c.resolve_course(args.course)
+        courses = [course]
         low = (course.get("name") or "").lower()
-        rows = [r for r in rows if low in (r.get("calendarName") or "").lower()]
+        items = [x for x in items if low in (x["course"] or "").lower()]
+    else:
+        courses = c.my_courses()
+    for course in courses:
+        try:
+            cols = c.grade_columns(course["id"])
+        except (TransportError, ApiError) as e:
+            skipped.append({"course": course.get("name"), "id": course.get("id"), "error": str(e)[:120]})
+            continue
+        for col in cols:
+            due = (col.get("grading") or {}).get("due")
+            if due:
+                items.append({"course": course.get("name"), "title": col.get("name"),
+                              "source": "gradebook", "due": due, "end": None, "type": None})
+    dedup, seen = [], set()
+    for x in sorted(items, key=lambda i: i["source"] != "calendar"):  # 稳定排序：日历条目先入
+        k = (" ".join((x["course"] or "").split()), " ".join((x["title"] or "").split()))
+        if k in seen:
+            continue
+        seen.add(k)
+        dedup.append(x)
+    items = dedup
     if args.from_:
-        rows = [r for r in rows if _date_part(r.get("start")) >= args.from_]
+        items = [x for x in items if _date_part(x.get("due")) >= args.from_]
     if args.to:
-        rows = [r for r in rows if _date_part(r.get("start")) <= args.to]
-    rows.sort(key=lambda r: r.get("start") or "")
-    slim = [{"course": r.get("calendarName"), "title": r.get("title"), "type": r.get("type"),
-             "start": r.get("start"), "end": r.get("end")} for r in rows]
-    emit({"count": len(slim), "dues": slim}, args.format,
-          lambda o: [f"{_date_part(r['start'])}  {r['course']}  {r['title']}" for r in o["dues"]])
+        items = [x for x in items if _date_part(x.get("due")) <= args.to]
+    items.sort(key=lambda x: x.get("due") or "")
+
+    def _lines(o):
+        out = [f"{_date_part(r['due'])}  {r['course']}  {r['title']}  [{r['source']}]" for r in o["dues"]]
+        if o.get("skipped"):
+            names = "、".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
+            out.append(f"!! 跳过 {len(o['skipped'])} 课成绩册（拉取失败）：{names}")
+        return out
+
+    emit({"count": len(items), "dues": items, "skipped": skipped}, args.format, _lines)
 
 
 def cmd_assignments(args):
@@ -311,7 +351,7 @@ def cmd_assignments(args):
         rows.append({"name": col.get("name"), "due": grading.get("due"),
                      "possible": (col.get("score") or {}).get("possible"),
                      "status": st.get("status"), "score": st.get("score"),
-                     "content_id": col.get("contentId")})
+                     "column_id": col.get("id"), "content_id": col.get("contentId")})
     rows.sort(key=lambda r: r.get("due") or "")
     emit({"course": course.get("name"), "assignments": rows}, args.format,
          lambda o: [f"{_dt_part(r['due'])}  {r['name']}  [{r['status'] or '-'}]" for r in o["assignments"]])
@@ -331,7 +371,8 @@ def cmd_grades(args):
             rows.append({"name": col.get("name"),
                          "due": (col.get("grading") or {}).get("due"),
                          "possible": (col.get("score") or {}).get("possible"),
-                         "status": st.get("status"), "score": st.get("score")})
+                         "status": st.get("status"), "score": st.get("score"),
+                         "column_id": col.get("id")})
         out.append({"course": course.get("name"), "columns": rows})
     emit(out if len(out) != 1 else out[0], args.format)
 

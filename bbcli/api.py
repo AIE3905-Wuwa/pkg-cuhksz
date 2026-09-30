@@ -9,7 +9,7 @@ from __future__ import annotations
 from urllib.parse import urljoin
 
 from . import config
-from .transport import Transport
+from .transport import ApiError, Transport, TransportError
 
 API = "/learn/api/public/v1"
 
@@ -122,13 +122,19 @@ class BBClient:
             return self._paginate(f"{API}/courses/{cid}/announcements")
         return self._paginate(f"{API}/announcements")  # 机构级
 
-    def course_announcements_all(self) -> list[dict]:
-        out = []
+    def course_announcements_all(self) -> tuple[list[dict], list[dict]]:
+        """逐课拉公告；单课失败（如公告工具关闭 400）跳过记入 skipped，不连坐整体。"""
+        out, skipped = [], []
         for c in self.my_courses():
-            for a in self._paginate(f"{API}/courses/{c['id']}/announcements"):
+            try:
+                rows = self._paginate(f"{API}/courses/{c['id']}/announcements")
+            except (ApiError, TransportError) as e:
+                skipped.append({"course": c.get("name"), "id": c.get("id"), "error": str(e)[:120]})
+                continue
+            for a in rows:
                 a["courseName"] = c.get("name")
                 out.append(a)
-        return out
+        return out, skipped
 
     # ---- 成绩册 ----
     def grade_columns(self, cid: str) -> list[dict]:
