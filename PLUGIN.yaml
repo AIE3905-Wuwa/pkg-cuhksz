@@ -1,5 +1,5 @@
 id: bb-map
-version: 0.5
+version: 0.6
 depends:
   - bb
   - wiki
@@ -9,6 +9,8 @@ attachment:
   - "wiki/bb/<term>/<course>/courseware/ —— 知识点页（每内容单元一份：简要介绍 + 单元文件清单 + raw_path 指针，可指目录；纯代理整页可再生）"
   - "wiki/bb/<term>/<course>/assessments/ —— 学业事务聚合页（每作业/考试一页，四要素：要求/参考/提交/结果）"
   - "wiki/bb/<term>/<course>/attachments/ —— 附件 1:1 代理（平铺，raw_file/raw_sha256）"
+commands:
+  - bb-map
 fields:
   raw_path: "标量（courseware 知识点页）——根相对路径，指向 bb/ 内容单元（文件或目录）；路径即出身证明"
   assessment: "块映射（assessments 聚合页机械区）——due（截止）/ submitted_at（提交时刻）/ score 与 possible（得分/满分）/ status（Graded|NeedsGrading|None）/ column_id 与 attempt_id（成绩册列与提交记录 id，对账锚点）——API 快照字段"
