@@ -44,6 +44,8 @@ python -m venv .venv
 
 **dues JSON 字段**（0.1.2）：条目统一为 `course / title / source（calendar|gradebook）/ due / end / type`（旧 `start` 字段并入 `due`）；`skipped` 为成绩册拉取失败的课程清单。
 
+**fetch 过滤与刷新**（0.1.4）：`--exclude-mime 子串,…`（mimeType 含任一子串即跳过，如 `video/,audio/`）与 `--exclude-ext mp4,mov`（扩展名跳过）在建计划时预跳过，结果报 `skipped` 清单（`--dry-run` 同样可见）；`--max-size MB` 为下载中断路（附件元数据无 size，只能边下边断）；`--refresh` 对已存在件重拉比对——内容相同记 `same` 跳过，变更以内容哈希前 8 位尾缀落新件（旧件保留 = 修订史），报 `updated` 清单。
+
 **Git Bash 注意**：以 `/` 开头的 raw 路径会被 MSYS 改写，用 `MSYS_NO_PATHCONV=1` 前缀或去掉首斜杠（相对路径）。
 
 ## 已知边界（2026-09-29 实测）

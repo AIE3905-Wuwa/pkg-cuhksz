@@ -35,7 +35,7 @@ Write: none (read-only by design; submitting assignments or posting announcement
 | Gradebook | `bb-cli grades [<course>] [--due-only]` |
 | Upcoming deadlines | `bb-cli dues [--from D] [--to D] --format text` |
 | Announcements | `bb-cli announcements [--course <substring>] [--limit N]` |
-| Course files / download | `bb-cli files <course>` / `bb-cli fetch <course> [-o DIR]` |
+| Course files / download | `bb-cli files <course>` / `bb-cli fetch <course> [-o DIR] [--exclude-mime video/,audio/] [--exclude-ext mp4,mov] [--max-size MB] [--refresh]` |
 | My submissions | `bb-cli submission <course> [--download]` |
 | Identity | `bb-cli whoami` |
 
@@ -48,6 +48,10 @@ The course argument accepts a course id (`_18027_1`), a course code, or a name s
 ## Timestamps
 
 `--format text` display and `--from` / `--to` / `--since` filtering use the local timezone; JSON output keeps the raw API value (UTC ISO `…Z`).
+
+## Media & refresh
+
+`fetch` materializes everything by default. Use `--exclude-mime` / `--exclude-ext` to skip media up front (skipped items are reported in the `skipped` list — record them as pointer entries, do not download), `--max-size MB` as a download-time breaker, and `--refresh` to re-pull existing files: identical content is reported `same` and kept, changed content lands as a new file suffixed with the first 8 hex of its content hash (the old file is kept as revision history, reported in `updated`).
 
 ## Known limits
 

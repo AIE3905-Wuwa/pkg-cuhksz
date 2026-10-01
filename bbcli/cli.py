@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -11,7 +13,7 @@ from pathlib import Path
 
 from . import __version__, auth, config
 from .api import BBClient
-from .transport import ApiError, Transport, TransportError
+from .transport import ApiError, TooLarge, Transport, TransportError
 
 
 # ---- 输出 ----
@@ -220,6 +222,14 @@ def cmd_files(args):
           lambda o: [f"{r['path']}  [{', '.join(a['fileName'] or '' for a in r['attachments'])}]" for r in o["files"]])
 
 
+def _sha256_file(p: Path) -> str:
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def cmd_fetch(args):
     c, _, _ = build_client()
     need_auth(c)
@@ -229,10 +239,28 @@ def cmd_fetch(args):
         rows = _match_rows(rows, args.match)
     if args.since:
         rows = [r for r in rows if _date_part(r.get("modified")) >= args.since]
-    plan = []
+    mime_subs = [m.strip().lower() for m in (args.exclude_mime or "").split(",") if m.strip()]
+    exts = {e.strip().lstrip(".").lower() for e in (args.exclude_ext or "").split(",") if e.strip()}
+    max_bytes = int(args.max_size * 1024 * 1024) if args.max_size else None
+
+    def _excluded(a) -> str | None:
+        mime = (a.get("mimeType") or "").lower()
+        if any(m in mime for m in mime_subs):
+            return "mime"
+        name = a.get("fileName") or ""
+        ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+        if ext in exts:
+            return "ext"
+        return None
+
+    plan, skipped = [], []
     used: set[str] = set()
     for r in rows:
         for a in r["attachments"]:
+            why = _excluded(a)
+            if why:
+                skipped.append({"file": a.get("fileName") or a["id"], "reason": why})
+                continue
             rel = "/".join([_sanitize(p) for p in r["path"].split(" / ")[:-1]]
                            + [_sanitize(a["fileName"] or a["id"])])
             if rel in used:  # 同目录同名附件：尾缀附件 id 防覆盖
@@ -241,23 +269,47 @@ def cmd_fetch(args):
             used.add(rel)
             plan.append({"rel": rel, "content_id": r["content_id"], "attachment": a})
     if args.dry_run:
-        emit({"dry_run": True, "course": course.get("name"), "count": len(plan), "plan": plan}, args.format)
+        emit({"dry_run": True, "course": course.get("name"), "count": len(plan),
+              "plan": plan, "skipped": skipped}, args.format)
         return
     outdir = Path(args.out or ".").expanduser()
     root = outdir / _sanitize(course.get("name") or course["id"])
-    done, errors = [], []
+    done, updated, errors = [], [], []
     for p in plan:
         dest = root / Path(*p["rel"].split("/"))
-        if dest.exists():
+        if dest.exists() and not args.refresh:
             done.append({"path": str(dest.relative_to(outdir)), "bytes": "exists"})
             continue
         try:
-            n = c.t.download(c.download_url(course["id"], p["content_id"], p["attachment"]["id"]), dest)
+            if dest.exists() and args.refresh:
+                # 重拉比对：内容相同即弃；变更以内容哈希尾缀落新件，旧件保留（修订史）
+                tmp = dest.with_suffix(dest.suffix + ".new")
+                c.t.download(c.download_url(course["id"], p["content_id"], p["attachment"]["id"]),
+                             tmp, max_bytes=max_bytes)
+                digest = _sha256_file(tmp)
+                if digest == _sha256_file(dest):
+                    tmp.unlink()
+                    done.append({"path": str(dest.relative_to(outdir)), "bytes": "same"})
+                    continue
+                if "." in dest.name:
+                    stem, ext = dest.name.rsplit(".", 1)
+                    new = dest.with_name(f"{stem}_{digest[:8]}.{ext}")
+                else:
+                    new = dest.with_name(f"{dest.name}_{digest[:8]}")
+                os.replace(tmp, new)
+                updated.append({"path": str(new.relative_to(outdir)),
+                                "old": str(dest.relative_to(outdir))})
+                continue
+            n = c.t.download(c.download_url(course["id"], p["content_id"], p["attachment"]["id"]),
+                             dest, max_bytes=max_bytes)
             done.append({"path": str(dest.relative_to(outdir)), "bytes": n})
+        except TooLarge as e:
+            skipped.append({"file": p["attachment"].get("fileName") or p["attachment"]["id"],
+                            "reason": "max-size", "detail": str(e)[:120]})
         except (ApiError, TransportError) as e:
             errors.append({"rel": p["rel"], "error": str(e)[:200]})
     emit({"course": course.get("name"), "out": str(outdir),
-          "downloaded": done, "errors": errors}, args.format)
+          "downloaded": done, "updated": updated, "skipped": skipped, "errors": errors}, args.format)
 
 
 def cmd_announcements(args):
@@ -487,6 +539,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--match")
     s.add_argument("--since", help="只取内容修改日 >= YYYY-MM-DD")
     s.add_argument("-o", "--out", default=".")
+    s.add_argument("--exclude-mime", help="跳过 mimeType 含任一子串的附件（逗号分隔，如 video/,audio/）")
+    s.add_argument("--exclude-ext", help="跳过指定扩展名附件（逗号分隔，如 mp4,mov）")
+    s.add_argument("--max-size", type=float, help="单件大小上限 MB，下载中断路跳过")
+    s.add_argument("--refresh", action="store_true",
+                   help="已存在件重拉比对：相同跳过、变更以内容哈希尾缀落新件（旧件保留）")
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_fetch)
 

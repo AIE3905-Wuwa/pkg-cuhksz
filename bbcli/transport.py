@@ -20,6 +20,10 @@ class TransportError(Exception):
     pass
 
 
+class TooLarge(TransportError):
+    """下载超过大小上限（--max-size 断路），部分写入已清理。"""
+
+
 class ApiError(Exception):
     def __init__(self, status: int, url: str, body: str):
         self.status = status
@@ -95,7 +99,7 @@ class Transport:
         except ValueError as e:
             raise ApiError(r.status_code, path, r.text[:200] or str(e)) from e
 
-    def download(self, url: str, dest: Path) -> int:
+    def download(self, url: str, dest: Path, max_bytes: int | None = None) -> int:
         if not url.startswith("http"):
             url = urljoin(config.BB_HOST + "/", url.lstrip("/"))
         r = self.request("GET", url, stream=True)  # curl_cffi 须请求时启用流式才能 iter_content
@@ -104,10 +108,17 @@ class Transport:
         dest.parent.mkdir(parents=True, exist_ok=True)
         tmp = dest.with_suffix(dest.suffix + ".part")
         written = 0
-        with open(tmp, "wb") as f:
-            for chunk in r.iter_content(65536):
-                if chunk:
-                    written += len(chunk)
-                    f.write(chunk)
+        try:
+            with open(tmp, "wb") as f:
+                for chunk in r.iter_content(65536):
+                    if chunk:
+                        written += len(chunk)
+                        if max_bytes and written > max_bytes:
+                            raise TooLarge(
+                                f"超过上限 {max_bytes // 1048576}MB（已写 {written} 字节）")
+                        f.write(chunk)
+        except TooLarge:
+            tmp.unlink(missing_ok=True)
+            raise
         os.replace(tmp, dest)
         return written
