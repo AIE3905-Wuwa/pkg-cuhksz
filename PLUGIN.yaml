@@ -1,10 +1,18 @@
 id: bb-map
-version: 0.1
+version: 0.2
 depends:
   - bb
   - wiki
 updated: 2026-10-01
 attachment:
-  - "wiki/bb/ —— BB 映射层（bb/ 拉取物 → wiki/bb/ 代理页，统一格式待裁定）"
-fields: {}
-inject: "BB 映射层 `wiki/bb/`：把 `bb/` 拉取物统一映射为 `wiki/bb/` 代理页（映射格式待用户裁定；占位骨架，fields / usage / checks 随格式一并落地）"
+  - "wiki/bb/<term>/<course>/ —— 映射层：info.md（课程信息页）+ lec&tut/（知识点页，每内容单元一份）"
+fields:
+  raw_path: "根相对路径——指向 bb/ 内容单元（文件或目录），知识点页必有；路径即出身证明"
+inject: "BB 映射层 `wiki/bb/<term>/<course>/`：把 `bb/` 拉取物统一映射为 `info.md`（课程信息：教学大纲/分组/考试时间）+ `lec&tut/`（每内容单元一份知识点页：简要介绍 + raw_path 指针）——不论源目录如何存储，统一为此格式"
+usage:
+  - 课程信息页：每课建 `info.md`（`type: bb` + `bb` 块映射 term_id/course_id + generated/stale_after），正文蒸馏教学大纲/分组/考试时间（读 bb/ 课程大纲、assessment 与分组文件）
+  - 知识点页：bb/ 每个内容单元（目录=课程文件+附属文件合一，或扁平单文件）→ `lec&tut/<单元名>.md`（`type: bb` + `raw_path` 指向该单元 + generated/stale_after），正文简要介绍一行起步 + 指针
+  - 映射不改 bb/ 源侧、不复制原文全文；简要介绍为蒸馏起步，深度摘要可选增强
+  - 写后管道（机械自动）：`python .meta/scripts/pipeline.py verify` + `index` + `tags` + `hot` + `log`
+checks:
+  - 语义项（附检后置）：知识点页缺 `raw_path` 或 raw_path 悬挂 → error；info.md 缺 `bb` 块映射（term_id/course_id）或与目录不对应 → error；知识点页缺简要介绍 → warning；映射完整性（bb/ 内容单元无对应 md）→ info 积压
