@@ -1,0 +1,10 @@
+id: bb-map
+version: 0.1
+depends:
+  - bb
+  - wiki
+updated: 2026-10-01
+attachment:
+  - "wiki/bb/ —— BB 映射层（bb/ 拉取物 → wiki/bb/ 代理页，统一格式待裁定）"
+fields: {}
+inject: "BB 映射层 `wiki/bb/`：把 `bb/` 拉取物统一映射为 `wiki/bb/` 代理页（映射格式待用户裁定；占位骨架，fields / usage / checks 随格式一并落地）"
