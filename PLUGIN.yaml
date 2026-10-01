@@ -1,0 +1,26 @@
+id: bb-map
+version: 0.1
+depends:
+  - bb
+  - wiki
+updated: 2026-10-01
+attachment:
+  - "wiki/bb/<term>/<course>/info.md —— 课程身份页兼总览（bb 块映射 + 基本信息机械蒸馏 + 备注沉淀）"
+  - "wiki/bb/<term>/<course>/lec&tut/ —— 课件桶（1:1 代理两形分区，默认姿态细则后置；桶名 v0.1 沿团队现名）"
+  - "wiki/bb/<term>/<course>/work/ —— 学业事务聚合页（每作业/考试一页，四要素：要求/参考/提交/结果）"
+  - "wiki/bb/<term>/<course>/attachments/ —— 附件 1:1 代理（平铺）"
+fields:
+  work: "块映射（work 聚合页机械区）——due（截止）/ submitted_at（提交时刻）/ score 与 possible（得分/满分）/ status（Graded|NeedsGrading|None）/ column_id 与 attempt_id（成绩册列与提交记录 id，对账锚点）——API 快照字段"
+  raw: "块映射（work 聚合页多源对账）——角色 → bb/ 相对路径（要求/参考/提交，开放词表），聚合页与 bb/ 文件群的对应关系"
+  raw_file: "标量（lec&tut / attachments 1:1 代理页）——根相对路径，指向 bb/ 原件（词形语义同 mapping）"
+  raw_sha256: "标量（1:1 代理页）——十六进制 SHA-256，可从 bb/ 机械重算"
+inject: "bb 映射法则：属地 wiki/bb/<term>/<course>/ 规范形四桶（bb/ 保源形，桶名 v0.1 沿团队现名）——info.md 身份页兼总览（bb 块映射 + 基本信息（师资/TA/分组/评分构成，机械蒸馏）+ 备注沉淀）；lec&tut/ 课件桶（1:1 代理两形分区，细则后置）；work/ 聚合页每作业/考试一页（四要素：要求/参考/提交/结果；work 块映射 due/submitted_at/score/status/column_id + raw 块映射角色→bb/ 路径 + 复盘沉淀只增）；attachments/ 1:1 代理平铺（raw_file/raw_sha256）；落位判据——有成绩册列或提交动作→work/、老师非讲义资产→attachments/、讲义课件→lec&tut/、结构事实入 info.md 正文；属地内容页一律两形分区（机械区可再生覆写+沉淀区只增，重建不得触碰沉淀区）；源消失标 status: deprecated 不删；原名保留仅清洗非法字符、同桶重名尾缀 column_id；API 快照节挂 stale_after=拉取日+TTL，本地对账代理无 TTL"
+usage:
+  - 新课落地：建属地目录 + info.md（bb 块映射 term_id/course_id + 基本信息节：师资/TA/分组/评分构成）；课件拉取后按 1:1 建 lec&tut/ 与 attachments/ 代理页（raw_file/raw_sha256）
+  - work 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/）；结果字段自 grades/submission 快照刷新机械区；毕写 log 行（类型 map）
+  - 落位判据（见注入行）——TA/分组/评分构成是结构事实，入 info.md 基本信息，不作附件页
+  - 重建纪律：机械区对账覆写；沉淀区（info 备注 / work 复盘 / 课件页笔记）只增，重建不得触碰
+  - stale 处置：work 结果与 info 基本信息挂 stale_after，stale 经 bbcli 现拉刷新（agent 即同步器）；lec&tut / attachments 代理纯本地对账无 TTL
+  - 派生只出不回：行动项→todo、高价值复盘→notes（回链 work 页）
+checks:
+  - 语义项（v0.1 人工，附检后置）：属地页落四桶之外 → error；1:1 页 raw_file 指 bb/ 不存在文件 → error；work 页缺 raw 块映射或 column_id → warning；源文件消失未标 deprecated → warning；沉淀区被重建改写 → error
