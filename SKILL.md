@@ -16,9 +16,9 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 
 ## Steps
 
-1. **锚点（一次读取）**：读 registry 与 `wiki/bb/inbox.md`（`terms` 块映射——现役学期与冻结标记）；inbox 缺席则以 `bb-cli courses --term` 现查定学期
+1. **锚点（一次读取）**：读 registry 与 `wiki/bb/inbox.md`（`terms` 块映射——现役学期与冻结标记）；**inbox 缺席即建**（terms 自 `bb-cli terms`/`courses` 现查登记 + 首刷速写与公告分拣，流程见注入区 bb 块）
 2. 会话核对：`bb-cli status`（未登录按 bbcli skill 登录纪律处理）；定位目标课（目录名 = 课程代码，如 AIE3005；新课先建属地目录与身份页字段）
-3. 拉取物核对：`bb/<term>/<course>/` 源树在位（缺则经 bbcli skill `fetch` 落位）；assessments 机械区数据自 `grades` / `submission` 快照现拉
+3. 拉取物核对：`bb/<term>/<course>/` 源树在位（缺则经 bbcli skill `fetch` 落位，默认带媒体过滤——策略见注入区 bb 块）；assessments 机械区数据自 `grades` / `submission` 快照现拉
 4. 按注入区契约逐桶落位：info（身份 + 基本信息蒸馏）→ courseware（内容单元页）→ assessments（聚合页）→ attachments（1:1 代理）；机械区对账覆写，沉淀区不触碰
 5. **呈落位预览**（新增 / 变更 / 废弃清单），等用户确认
 6. **写后管道**（确定性，机械自动不询问）：按注入区序执行各插件写入调用，毕即 `python .meta/scripts/pipeline.py verify`（写后自证，未过即回修）；随即按提交纪律入库（`映射: <term>/<course>`，词表见 `.meta/protocol/actions.md`）
@@ -46,16 +46,18 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 
 <!-- cmd-inject:start -->
 <!-- usage:bb -->
-- 进域先读 wiki/bb/inbox.md（速写与域配置一体）；stale 即经 bbcli 现拉刷新（agent 即同步器），毕写 log 行（类型 other）
-- 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名新文件尾缀
+- 进域先读 wiki/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写 → 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
+- 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名变更件 --refresh 重拉、内容哈希尾缀落新件（旧件保留=修订史）
 - 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
+- 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
+- 公告拆信：不存档不立页（真相在 BB 现拉即得）；作业变更→assessments 机械区、考试/调课→info 基本信息（+calendar 派生）、政策/师资/分组→info 基本信息、行动项→todo、资源发布→触发 fetch 即弃、高价值长文→notes 涌现回链
 - 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）
 - 隐私与边界：成绩按需现拉呈现即止、不默认投影；roster 不拉；提交作业等写操作不入本域
 <!-- /usage:bb -->
 
 <!-- usage:bb-map -->
 - 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id + generated/stale_after），正文蒸馏教学大纲/师资/TA/分组/评分构成/考试时间（读 bb/ 大纲与 assessment 文件）；「何时有何事」记此处，被评分事务全要素归 assessments 页
-- 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元 + generated），简要介绍一行起步 + 单元文件清单，整页可再生；深度摘要可选增强，珍贵内容蒸馏入 notes
+- 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元 + generated），简要介绍一行起步 + 单元文件清单（两态：本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块），整页可再生；深度摘要可选增强，珍贵内容蒸馏入 notes
 - assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/）；结果字段自 grades/submission 快照刷新机械区；毕写 log 行（类型 map）
 - attachments 代理：老师发布的非讲义资产每件一页（raw_file/raw_sha256），平铺；TA/分组等结构事实不作附件页
 - 落位判据（见注入行）
