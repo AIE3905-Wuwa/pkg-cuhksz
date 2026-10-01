@@ -1,5 +1,5 @@
 id: bb-map
-version: 0.6
+version: 0.7
 depends:
   - bb
   - wiki
@@ -20,7 +20,7 @@ fields:
 inject: "bb 映射法则：属地 wiki/bb/<term>/<course>/ 规范形四桶（bb/ 保源形，桶名 v0.4 终裁：courseware/assessments/attachments）——info.md 课程信息页兼身份页（bb 块映射 + 机械蒸馏教学大纲/师资/TA/分组/评分构成/考试时间 + 备注沉淀；存「何时有何事」，被评分事务全要素归 assessments）；courseware/ 知识点页每内容单元一份（单元 = bb/ 目录「讲义+附属文件合一」或扁平单文件；简要介绍 + 单元文件清单 + raw_path 指针可指目录；纯代理）；assessments/ 聚合页每作业/考试一页（四要素：要求/参考/提交/结果；assessment 块映射 due/submitted_at/score/status/column_id + raw 块映射角色→bb/ 路径 + `## 复盘` 沉淀只增）；attachments/ 1:1 代理平铺（raw_file/raw_sha256，纯代理）；落位判据——有成绩册列或提交动作→assessments/、老师非讲义资产→attachments/、内容单元→courseware/、结构事实入 info.md；info 与 assessments 两形分区（机械区可再生覆写+沉淀区只增，重建不得触碰），courseware/attachments 纯代理（珍贵内容入 notes）；映射不改 bb/ 源侧、不复制原文全文、源消失标 deprecated 不删；API 快照节挂 stale_after=拉取日+TTL，本地对账代理无 TTL"
 usage:
   - 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id + generated/stale_after），正文蒸馏教学大纲/师资/TA/分组/评分构成/考试时间（读 bb/ 大纲与 assessment 文件）；「何时有何事」记此处，被评分事务全要素归 assessments 页
-  - 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元 + generated），简要介绍一行起步 + 单元文件清单，整页可再生；深度摘要可选增强，珍贵内容蒸馏入 notes
+  - 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元 + generated），简要介绍一行起步 + 单元文件清单（两态：本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块），整页可再生；深度摘要可选增强，珍贵内容蒸馏入 notes
   - assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/）；结果字段自 grades/submission 快照刷新机械区；毕写 log 行（类型 map）
   - attachments 代理：老师发布的非讲义资产每件一页（raw_file/raw_sha256），平铺；TA/分组等结构事实不作附件页
   - 落位判据（见注入行）

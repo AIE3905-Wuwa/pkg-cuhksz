@@ -22,6 +22,7 @@ bb 域的映射法则（mapping 之于 vault；bb 域内插件，契约见 bb �
 
 ## Changelog
 
+- 0.7（2026-10-01）单元清单两态（本地在位 / 未物化指针条目——配套 bb v0.2 媒体指针化）；命令锚点 inbox 缺席即建
 - 0.6（2026-10-01）命令 bb-map 立设：自本插件契约蒸馏（map / lark-map 同构——拉取核对 → 四桶落位 → 对账 → 写后管道），consumes [bb, bb-map, trust, index, hot, log]；实验前先行（用户裁定）
 - 0.5（2026-10-01）courseware 回归纯代理：撤 `## 笔记` 沉淀节——笔记是人的造物，落点单独设计、不进本契约；两形分区收窄回 info / assessments
 - 0.4（2026-10-01）桶名终裁与笔记落点：lec&tut → courseware、work → assessments（字段 work → assessment）；courseware 知识点页补 `## 笔记` 沉淀节，两形分区统一（attachments 仍纯代理）
