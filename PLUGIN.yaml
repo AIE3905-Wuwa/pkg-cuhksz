@@ -12,7 +12,7 @@ attachment:
 fields:
   bb: "块映射（课程身份页）——term_id（学期 machine id，如 _426_1）/ course_id（课程 machine id，如 _18030_1）；与属地目录一比一，即身份证明"
   terms: "块映射（域根速写页）——term 目录名 → 一句话（现役/冻结标记 + term_id）；现役学期即拉取与速写的默认作用域"
-inject: "BB 课程域 `wiki/bb/`（外领地 bb.cuhk.edu.cn，连接器 bb-cli 纯只读，用法与位置见 bbcli skill）：双侧同构 `<term>/<course>/`——外 `bb/` 拉取物仓储（课件全量物化 + 提交件 submissions/，只增、删改自由属于人、存储是唯一成本），内 `wiki/bb/` 属地，目录名 = 学期名/课程代码（如 2610UG/AIE3005），machine id 落身份页 bb 块映射（term_id/course_id）作一比一身份证明，同期同代码尾缀消歧、停用标 status: deprecated 不删；域根速写页 inbox.md（近窗公告蒸馏 + 临近截止 + 未交提醒，行标课程，整页可再生短 TTL；frontmatter 兼域配置——terms 块映射现役学期与冻结标记）；课件物化后即本地终态资产豁免 TTL；投影细则归 bb_map 后议；凭据会话只存本机不入库；课程/成绩/提交数据属实例数据不入框架仓库；trust 天花板 machine-confirmed，stale_after = 拉取日 + TTL（默认 1 天，速写页覆写），agent 即同步器"
+inject: "BB 课程域 `wiki/bb/`（外领地 bb.cuhk.edu.cn，连接器 bb-cli 纯只读，用法与位置见 bbcli skill）：双侧同构 `<term>/<course>/`——外 `bb/` 拉取物仓储（课件全量物化 + 提交件 submissions/，只增、删改自由属于人、存储是唯一成本），内 `wiki/bb/` 属地，目录名 = 学期名/课程代码（如 2610UG/AIE3005），machine id 落身份页 bb 块映射（term_id/course_id）作一比一身份证明，同期同代码尾缀消歧、停用标 status: deprecated 不删；域根速写页 inbox.md（近窗公告蒸馏 + 临近截止 + 未交提醒，行标课程，整页可再生短 TTL；frontmatter 兼域配置——terms 块映射现役学期与冻结标记）；课件物化后即本地终态资产豁免 TTL；投影细则见 bb-map 插件；凭据会话只存本机不入库；课程/成绩/提交数据属实例数据不入框架仓库；trust 天花板 machine-confirmed，stale_after = 拉取日 + TTL（默认 1 天，速写页覆写），agent 即同步器"
 usage:
   - 进域先读 wiki/bb/inbox.md（速写与域配置一体）；stale 即经 bbcli 现拉刷新（agent 即同步器），毕写 log 行（类型 other）
   - 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名新文件尾缀
