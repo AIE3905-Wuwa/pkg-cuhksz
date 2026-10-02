@@ -1,5 +1,5 @@
 id: bb-map
-version: 0.11
+version: 0.12
 depends:
   - bb
   - wiki
@@ -17,7 +17,7 @@ fields:
   raw: "块映射（assessments 聚合页多源对账）——角色 → bb/ 相对路径（要求/参考/提交，开放词表），聚合页与 bb/ 文件群的对应关系；允许多页引用同一文件（共享要求文件为正常形态）"
   raw_file: "标量（attachments 1:1 代理页）——根相对路径，指向 bb/ 原件（词形语义同 mapping）"
   raw_sha256: "标量（attachments 1:1 代理页）——十六进制 SHA-256，可从 bb/ 机械重算"
-inject: "bb 映射法则：属地 wiki/bb/<term>/<course>/ 规范形四桶（bb/ 保源形，桶名 v0.4 终裁：courseware/assessments/attachments）——info.md 课程信息页兼身份页（bb 块映射 term_id/course_id/term_status + 大纲课程政策类要点蒸馏（开放词表：评分/考核/师资/TA/分组/教学语言/AI 政策，info-N 锚点，缺项标未提供）+ 备注沉淀；存「何时有何事」，被评分事务全要素归 assessments）；courseware/ 知识点页每内容单元一份（单元 = bb/ 目录「讲义+附属文件合一」或扁平单文件，平行同类目录合为一页；知识点摘要（sm-N 锚点 + 一行概括 + 章节提示）+ 专有名词对照表 + 单元文件清单（清单即对应关系）+ raw_path 指针（未下载单元可缺省）；纯代理）；assessments/ 聚合页每作业/考试一页（汇总列 Weighted Total/Total 排除；四要素：要求/参考蒸馏（req-N/ref-N 锚点）/提交/结果机械快照，due 缺省不告警、无提交独立话术；assessment 块映射 due/submitted_at/score/status/column_id + raw 块映射角色→bb/ 路径 + `## 复盘` 沉淀只增）；attachments/ 1:1 代理平铺（raw_file/raw_sha256，纯代理）；落位判据——有成绩册列或提交动作→assessments/（汇总列与分节登记列除外——分节登记列 = 非知识考核的分节/出勤登记，如 Tutorial Section）、老师非讲义资产→attachments/、内容单元→courseware/、结构事实入 info.md；讲义/附件边界：随周次内容→courseware、支撑性资源→attachments；info 与 assessments 两形分区（机械区可再生覆写+沉淀区只增，重建不得触碰），courseware/attachments 纯代理（珍贵内容入 notes）；映射不改 bb/ 源侧、不复制原文全文、源消失标 deprecated 不删；API 快照节挂 stale_after=拉取日+TTL，本地对账代理无 TTL"
+inject: "bb 映射法则：属地 wiki/bb/<term>/<course>/ 规范形四桶（bb/ 保源形，桶名 v0.4 终裁：courseware/assessments/attachments；课程根另容 user.md 认知档案——bb-track 域内原生页，不受四桶约束）——info.md 课程信息页兼身份页（bb 块映射 term_id/course_id/term_status + 大纲课程政策类要点蒸馏（开放词表：评分/考核/师资/TA/分组/教学语言/AI 政策，info-N 锚点，缺项标未提供）+ 备注沉淀；存「何时有何事」，被评分事务全要素归 assessments）；courseware/ 知识点页每内容单元一份（单元 = bb/ 目录「讲义+附属文件合一」或扁平单文件，平行同类目录合为一页；知识点摘要（sm-N 锚点 + 一行概括 + 章节提示）+ 专有名词对照表 + 单元文件清单（清单即对应关系）+ raw_path 指针（未下载单元可缺省）；纯代理）；assessments/ 聚合页每作业/考试一页（汇总列 Weighted Total/Total 排除；四要素：要求/参考蒸馏（req-N/ref-N 锚点）/提交/结果机械快照，due 缺省不告警、无提交独立话术；assessment 块映射 due/submitted_at/score/status/column_id + raw 块映射角色→bb/ 路径 + `## 复盘` 沉淀只增）；attachments/ 1:1 代理平铺（raw_file/raw_sha256，纯代理）；落位判据——有成绩册列或提交动作→assessments/（汇总列与分节登记列除外——分节登记列 = 非知识考核的分节/出勤登记，如 Tutorial Section）、老师非讲义资产→attachments/、内容单元→courseware/、结构事实入 info.md；讲义/附件边界：随周次内容→courseware、支撑性资源→attachments；info 与 assessments 两形分区（机械区可再生覆写+沉淀区只增，重建不得触碰），courseware/attachments 纯代理（珍贵内容入 notes）；映射不改 bb/ 源侧、不复制原文全文、源消失标 deprecated 不删；API 快照节挂 stale_after=拉取日+TTL，本地对账代理无 TTL"
 usage:
   - 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id/term_status（现役|冻结）+ generated/stale_after），正文 `## 基本信息` 课程政策类要点蒸馏（评分/考核/师资/TA/分组/教学语言/AI 政策，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
   - 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件；平行同类目录合为一页）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元，完全未下载单元可缺省 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 + 源侧章节级提示 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块；扁平多附件单元清单即对应关系）；整页可再生，珍贵内容蒸馏入 notes
@@ -29,4 +29,4 @@ usage:
   - 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
   - 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）
 checks:
-  - 语义项（v0.1 人工，附检后置）：属地页落四桶之外 → error；知识点页 raw_path 悬挂 → error（缺省合法——未下载单元以清单标注即构成记录）；info.md 缺 bb 块映射（term_id/course_id/term_status）或与目录不对应 → error；attachments 代理 raw_file 指 bb/ 不存在文件 → error；assessments 页缺 raw 块映射或 column_id → warning；汇总列（Weighted Total/Total）建页 → warning；知识点页缺 `## 知识点摘要` 或摘要点缺 sm-N 锚点 → warning；知识点页缺 `## 专有名词` → info；info 蒸馏节缺课程政策类要点 → info；assessments 有要求源但要求节未蒸馏 → info；源文件消失未标 deprecated → warning；沉淀区（备注/复盘）被重建改写 → error；映射完整性（bb/ 内容单元无对应页）→ info
+  - 语义项（v0.1 人工，附检后置）：属地页落四桶之外 → error（课程根 user.md 除外——bb-track 域内原生页）；知识点页 raw_path 悬挂 → error（缺省合法——未下载单元以清单标注即构成记录）；info.md 缺 bb 块映射（term_id/course_id/term_status）或与目录不对应 → error；attachments 代理 raw_file 指 bb/ 不存在文件 → error；assessments 页缺 raw 块映射或 column_id → warning；汇总列（Weighted Total/Total）建页 → warning；知识点页缺 `## 知识点摘要` 或摘要点缺 sm-N 锚点 → warning；知识点页缺 `## 专有名词` → info；info 蒸馏节缺课程政策类要点 → info；assessments 有要求源但要求节未蒸馏 → info；源文件消失未标 deprecated → warning；沉淀区（备注/复盘）被重建改写 → error；映射完整性（bb/ 内容单元无对应页）→ info
