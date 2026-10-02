@@ -46,7 +46,7 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 
 <!-- cmd-inject:start -->
 <!-- usage:bb -->
-- 进域先读 wiki/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写 → 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
+- 进域先读 wiki/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写（未交提醒双源：assignments 无提交 ∪ grades 有 due 无 attempt）→ 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
 - 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名变更件 --refresh 重拉、内容哈希尾缀落新件（旧件保留=修订史）
 - 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
 - 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
