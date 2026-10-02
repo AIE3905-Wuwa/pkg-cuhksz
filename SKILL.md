@@ -51,7 +51,7 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 - 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
 - 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
 - 公告拆信：不存档不立页（真相在 BB 现拉即得）；作业变更→assessments 机械区、考试/调课→info 基本信息（+calendar 派生）、政策/师资/分组→info 基本信息、行动项→todo、资源发布→触发 fetch 即弃、高价值长文→notes 涌现回链
-- 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）
+- 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）——todo/calendar/notes 桥，格式细则归桥
 - 隐私与边界：成绩按需现拉呈现即止、不默认投影；roster 不拉；提交作业等写操作不入本域
 <!-- /usage:bb -->
 
@@ -64,7 +64,7 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 - 重建纪律：机械区对账覆写；沉淀区（info 备注 / assessments 复盘）只增，重建不得触碰；attachments 代理整页可再生
 - stale 处置：assessments 结果与 info 基本信息挂 stale_after，stale 经 bbcli 现拉刷新（agent 即同步器）；courseware/attachments 纯本地对账无 TTL
 - 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
-- 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）
+- 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）——todo/notes 桥
 <!-- /usage:bb-map -->
 
 <!-- usage:trust -->
