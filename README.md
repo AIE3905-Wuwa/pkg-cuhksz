@@ -29,11 +29,11 @@ python -m venv .venv
 | `courses [--term 子串]` | 我的课程（`--format text` 一行一课） |
 | `tree <课程> [--depth N] [--no-attachments]` | 内容树（folder/lesson/assignment，叶带附件名） |
 | `files <课程> [--match 正则]` | 课件清单（全路径 + 附件 id/文件名/mime；`--match` 作用路径与文件名） |
-| `fetch <课程> [--match 正则] [--since YYYY-MM-DD] [-o 目录] [--dry-run]` | 下载课件，保留 `课程/目录树` 结构；`--match` 作用路径与文件名；已存在跳过；同名附件尾缀附件 id |
+| `fetch <课程> [--match 正则] [--since YYYY-MM-DD] [-o 目录] [--dest 目录] [--dry-run]` | 下载课件，保留 `课程/目录树` 结构；`--match` 作用路径与文件名；已存在跳过；同名附件尾缀附件 id；`--dest` 直接落指定目录（不拼课程名） |
 | `announcements [--course 子串\|all] [--limit N] [--html]` | 公告（默认扫全部课程，正文转纯文本；单课拉取失败跳过并在结果报 `skipped` 清单） |
 | `dues [--from D] [--to D] [--course C]` | 跨课程截止：日历端点 + 每课成绩册列**双源合并去重**（日历会漏项，成绩册兜底；条目带 `source`，同课同题保留日历条目；请求量 ≈ 课程数） |
 | `assignments <课程>` | 作业清单：截止 × 满分 × 我的提交状态（NeedsGrading/Graded/None） |
-| `submission <课程> [--match 正则] [--download] [-o 目录]` | 我的提交明细：状态 × 提交时刻 × 文件清单；`--download` 落盘 `课程/submissions/作业/文件`（Classic 路由） |
+| `submission <课程> [--match 正则] [--download] [-o 目录] [--dest 目录]` | 我的提交明细：状态 × 提交时刻 × 文件清单；`--download` 落盘 `课程/submissions/作业/文件`（Classic 路由）；`--dest` 直接落指定目录（不拼课程名/submissions） |
 | `grades [课程] [--due-only]` | 成绩册列 × 我的状态（默认全部课程） |
 | `roster <课程>` | 课程成员（含 lastAccessed，注意隐私） |
 | `raw GET <路径> [--q k=v]...` | 任意 REST GET 透传——新需求先走这里，验证后再封命令 |
@@ -45,6 +45,8 @@ python -m venv .venv
 **dues JSON 字段**（0.1.2）：条目统一为 `course / title / source（calendar|gradebook）/ due / end / type`（旧 `start` 字段并入 `due`）；`skipped` 为成绩册拉取失败的课程清单。
 
 **fetch 过滤与刷新**（0.1.4）：`--exclude-mime 子串,…`（mimeType 含任一子串即跳过，如 `video/,audio/`）与 `--exclude-ext mp4,mov`（扩展名跳过）在建计划时预跳过，结果报 `skipped` 清单（`--dry-run` 同样可见）；`--max-size MB` 为下载中断路（附件元数据无 size，只能边下边断）；`--refresh` 对已存在件重拉比对——内容相同记 `same` 跳过，变更以内容哈希前 8 位尾缀落新件（旧件保留 = 修订史），报 `updated` 清单。
+
+**fetch 默认媒体过滤与落位**（0.1.5）：`fetch` 默认跳过常见媒体扩展名（`mts/mpg/mpeg/avi/mkv/wav/mp4/mov/mp3/m4a/webm`），`--no-media-filter` 恢复全量，`--exclude-ext` 追加到默认表。`--dest 目录` 供 `fetch` / `submission` 指定完整目标目录直接落位（不再自动拼课程名）。文件名落盘前先解码 HTML 实体、截断保留扩展名（长名不再丢 `.pdf` 等尾缀）。
 
 **Git Bash 注意**：以 `/` 开头的 raw 路径会被 MSYS 改写，用 `MSYS_NO_PATHCONV=1` 前缀或去掉首斜杠（相对路径）。
 

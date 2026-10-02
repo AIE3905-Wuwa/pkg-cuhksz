@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import os
 import re
@@ -31,9 +32,22 @@ def strip_html(html: str) -> str:
     return BeautifulSoup(html or "", "html.parser").get_text("\n", strip=True)
 
 
+_MAX_NAME = 80
+_DEFAULT_MEDIA_EXTS = {"mts", "mpg", "mpeg", "avi", "mkv", "wav",
+                       "mp4", "mov", "mp3", "m4a", "webm"}
+
+
 def _sanitize(name: str) -> str:
-    s = re.sub(r'[\\/:*?"<>|\r\n\t]', "_", name).strip(" .")
-    return s[:80] or "_"
+    s = html.unescape(name or "")
+    s = re.sub(r'[\\/:*?"<>|\r\n\t]', "_", s).strip(" .")
+    if not s:
+        return "_"
+    if len(s) <= _MAX_NAME:
+        return s
+    stem, dot, ext = s.rpartition(".")
+    if dot and ext and len(ext) <= 10 and " " not in ext:
+        return stem[: _MAX_NAME - 1 - len(ext)] + "." + ext
+    return s[:_MAX_NAME]
 
 
 def _local_dt(iso: str | None) -> datetime | None:
@@ -241,6 +255,8 @@ def cmd_fetch(args):
         rows = [r for r in rows if _date_part(r.get("modified")) >= args.since]
     mime_subs = [m.strip().lower() for m in (args.exclude_mime or "").split(",") if m.strip()]
     exts = {e.strip().lstrip(".").lower() for e in (args.exclude_ext or "").split(",") if e.strip()}
+    if not args.no_media_filter:
+        exts |= _DEFAULT_MEDIA_EXTS
     max_bytes = int(args.max_size * 1024 * 1024) if args.max_size else None
 
     def _excluded(a) -> str | None:
@@ -273,12 +289,13 @@ def cmd_fetch(args):
               "plan": plan, "skipped": skipped}, args.format)
         return
     outdir = Path(args.out or ".").expanduser()
-    root = outdir / _sanitize(course.get("name") or course["id"])
+    root = Path(args.dest).expanduser() if args.dest else outdir / _sanitize(course.get("name") or course["id"])
+    base = root if args.dest else outdir
     done, updated, errors = [], [], []
     for p in plan:
         dest = root / Path(*p["rel"].split("/"))
         if dest.exists() and not args.refresh:
-            done.append({"path": str(dest.relative_to(outdir)), "bytes": "exists"})
+            done.append({"path": str(dest.relative_to(base)), "bytes": "exists"})
             continue
         try:
             if dest.exists() and args.refresh:
@@ -289,7 +306,7 @@ def cmd_fetch(args):
                 digest = _sha256_file(tmp)
                 if digest == _sha256_file(dest):
                     tmp.unlink()
-                    done.append({"path": str(dest.relative_to(outdir)), "bytes": "same"})
+                    done.append({"path": str(dest.relative_to(base)), "bytes": "same"})
                     continue
                 if "." in dest.name:
                     stem, ext = dest.name.rsplit(".", 1)
@@ -297,12 +314,12 @@ def cmd_fetch(args):
                 else:
                     new = dest.with_name(f"{dest.name}_{digest[:8]}")
                 os.replace(tmp, new)
-                updated.append({"path": str(new.relative_to(outdir)),
-                                "old": str(dest.relative_to(outdir))})
+                updated.append({"path": str(new.relative_to(base)),
+                                "old": str(dest.relative_to(base))})
                 continue
             n = c.t.download(c.download_url(course["id"], p["content_id"], p["attachment"]["id"]),
                              dest, max_bytes=max_bytes)
-            done.append({"path": str(dest.relative_to(outdir)), "bytes": n})
+            done.append({"path": str(dest.relative_to(base)), "bytes": n})
         except TooLarge as e:
             skipped.append({"file": p["attachment"].get("fileName") or p["attachment"]["id"],
                             "reason": "max-size", "detail": str(e)[:120]})
@@ -432,19 +449,20 @@ def cmd_submission(args):
     dl = []
     if args.download:
         outdir = Path(args.out or ".").expanduser()
-        root = outdir / _sanitize(course.get("name") or course["id"]) / "submissions"
+        root = Path(args.dest).expanduser() if args.dest else outdir / _sanitize(course.get("name") or course["id"]) / "submissions"
+        base = root if args.dest else outdir
         for r in rows:
             if not r["attempt_id"]:
                 continue
             for f in r["files"]:
                 dest = root / _sanitize(r["name"] or r["column_id"]) / _sanitize(f["name"] or f["id"])
                 if dest.exists():
-                    dl.append({"path": str(dest.relative_to(outdir)), "bytes": "exists"})
+                    dl.append({"path": str(dest.relative_to(base)), "bytes": "exists"})
                     continue
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 try:
                     n = c.t.download(c.attempt_download_url(course["id"], r["attempt_id"], f["id"], f["name"]), dest)
-                    dl.append({"path": str(dest.relative_to(outdir)), "bytes": n})
+                    dl.append({"path": str(dest.relative_to(base)), "bytes": n})
                 except (ApiError, TransportError) as e:
                     dl.append({"file": f.get("name"), "error": str(e)[:200]})
     emit({"course": course.get("name"), "submissions": rows, "downloaded": dl}, args.format,
@@ -539,8 +557,11 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--match")
     s.add_argument("--since", help="只取内容修改日 >= YYYY-MM-DD")
     s.add_argument("-o", "--out", default=".")
+    s.add_argument("--dest", help="完整目标目录：直接落此目录，不再拼课程名")
     s.add_argument("--exclude-mime", help="跳过 mimeType 含任一子串的附件（逗号分隔，如 video/,audio/）")
     s.add_argument("--exclude-ext", help="跳过指定扩展名附件（逗号分隔，如 mp4,mov）")
+    s.add_argument("--no-media-filter", action="store_true",
+                   help="关闭默认媒体扩展名过滤（仅按 --exclude-mime/--exclude-ext）")
     s.add_argument("--max-size", type=float, help="单件大小上限 MB，下载中断路跳过")
     s.add_argument("--refresh", action="store_true",
                    help="已存在件重拉比对：相同跳过、变更以内容哈希尾缀落新件（旧件保留）")
@@ -568,6 +589,7 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--match", help="作业名正则过滤（不区分大小写）")
     s.add_argument("--download", action="store_true", help="下载提交文件至 课程/submissions/作业/")
     s.add_argument("-o", "--out", default=".")
+    s.add_argument("--dest", help="完整目标目录：直接落此目录（其下仍按 作业/文件 分），不再拼课程名/submissions")
     s.set_defaults(fn=cmd_submission)
 
     s = cmd("grades", "成绩册（默认全部课程）")
