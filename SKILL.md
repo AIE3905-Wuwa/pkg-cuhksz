@@ -33,7 +33,7 @@ Write: none (read-only by design; submitting assignments or posting announcement
 | Terms | `bb-cli terms --format text` (locate the current term name first, then filter with it, e.g. `--term 2610UG`) |
 | Assignments + status | `bb-cli assignments <course> --format json` (due / possible / status / score) |
 | Gradebook | `bb-cli grades [<course>] [--due-only]` |
-| Upcoming deadlines | `bb-cli dues [--from D] [--to D] --format text` |
+| Upcoming deadlines (one course / all) | `bb-cli dues [--course C] [--from D] [--to D] --format text` |
 | Announcements | `bb-cli announcements [--course <substring>] [--limit N]` |
 | Course files / download | `bb-cli files <course>` / `bb-cli fetch <course> [-o DIR] [--dest DIR] [--exclude-mime video/,audio/] [--exclude-ext ext,…] [--no-media-filter] [--max-size MB] [--refresh]` |
 | My submissions | `bb-cli submission <course> [--download] [--dest DIR]` |
