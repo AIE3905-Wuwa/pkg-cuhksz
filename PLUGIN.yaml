@@ -1,9 +1,10 @@
 id: bb
-version: 0.4
+version: 0.5
 depends:
   - domain
   - wiki
   - trust
+  - log
 updated: 2026-10-02
 attachment:
   - "bb/ —— BB 课程工作区（root 容器，与 vault/projects 平级；<term>/<course>/ 结构：机器拉取物只增 + 笔记保留子区 notes/ 归人全权）"
