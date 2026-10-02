@@ -6,12 +6,12 @@
 
 - 双侧同构 `<term>/<course>/`：外 `bb/<term>/<course>/`（课件保留源侧目录树、提交件 `submissions/`），内 `wiki/bb/<term>/<course>/`
 - 目录名人类可读：term 名（如 `2610UG`）+ 课程代码（如 `AIE3005`）——恰为 bbcli 查询参数形态，人机两用；machine id（term_id / course_id）落属地身份页 frontmatter；同期同代码尾缀 course_id 消歧；停用课标 status: deprecated 不删
-- 域根速写页 `wiki/bb/inbox.md`：近窗公告蒸馏 + 临近截止 + 未交提醒（行标课程），整页可再生、短 TTL；frontmatter 兼域配置（`terms` 块映射：现役学期与冻结标记）——不另立声明页（2026-10-01 裁定）；刷新流程 = 现拉公告+dues → 蒸馏速写 → 公告分拣派生，**缺席即建**（bb-map 命令锚点触发或 agent 自发）
-- 属地页面形态：课程身份页（每课必有，身份证明载体，即 bb-map info.md）；公告不立页——信封拆信归既有归宿（见 Invariants）；其余内容页形态随真实使用浮现
+- 域根速写页 `wiki/bb/inbox.md`：近窗公告蒸馏 + 临近截止 + 未交提醒（**双源**：作业列表无提交 ∪ 成绩册有 due 无 attempt；行标课程），整页可再生、短 TTL；frontmatter 兼域配置（`terms` 块映射：现役学期与冻结标记）——不另立声明页（2026-10-01 裁定）；刷新流程 = 现拉公告+dues → 蒸馏速写 → 公告分拣派生，**缺席即建**（bb-map 命令锚点触发或 agent 自发）
+- 属地页面形态：课程身份页（每课必有，身份证明载体即 bb-map info.md——bb 块映射 term_id / course_id / term_status，学期状态落页消除 inbox 单点）；公告不立页——信封拆信归既有归宿（见 Invariants）；其余内容页形态随真实使用浮现
 
 ## Invariants
 
-- 契约六问：外领地 = bb.cuhk.edu.cn（连接器 bb-cli 可达）；落地 = 自立容器 `bb/`（双判据：课件只增 vs 信息页可再生的写模型分叉 + term/course 层级由源规定的结构刚性）；身份证明 = 身份页 `bb` 块映射 term_id / course_id ↔ 属地目录一比一；属地 = `wiki/bb/`；写模型 = 外侧只增、删改自由属于人，内侧机械区可再生覆写 + 沉淀区只增；信任 = 天花板 machine-confirmed，速写与快照挂 stale_after = 拉取日 + TTL（默认 1 天，速写页可覆写），agent 即同步器
+- 契约六问：外领地 = bb.cuhk.edu.cn（连接器 bb-cli 可达）；落地 = 自立容器 `bb/`（双判据：课件只增 vs 信息页可再生的写模型分叉 + term/course 层级由源规定的结构刚性）；身份证明 = 身份页 `bb` 块映射 term_id / course_id / term_status ↔ 属地目录一比一；属地 = `wiki/bb/`；写模型 = 外侧只增、删改自由属于人，内侧机械区可再生覆写 + 沉淀区只增；信任 = 天花板 machine-confirmed，速写与快照挂 stale_after = 拉取日 + TTL（默认 1 天，速写页可覆写；日期粒度，过期判定以当日为限），agent 即同步器
 - 课件物化后即本地终态资产：豁免 TTL（vault 式不可变），失配以哈希对账
 - 只读纪律：连接器纯只读数据面，提交作业等写动作不入本域
 - 凭据纪律：会话与凭据只存本机（`~/.bb-cli/`，BB_CLI_HOME 可覆写），绝不入库
@@ -22,5 +22,6 @@
 
 ## Changelog
 
+- 0.3（2026-10-02）域规则批 D1~D3 落地（修订指引批三）：未交提醒双源；身份页增 term_status 消除学期状态单点；stale_after 日期粒度语义写明
 - 0.2（2026-10-01）P0 补缺批次：公告拆信分拣（信封不存档，路由至既有归宿）+ inbox 刷新流程与缺席即建（首跑鸡蛋问题）；物化分层（媒体默认指针化、按需单取）；同名变更件哈希尾缀——契约与 fetch 实现漂移修正（bb-cli 0.1.4 配套）
 - 0.1（2026-10-01）立设：基石声明（email 形——契约活 manifest，无命令无脚本）；速写页兼域配置、全量物化放行均用户裁定；投影细则归 bb-map 后议
