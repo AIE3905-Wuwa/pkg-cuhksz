@@ -1,5 +1,5 @@
 id: bb-map
-version: 0.12
+version: 0.13
 depends:
   - bb
   - wiki
@@ -27,6 +27,6 @@ usage:
   - 重建纪律：机械区对账覆写；沉淀区（info 备注 / assessments 复盘）只增，重建不得触碰；attachments 代理整页可再生
   - stale 处置：assessments 结果与 info 基本信息挂 stale_after，stale 经 bbcli 现拉刷新（agent 即同步器）；courseware/attachments 纯本地对账无 TTL
   - 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
-  - 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）
+  - 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）——todo/notes 桥
 checks:
   - 语义项（v0.1 人工，附检后置）：属地页落四桶之外 → error（课程根 user.md 除外——bb-track 域内原生页）；知识点页 raw_path 悬挂 → error（缺省合法——未下载单元以清单标注即构成记录）；info.md 缺 bb 块映射（term_id/course_id/term_status）或与目录不对应 → error；attachments 代理 raw_file 指 bb/ 不存在文件 → error；assessments 页缺 raw 块映射或 column_id → warning；汇总列（Weighted Total/Total）建页 → warning；知识点页缺 `## 知识点摘要` 或摘要点缺 sm-N 锚点 → warning；知识点页缺 `## 专有名词` → info；info 蒸馏节缺课程政策类要点 → info；assessments 有要求源但要求节未蒸馏 → info；源文件消失未标 deprecated → warning；沉淀区（备注/复盘）被重建改写 → error；映射完整性（bb/ 内容单元无对应页）→ info
