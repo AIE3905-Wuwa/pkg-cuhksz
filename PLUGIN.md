@@ -1,18 +1,18 @@
 # bb-map：bb 域映射法则
 
-bb 域的映射法则（mapping 之于 vault；bb 域内插件，契约见 bb 插件）。**规范化投影**：`bb/` 保源形（对账前提），属地 `wiki/bb/<term>/<course>/` 统一规范形四桶——不论源目录如何存储。映射与理解解耦：代理是「bb 资产在 md 世界的代表」，登记 + 简要介绍起步，深度摘要为可选增强。桶名 v0.4 终裁：`courseware`（原 lec&tut）/ `assessments`（原 work）/ `attachments`（2026-10-01 裁定）。
+bb 域的映射法则（mapping 之于 vault；bb 域内插件，契约见 bb 插件）。**规范化投影**：`bb/` 保源形（对账前提），属地 `wiki/bb/<term>/<course>/` 统一规范形四桶——不论源目录如何存储。映射与理解解耦：代理是「bb 资产在 md 世界的代表」，courseware 标配「知识点摘要（分点 `<a id="sm-N">` 锚点）+ 专有名词」，深度讲解为可选增强。桶名 v0.4 终裁：`courseware`（原 lec&tut）/ `assessments`（原 work）/ `attachments`（2026-10-01 裁定）。
 
 ## Structure
 
-- `info.md`——课程信息页兼身份页（一课一锚点）：frontmatter `bb` 块映射（term_id / course_id，身份证明归 bb 插件）+ 正文机械蒸馏节（教学大纲 / 师资 / TA / 分组 / 评分构成 / 考试时间）+ `## 备注`（沉淀区只增）。边界：info 存「何时有何事」（日程视角），被评分事务全要素归 assessments 页
-- `courseware/<单元名>.md`——知识点页：每个内容单元一份（内容单元 = bb/ 中的目录「讲义 + 附属文件合一」或扁平单文件）；简要介绍 + 单元文件清单 + `raw_path` 指针（可指文件或目录）；纯代理，整页可再生
-- `assessments/`——学业事务聚合页：每作业 / 考试 / quiz 一页（文件名 = 作业名原形清洗），四要素归一——要求 / 参考（可选）/ 提交 / 结果
+- `info.md`——课程信息页兼身份页（一课一锚点）：frontmatter `bb` 块映射（term_id / course_id，身份证明归 bb 插件）+ 正文机械蒸馏节（教学大纲 / 师资 / TA / 分组 / 评分构成 / 考试时间六项，分点 `<a id="info-N">` 锚点，缺项如实标「未提供」）+ `## 备注`（沉淀区只增）。边界：info 存「何时有何事」（日程视角），被评分事务全要素归 assessments 页
+- `courseware/<单元名>.md`——知识点页：每个内容单元一份（内容单元 = bb/ 中的目录「讲义 + 附属文件合一」或扁平单文件）；frontmatter 对账字段 `raw_path`（可指文件或目录）+ `## 知识点摘要`（分点 `<a id="sm-N">` 锚点 + 一行概括，锚点即定位指针）+ `## 知识点联系`（点间互链）+ `## 专有名词`（英中对照表）+ `## 单元文件`（两态对账清单）；纯代理，整页可再生（摘要与术语表皆自源蒸馏）
+- `assessments/`——学业事务聚合页：每作业 / 考试 / quiz 一页（文件名 = 作业名原形清洗），四要素归一——要求 / 参考（有源则自源蒸馏，分点 `<a id="req-N">` / `<a id="ref-N">` 锚点）/ 提交 / 结果（机械快照）
 - `attachments/`——附件 1:1 代理（每附件一页，平铺；细分结构等真实内容浮现再说）
 - 落位判据：**有成绩册列或提交动作 → assessments/**；老师发布的非讲义资产 → attachments/；讲义课件（内容单元）→ courseware/；结构事实（大纲 / 师资 / TA / 分组 / 评分构成 / 考试时间）入 info.md 正文，不作附件
 
 ## Invariants
 
-- 两形分区（lark 档案页先例）：info（机械蒸馏节 + 备注沉淀）与 assessments（机械区 + `## 复盘` 沉淀）分区制——机械区可再生覆写、沉淀区只增，重建不得触碰；courseware / attachments 为纯代理（整页可再生，珍贵内容蒸馏入 notes，不留在代理页）
+- 两形分区（lark 档案页先例）：info（机械蒸馏节 + 备注沉淀）与 assessments（机械区 + `## 复盘` 沉淀）分区制——机械区可再生覆写、沉淀区只增，重建不得触碰（info 蒸馏节 / assessments 要求·参考·提交·结果皆机械区，蒸馏进机械区不增设沉淀区）；courseware / attachments 为纯代理（整页可再生，珍贵内容蒸馏入 notes，不留在代理页）——courseware 代理密度为「知识点摘要 + 专有名词」（自源蒸馏、可再生，非人的沉淀），不设沉淀区
 - 对账三字段分家：courseware `raw_path`（可指单元目录，路径即出身证明）；attachments `raw_file` / `raw_sha256`（文件级 1:1，词形语义同 mapping，指向 bb/）；assessments `raw` 块映射（角色→bb/ 路径，多源）+ `assessment` 块映射（due / submitted_at / score / possible / status / column_id / attempt_id——API 快照）
 - 映射不改 `bb/` 源侧，删改自由属于人；不复制原文全文；源侧消失标 `status: deprecated` 不删
 - 命名：原名保留（忠实），仅清洗文件系统非法字符；同桶重名尾缀 column_id 短形（lark-im 先例）
@@ -22,6 +22,8 @@ bb 域的映射法则（mapping 之于 vault；bb 域内插件，契约见 bb �
 
 ## Changelog
 
+- 0.9（2026-10-02）info 蒸馏完备化六项（`<a id="info-N">` 锚点）+ assessments 要求/参考蒸馏（`req-N`/`ref-N` 锚点）；attachments 不变（用户裁定）。
+- 0.8（2026-10-02）courseware 代理升级：简要介绍 → 知识点摘要（`<a id="sm-N">` 锚点 + 一行概括）+ 知识点联系 + 专有名词对照表；仍纯代理整页可再生（用户裁定）。
 - 0.7（2026-10-01）单元清单两态（本地在位 / 未物化指针条目——配套 bb v0.2 媒体指针化）；命令锚点 inbox 缺席即建
 - 0.6（2026-10-01）命令 bb-map 立设：自本插件契约蒸馏（map / lark-map 同构——拉取核对 → 四桶落位 → 对账 → 写后管道），consumes [bb, bb-map, trust, index, hot, log]；实验前先行（用户裁定）
 - 0.5（2026-10-01）courseware 回归纯代理：撤 `## 笔记` 沉淀节——笔记是人的造物，落点单独设计、不进本契约；两形分区收窄回 info / assessments
