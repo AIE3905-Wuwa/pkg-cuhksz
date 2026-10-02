@@ -19,9 +19,9 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 1. **锚点（一次读取）**：读 registry 与 `wiki/bb/inbox.md`（`terms` 块映射——现役学期与冻结标记）；**inbox 缺席即建**（terms 自 `bb-cli terms`/`courses` 现查登记 + 首刷速写与公告分拣，流程见注入区 bb 块）
 2. 会话核对：`bb-cli status`（未登录按 bbcli skill 登录纪律处理）；定位目标课（目录名 = 课程代码，如 AIE3005；新课先建属地目录与身份页字段）
 3. 拉取物核对：`bb/<term>/<course>/` 源树在位（缺则经 bbcli skill `fetch` 落位，默认带媒体过滤——策略见注入区 bb 块）；assessments 机械区数据自 `grades` / `submission` 快照现拉
-4. 按注入区契约逐桶落位：info（身份 + `## 基本信息` 六项蒸馏 `info-N` 锚点）→ courseware（读源识别知识点 → `## 知识点摘要`（sm-N 锚点 + 一行概括）+ `## 知识点联系` + `## 专有名词` + `## 单元文件`）→ assessments（`## 要求`/`## 参考` 有源蒸馏 `req-N`/`ref-N` 锚点 + `## 提交`/`## 结果` 机械快照）→ attachments（1:1 代理）；机械区对账覆写，沉淀区不触碰
+4. 按注入区契约逐桶落位：info（身份 bb 块映射 term_id/course_id/term_status + `## 基本信息` 课程政策类要点蒸馏 `info-N` 锚点）→ courseware（读源识别知识点 → `## 知识点摘要`（sm-N 锚点 + 一行概括 + 章节提示）+ `## 知识点联系` + `## 专有名词` + `## 单元文件`）→ assessments（汇总列排除；`## 要求`/`## 参考` 有源蒸馏 `req-N`/`ref-N` 锚点 + `## 提交`/`## 结果` 机械快照，due 缺省不告警）→ attachments（1:1 代理）；机械区对账覆写，沉淀区不触碰
 5. **呈落位预览**（新增 / 变更 / 废弃清单），等用户确认
-6. **写后管道**（确定性，机械自动不询问）：按注入区序执行各插件写入调用，毕即 `python .meta/scripts/pipeline.py verify`（写后自证，未过即回修）；随即按提交纪律入库（`映射: <term>/<course>`，词表见 `.meta/protocol/actions.md`）
+6. **写后管道**（确定性，机械自动不询问）：按注入区序执行各插件写入调用（index/tags/hot/log 派生层重建在前），毕即 `python .meta/scripts/pipeline.py verify` 收尾（写后自证，未过即回修）；随即按提交纪律入库（`映射: <term>/<course>`，词表见 `.meta/protocol/actions.md`）
 7. 回报：课程 / 四桶新增·变更·废弃计数 / stale 清单（stale 项经 bbcli 现拉刷新后消除）
 
 ## Prohibitions
@@ -56,14 +56,14 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 <!-- /usage:bb -->
 
 <!-- usage:bb-map -->
-- 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id + generated/stale_after），正文 `## 基本信息` 六项蒸馏（教学大纲/师资/TA/分组/评分构成/考试时间，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
-- 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块）；整页可再生，珍贵内容蒸馏入 notes
-- assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗）；`## 要求`/`## 参考` 有源则蒸馏（分点 `<a id="req-N">`/`<a id="ref-N">` 锚点，无源标「无单独要求文件」）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/）；`## 提交`/`## 结果` 自 grades/submission 快照刷新机械区；毕写 log 行（类型 map）
+- 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id/term_status（现役|冻结）+ generated/stale_after），正文 `## 基本信息` 课程政策类要点蒸馏（评分/考核/师资/TA/分组/教学语言/AI 政策，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
+- 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件；平行同类目录合为一页）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元，完全未下载单元可缺省 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 + 源侧章节级提示 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块；扁平多附件单元清单即对应关系）；整页可再生，珍贵内容蒸馏入 notes
+- assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗；汇总列 Weighted Total/Total 排除不建页）；`## 要求`/`## 参考` 有源则蒸馏（分点 `<a id="req-N">`/`<a id="ref-N">` 锚点，无源标「无单独要求文件」）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/；允许多页引用同一文件）；`## 提交`/`## 结果` 自 grades/submission 快照刷新机械区（due 缺省预留说明位不告警；无提交记录用独立话术列三种可能）；毕写 log 行（类型 map）
 - attachments 代理：老师发布的非讲义资产每件一页（raw_file/raw_sha256），平铺；TA/分组等结构事实不作附件页
 - 落位判据（见注入行）
 - 重建纪律：机械区对账覆写；沉淀区（info 备注 / assessments 复盘）只增，重建不得触碰；attachments 代理整页可再生
 - stale 处置：assessments 结果与 info 基本信息挂 stale_after，stale 经 bbcli 现拉刷新（agent 即同步器）；courseware/attachments 纯本地对账无 TTL
-- 写后管道（机械自动）：python .meta/scripts/pipeline.py verify + index + tags + hot + log
+- 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
 - 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）
 <!-- /usage:bb-map -->
 
