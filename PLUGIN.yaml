@@ -1,0 +1,24 @@
+id: bb-teach
+version: 0.1
+depends:
+  - bb-track
+  - bb-map
+commands:
+  - bb-teach
+updated: 2026-10-04
+attachment:
+  - "wiki/bb/<term>/<course>/user.md —— 认知档案（bb-track 属；本插件只读消费读数/证据/目标）"
+  - "wiki/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读定位与回链（sm-N/req-N 锚点）"
+fields: {}
+inject: "教学消费侧 bb-teach（bb-track 的 teaching 消费侧）：提问即讲解——问题定位 courseware sm-N（query 检索 + bb-map 收窄）→ 读 bb-track 认知档案（读数/证据/目标，stale 先核对）→ 按熟练度×难度二维伸缩讲解（已知略讲/反问、未知讲透）+ 术语以用户已锚点集为准 + 错题/目标注入 + 锚点回链；三层反馈闭环——单轮反馈不落盘、显著答疑落 session 纪要、仅显著信号（跨会话稳定/主动应用/machine 验证）才经确认收敛 user.md（写回委托 bb-track 契约）；讲解不写 log、仅认知收敛走 bb-track 写后管道；默认纯对话不落盘"
+usage:
+  - "定位：问题→提取关键词→query 分层检索（hot→index→grep→读页）→ bb-map courseware sm-N 锚点与 `## 专有名词` 对照表收窄；跨页跨点皆列"
+  - "读态：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；stale 核对、差距现算（courseware 全集 − 已锚点集）、错题点级结论——纪律见注入区 bb-track 块"
+  - "二维伸缩（熟练度×难度）：未锚点/生疏→完整讲透（硬核概念加类比+数字例子+前置链补全）；熟悉→重点怎么用+易错点；熟练→为什么+易错点+跨点联系+开放问题；掌握→反问/挑战题/引导自查（不灌输）"
+  - "术语门槛：允许出现的术语 = 用户已锚点集（非「本课前面出现」）；超出者当场解释、绝不假定已知"
+  - "目标与错题注入：短期优先（带时效）命中者篇幅 +1 档标「近期重点」、过期降级；命中 assessments 复盘错题点易错点 +1 档并点出"
+  - "输出：行内加粗标签骨架（直觉/是什么/为什么/怎么用/类比/易错点/前置）按矩阵伸缩，每条回链 courseware sm-N"
+  - "三层反馈闭环：单轮反馈（懂了/追问/答错）只调当轮讲法、不落盘；显著答疑可经 save 落 session 纪要（事实非断言）；仅显著信号（跨会话稳定/主动正确应用/machine 验证）才提议收敛 user.md——写回委托 bb-track 写契约、经用户确认；单轮「懂了」不写、单轮「没懂」不判生疏"
+  - "log 纪律：讲解动作不写 log（不采集行为信号）；仅认知收敛走 bb-track 写后管道（log profile --domain bb + verify）"
+checks:
+  - "语义项（v0.1 人工，附检后置）：未读 user.md 即讲解 → warning；术语超已锚点集且未当场解释 → warning；对「掌握」档仍长篇灌输 → info；未经确认即写 user.md → error；单轮「懂了」即写「掌握」入 user.md → error；讲解缺 courseware 锚点回链 → info"
