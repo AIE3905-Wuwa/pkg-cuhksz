@@ -1,5 +1,5 @@
 id: bb-track
-version: 0.3
+version: 0.4
 depends:
   - bb
   - bb-map
