@@ -1,10 +1,12 @@
 id: bb-quiz
-version: 0.2
+version: 0.3
 depends:
   - bb-track
   - bb-map
 commands:
   - bb-quiz
+usage_routes:
+  - bb-track
 updated: 2026-10-04
 attachment:
   - "bb/<term>/<course>/notes/testing/ —— 考卷子区（bb v0.7 共居；每测一组：<名>-试题.md + <名>-答案.md，判分追记于答案页 `## 判分`；ai 产物只增，重测出新卷旧卷留档）"

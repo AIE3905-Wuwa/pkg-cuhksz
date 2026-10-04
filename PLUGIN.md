@@ -2,7 +2,7 @@
 
 ## 设计概要
 
-- **为什么存在**：bb-track 的 **testing 消费侧**——与 bb-teach 教正交的考：自测出题加判分回流，是认知数据环的 machine 证据入口。teach 产物是弱证据；判分是 machine 证据；权重见 bb-track。零领地纯工作流件，见 mechanics 第 8 节；用法经 consumes 挂 bb-track 命令现场
+- **为什么存在**：bb-track 的 **testing 消费侧**——与 bb-teach 教正交的考：自测出题加判分回流，是认知数据环的 machine 证据入口。teach 产物是弱证据；判分是 machine 证据；权重见 bb-track。零领地纯工作流件，见 mechanics 第 8 节；用法经源侧路由挂 bb-track 命令现场
 - **关键裁定**：
   - 考卷不是课程原有物，是认知采集所需的过程素材——落 bb 侧素材层 `notes/testing/` 子区，term/course 双维随域；不立 wiki 页，不立根容器。2026-10-04 所有者改造：exams/ 容器废除；bb-exam 更名 bb-quiz，informal 自测与 bb-map assessments 管的 formal exam 划界
   - 对齐样例而非自创风格：题型与难度中值随样例，无样例回落已知作业，再回落用户习惯；难度 = 认知层级 1-5，M 为软约束——粗保证：生疏偏易打底，掌握偏难挑战
@@ -29,5 +29,6 @@
 
 ## Changelog
 
+- 0.3 2026-10-04：立 usage_routes: [bb-track]——同 bb-teach，用法经源侧路由落枢纽命令
 - 0.2 2026-10-04：改造，自 bb-exam v0.1 更名重构。exams/ 根容器废除，考卷落 bb/<term>/<course>/notes/testing/，bb v0.7 素材层，term 维度恢复；更名 quiz——informal 自测，与 bb-map assessments 管的 formal exam 划界；判分回流立设，machine 证据经确认入 user.md，闭环补全；越界与字段检查降 warning；教学纪要改读 notes/ ai 笔记，best-effort
 - 0.1 2026-10-04，bb-exam 名下：立设——testing 消费侧插件加命令加 exams/ 容器；五要求落地：题型难度对齐、术语一致、不越界、解析回链、参照认知档案
