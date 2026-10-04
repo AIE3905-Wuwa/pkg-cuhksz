@@ -5,6 +5,8 @@ depends:
   - bb-map
   - trust
   - wiki
+commands:
+  - bb-track
 updated: 2026-10-04
 attachment:
   - "wiki/bb/<term>/<course>/user.md —— 认知档案（课程根，不入四桶；两区制：认知读数收敛覆写 + 证据流只增）"
