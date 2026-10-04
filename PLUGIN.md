@@ -8,7 +8,7 @@
 - 建档懒惰式：首个显著信号或用户明示时建，不随新课强制立页（缺席 = 尚无认知数据，消费侧降级处理不报错）
 - 两区制正文：`## 认知读数`（收敛覆写——新值取代旧值）+ `## 证据流`（只增不改写）
 - 学期即边界：term 在路径中，学期冻结随 term_status；新学期新档，旧档只读可作初始参考
-- 笔记消费契约：`bb/<term>/<course>/notes/` 只读（bb v0.4 机器写边界），可选 frontmatter 三属性（见 manifest fields）——stage 标记属人（agent 只读不写）
+- 笔记消费契约：`bb/<term>/<course>/notes/` 只读（bb v0.7 共居区——人的笔记 + ai 笔记 + testing/ 考卷），可选 frontmatter 三属性（见 manifest fields）——stage 标记属人（agent 只读不写）
 
 ## Invariants
 
@@ -19,6 +19,7 @@
 - 目标层入读数：课程目标 + 短期优先（带时效，过期即失效）
 - 错题分层：题级事实归 assessments 复盘区（可选行约定带知识点 wikilink 供反向索引）；点级结论入读数；统计现算不落盘
 - 更新双轨：agent 识别显著信号自发（成绩刷新后、笔记 stage 变更后）+ 用户明示（自述即认知输入）；显著纪律——记显著不记日常
+- 采集通道（v0.3 起，素材层 = bb v0.7 共居区）：bb-teach（讲解→notes/ ai 笔记 = 弱证据）与 bb-quiz（自测→notes/testing/ 判分 = machine 证据）是认知数据的主动采集面——产物落 bb 侧素材层，证据入流经用户确认；用法投影挂 bb-track 命令（cmd-inject 机制，装卸自动同步）
 - trust 复用：generated 随手写；读数天花板 machine-confirmed，证据流含 human 事件则 human-reviewed；stale_after 默认 14 天（页面可覆写）——stale 时消费前先核对近窗证据或询问用户
 - 不打 tags（单课路径直读，同 user-profile 先例）
 - v0.1 非目标：行为信号（查阅频次）不采集；课表时间触发悬置（课表源缺口：SIS / ics 归 calendar 源适配器，挂缺见 log）
@@ -27,5 +28,6 @@
 
 ## Changelog
 
+- 0.3（2026-10-04）采集通道披露（teach/quiz 改造配套）：notes/ 消费扩为共居区（ai 笔记弱证据 + testing/ 考卷判分 machine 证据）；stale 未核对前保守档消费
 - 0.2（2026-10-02）全局域批三：挂 user-profile 认知桥注册行（建档时维护画像 `## 域认知` 节，缺席容错）；log 行带域标 --domain bb
 - 0.1（2026-10-02）立设（组会裁定 + 两轮详谈收敛）：认知档案两区制、笔记只读消费契约三属性、属地原生页首例（携 wiki v0.7 属地两形、bb-map v0.12 四桶豁免）
