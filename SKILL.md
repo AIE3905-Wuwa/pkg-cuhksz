@@ -1,7 +1,7 @@
 ---
 name: bb-track
 owner: bb-track
-consumes: [bb-track, bb-teach, bb-quiz, trust, log]
+consumes: [bb-track, trust, log]
 description: "认知档案：读/建/更 wiki/bb/<term>/<course>/user.md 学习状态（认知读数+证据流+目标层），差距现算；采集通道（讲解答疑 bb-teach / 出题自测 bb-quiz）用法挂载于此。Triggers on: 认知档案, 学习状态, 我学得怎么样, user.md, bb-track."
 ---
 
@@ -16,11 +16,10 @@ bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认�
 
 ## Steps
 
-1. **读档**：定位课程（`<term>/<course>`）→ user.md 认知读数 + 证据流 + 目标层；stale 先核对（近窗证据或询问，未核对前保守档）
-2. **差距分析（现算）**：courseware 知识点全集 − 已锚点集 → 生疏/未覆盖清单；错题点自 assessments 复盘
-3. **建档/更新**：建档懒惰式（首个显著信号或用户明示，不随新课强制立页）；证据追加 `- MM-DD 出处：断言 → [[回链]]`；读数收敛（新值取代旧值、证据流不动）；均经用户确认
-4. **认知桥登记**：建档时若画像在场，维护 profile `## 域认知` 节一行（bb + 路径形）；缺席跳过不代建
-5. **写后**：verify + log 行（profile --domain bb）
+1. **定位与读档**：定位课程 `<term>/<course>`，读 user.md 认知读数、证据流、目标层——细则见注入区 bb-track 块
+2. **差距分析**：courseware 知识点全集减已锚点集，现算；错题点自 assessments 复盘
+3. **建档或更新**：建档懒惰式；证据追加与读数收敛按注入区 bb-track 块纪律，均经用户确认
+4. **写后**：verify 加 log 行
 
 ## Prohibitions
 
@@ -39,7 +38,7 @@ bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认�
 
 ## Injected Section (plugin usage blocks)
 
-> 本区为 wiki_plugin_kernel 自各插件 manifest usage 列表按本命令 consumes 序投影（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
+> 本区为 wiki_plugin_kernel 投影：consumes 拉取与源侧路由 usage_routes 合流，披露序 = owner 在前、路由居中、拉取殿后（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-track -->
@@ -52,18 +51,6 @@ bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认�
 - 写后管道：verify；log 行（类型 profile，--domain bb）
 - 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
 <!-- /usage:bb-track -->
-
-<!-- usage:bb-teach -->
-- 定位：问题→提取关键词→query 分层检索（hot→index→grep→读页）→ bb-map courseware sm-N 锚点与 `## 专有名词` 对照表收窄；跨页跨点皆列
-- 读态：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；stale 核对、差距现算（courseware 全集 − 已锚点集）、错题点级结论——纪律见注入区 bb-track 块
-- 二维伸缩（熟练度×难度）：未锚点/生疏→完整讲透（硬核概念加类比+数字例子+前置链补全）；熟悉→重点怎么用+易错点；熟练→为什么+易错点+跨点联系+开放问题；掌握→反问/挑战题/引导自查（不灌输）
-- 术语门槛：允许出现的术语 = 用户已锚点集（非「本课前面出现」）；超出者当场解释、绝不假定已知
-- 目标与错题注入：短期优先（带时效）命中者篇幅 +1 档标「近期重点」、过期降级；命中 assessments 复盘错题点易错点 +1 档并点出
-- 输出：行内加粗标签骨架（直觉/是什么/为什么/怎么用/类比/易错点/前置）按矩阵伸缩，每条回链 courseware sm-N
-- 三层反馈闭环：单轮反馈（懂了/追问/答错）只调当轮讲法、不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 notes/ ai 笔记——一篇一问（问题+讲解骨架+易错点+锚点回链），origin: ai / form: text，命名 <日期>-<主题>.md，只增不覆写；仅显著信号（跨会话稳定/主动正确应用/machine 验证）才提议收敛 user.md——写回委托 bb-track 写契约、经用户确认；单轮「懂了」不写、单轮「没懂」不判生疏
-- 档案姿态：user.md stale 先核对（未核对前按保守档讲），缺席（冷启动）全场按未锚点档讲透——不因无档案拒绝讲解
-- log 纪律：讲解对话不写 log（不采集行为信号）；显著答疑落 notes/ 后写一行（other --domain bb）；认知收敛走 bb-track 写后管道（log profile --domain bb + verify）
-<!-- /usage:bb-teach -->
 
 <!-- usage:bb-quiz -->
 - 解析输入：范围（章节/单元/sm-N 列表）+ 样例（可选）；课程定位经 bb 目录结构（<term>/<course>，现役学期可缺省）
@@ -79,6 +66,18 @@ bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认�
 - 不越界：术语/知识点只取自范围内 courseware sm-N，越界弃题重出（除非用户明示；语义约束出题侧自检）
 - 写后：log 行（类型 other --domain bb）+ pipeline.py verify
 <!-- /usage:bb-quiz -->
+
+<!-- usage:bb-teach -->
+- 定位：问题→提取关键词→query 分层检索（hot→index→grep→读页）→ bb-map courseware sm-N 锚点与 `## 专有名词` 对照表收窄；跨页跨点皆列
+- 读态：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；stale 核对、差距现算（courseware 全集 − 已锚点集）、错题点级结论——纪律见注入区 bb-track 块
+- 二维伸缩（熟练度×难度）：未锚点/生疏→完整讲透（硬核概念加类比+数字例子+前置链补全）；熟悉→重点怎么用+易错点；熟练→为什么+易错点+跨点联系+开放问题；掌握→反问/挑战题/引导自查（不灌输）
+- 术语门槛：允许出现的术语 = 用户已锚点集（非「本课前面出现」）；超出者当场解释、绝不假定已知
+- 目标与错题注入：短期优先（带时效）命中者篇幅 +1 档标「近期重点」、过期降级；命中 assessments 复盘错题点易错点 +1 档并点出
+- 输出：行内加粗标签骨架（直觉/是什么/为什么/怎么用/类比/易错点/前置）按矩阵伸缩，每条回链 courseware sm-N
+- 三层反馈闭环：单轮反馈（懂了/追问/答错）只调当轮讲法、不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 notes/ ai 笔记——一篇一问（问题+讲解骨架+易错点+锚点回链），origin: ai / form: text，命名 <日期>-<主题>.md，只增不覆写；仅显著信号（跨会话稳定/主动正确应用/machine 验证）才提议收敛 user.md——写回委托 bb-track 写契约、经用户确认；单轮「懂了」不写、单轮「没懂」不判生疏
+- 档案姿态：user.md stale 先核对（未核对前按保守档讲），缺席（冷启动）全场按未锚点档讲透——不因无档案拒绝讲解
+- log 纪律：讲解对话不写 log（不采集行为信号）；显著答疑落 notes/ 后写一行（other --domain bb）；认知收敛走 bb-track 写后管道（log profile --domain bb + verify）
+<!-- /usage:bb-teach -->
 
 <!-- usage:trust -->
 - 写页随手写 `generated`（块式：`by: agent/<当前模型>` / `at: 今日`）
