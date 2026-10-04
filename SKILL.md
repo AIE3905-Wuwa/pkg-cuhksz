@@ -2,12 +2,12 @@
 name: bb-quiz
 owner: bb-quiz
 consumes: [bb-quiz, bb-map, bb-track, trust, log]
-description: "出题自测：读 bb-track 认知档案与 courseware 知识点，生成英文试题 + 中文解析（落 notes/testing/），作答后判分回流认知档案。Triggers on: 出题, 自测, quiz, 生成习题, 考我, quiz me."
+description: "出题自测：读 bb-track 认知档案与 courseware 知识点，生成试题与解析（题干语言跟源、解析语言跟读者配置；落 notes/testing/），作答后判分回流认知档案。Triggers on: 出题, 自测, quiz, 生成习题, 考我, quiz me."
 ---
 
 # bb-quiz：出题自测
 
-用户指定范围（+ 可选样例），读 bb-track 认知档案知道「哪些点生疏该测、哪些点掌握可挑战」，按 courseware 知识点生成英文试题 + 中文解析——题型/难度对齐样例、知识点不越界、解析回链课件位置。考卷落 bb 侧素材层（`notes/testing/`，过程素材非档案）；作答后判分，经确认回流 user.md（machine 证据）。定位 = 检验，与 bb-teach（教学）正交。
+用户指定范围（+ 可选样例），读 bb-track 认知档案知道「哪些点生疏该测、哪些点掌握可挑战」，按 courseware 知识点生成试题与解析——题干语言跟源（样例/已知作业/课程材料）、解析语言跟读者（language 页配置）、题型/难度对齐样例、知识点不越界、解析回链课件位置。考卷落 bb 侧素材层（`notes/testing/`，过程素材非档案）；作答后判分，经确认回流 user.md（machine 证据）。定位 = 检验，与 bb-teach（教学）正交。
 
 ## Scope
 
@@ -32,7 +32,7 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 
 ## Language
 
-题目英文（术语对齐 courseware 专有名词表）；解析与判分中文；路径与专名保留原形。
+题干语言跟源——样例 → 已知作业 → 课程材料（术语对齐 courseware 专有名词表）；解析与判分语言取行文声明页 `wiki/language.md` 的 annotation 键，页面或缺席键跟会话语言；路径与专名保留原形。
 
 ## Parameters
 
@@ -52,8 +52,8 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 - 定题型与难度中值：样例 → assessments 已知作业 → 用户习惯；难度 = 认知层级 1-5（记忆/理解/应用/分析/综合），中值 M = 样例各题层级中位数（LLM 语义判断，软约束——粗保证 = 生疏偏易打底、掌握偏难挑战）
 - 读教学纪要（best-effort）：notes/ ai 笔记（origin: ai）近期教了什么/卡在哪，避免重复或重点测刚教；缺席或无笔记静默跳过
 - 选题：范围内知识点按 生疏/未锚点/错题/短期优先 排序覆盖
-- 出题：英文题干、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M
-- 写解析：中文、每题标知识点 + sm-N wikilink
+- 出题：题干语言源对齐（样例 → 已知作业 → 课程材料）、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M
+- 写解析：语言读者对齐（language 页 annotation 键，页面或缺席键跟会话语言）、每题标知识点 + sm-N wikilink；判分同语言
 - 落盘：notes/testing/<名>-试题.md + -答案.md（quiz 块映射 + origin: ai + generated；试题页不含答案）；旧卷不删不覆写
 - 判分（用户作答后）：对照答案页逐题判定 → 答案页追记 `## 判分`（日期 + 逐题对错 + 得分）；错题点与总体表现经用户确认回写 user.md 证据流（出处 machine 自测）——显著者按收敛纪律改读数；考卷本体是素材，档案只收结论
 - 不越界：术语/知识点只取自范围内 courseware sm-N，越界弃题重出（除非用户明示；语义约束出题侧自检）
