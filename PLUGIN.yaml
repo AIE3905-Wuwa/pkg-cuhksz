@@ -1,10 +1,12 @@
 id: bb-teach
-version: 0.2
+version: 0.3
 depends:
   - bb-track
   - bb-map
 commands:
   - bb-teach
+usage_routes:
+  - bb-track
 updated: 2026-10-04
 attachment:
   - "bb/<term>/<course>/notes/ —— 讲解沉淀落此（ai 笔记：一篇一问，origin: ai，只增不覆写；bb v0.7 共居区，bb-track 弱证据）"
