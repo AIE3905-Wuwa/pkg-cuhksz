@@ -1,6 +1,14 @@
 # bb-quiz：出题自测（testing 消费侧）
 
-bb-track 管「用户的认知状态是什么」，bb-teach 管「教」（teaching 消费侧），本插件管「考」（testing 消费侧）——用户指定范围 + 可选样例，生成英文试题 + 中文解析帮用户自测；作答后判分回流认知档案（machine 证据）。考卷不是课程原有物，是认知采集所需的过程素材——落 bb 侧素材层（bb v0.7 notes/testing/ 子区，term/course 双维随域），不立 wiki 页、不立根容器。
+## 设计概要
+
+- **为什么存在**：bb-track 的 **testing 消费侧**——与 bb-teach（教）正交的「考」：自测出题 + 判分回流，是认知数据环的 machine 证据入口（teach 产物是弱证据、判分是 machine 证据，权重见 bb-track）。零领地纯工作流件（mechanics §8），用法经 consumes 挂 bb-track 命令现场
+- **关键裁定**：
+  - 考卷不是课程原有物，是认知采集所需的过程素材——落 bb 侧素材层 `notes/testing/` 子区（term/course 双维随域），不立 wiki 页、不立根容器（2026-10-04 所有者改造：exams/ 容器废除、bb-exam 更名 quiz——informal 自测与 bb-map assessments 管的 formal exam 划界）
+  - 对齐样例而非自创风格：题型与难度中值随样例（fallback 已知作业 → 用户习惯）；难度 = 认知层级 1-5，M 为软约束——粗保证 = 生疏偏易打底、掌握偏难挑战
+  - 不越界：知识点全集 = courseware sm-N ∩ 用户范围，越界弃题重出——测的是范围内掌握，不是知识面
+  - 判分回流闭环：答案页追记 `## 判分`，错题点经确认回写 user.md（machine 自测证据）；考卷本体是素材、档案只收结论
+  - 教学纪要 best-effort：读 teach 的 ai 笔记避免重复、重点测刚教——两条采集通道经素材层弱耦合
 
 ## Structure
 
