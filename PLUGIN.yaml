@@ -1,5 +1,5 @@
 id: bb-quiz
-version: 0.3
+version: 0.4
 depends:
   - bb-track
   - bb-map
@@ -14,7 +14,7 @@ attachment:
   - "wiki/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读（sm-N 锚点、专有名词表、已知作业）"
 fields:
   quiz: "块映射（考卷页）——course（课程代码）/ scope（出题范围）/ difficulty_median（难度中值 1-5，认知层级）/ types（题型列表，开放词表）/ source（样例 sample|作业 assignment|习惯 habit）/ answer_of（答案页回链试题文件名）"
-inject: "出题自测 bb-quiz（bb-track 的 testing 消费侧）：用户指定范围 + 可选样例 → 生成英文试题（题型与难度中值对齐样例，无样例回落已知作业、再回落用户习惯）+ 中文解析（每题标知识点 sm-N 位置）；知识点全集 = courseware sm-N、范围 = 用户指定子集、不越界（除非用户明示）；选题与难度分布参照 bb-track 熟练度/目标层/错题（stale 保守档、冷启动全场未锚点均匀出题），教学纪要（notes/ ai 笔记）best-effort 按需读；考卷落 bb/<term>/<course>/notes/testing/<名>-试题.md + -答案.md（origin: ai，只增）；判分（作答后）= 答案页追记 `## 判分` + 经确认回写 user.md 证据流（machine 自测）；写后 log 行（other --domain bb）+ verify"
+inject: "出题自测 bb-quiz（bb-track 的 testing 消费侧）：用户指定范围 + 可选样例 → 生成试题（题型与难度中值对齐样例，无样例回落已知作业、再回落用户习惯；题干语言源对齐——跟样例/已知作业/课程材料）+ 解析（语言读者对齐——取行文声明页 `wiki/language.md` 的 annotation 键，页面或缺席键跟会话语言；每题标知识点 sm-N 位置）；知识点全集 = courseware sm-N、范围 = 用户指定子集、不越界（除非用户明示）；选题与难度分布参照 bb-track 熟练度/目标层/错题（stale 保守档、冷启动全场未锚点均匀出题），教学纪要（notes/ ai 笔记）best-effort 按需读；考卷落 bb/<term>/<course>/notes/testing/<名>-试题.md + -答案.md（origin: ai，只增）；判分（作答后）= 答案页追记 `## 判分` + 经确认回写 user.md 证据流（machine 自测）；写后 log 行（other --domain bb）+ verify"
 usage:
   - "解析输入：范围（章节/单元/sm-N 列表）+ 样例（可选）；课程定位经 bb 目录结构（<term>/<course>，现役学期可缺省）"
   - "读知识点全集：courseware sm-N + `## 专有名词` 对照表，取范围内子集"
@@ -22,8 +22,8 @@ usage:
   - "定题型与难度中值：样例 → assessments 已知作业 → 用户习惯；难度 = 认知层级 1-5（记忆/理解/应用/分析/综合），中值 M = 样例各题层级中位数（LLM 语义判断，软约束——粗保证 = 生疏偏易打底、掌握偏难挑战）"
   - "读教学纪要（best-effort）：notes/ ai 笔记（origin: ai）近期教了什么/卡在哪，避免重复或重点测刚教；缺席或无笔记静默跳过"
   - "选题：范围内知识点按 生疏/未锚点/错题/短期优先 排序覆盖"
-  - "出题：英文题干、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M"
-  - "写解析：中文、每题标知识点 + sm-N wikilink"
+  - "出题：题干语言源对齐（样例 → 已知作业 → 课程材料）、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M"
+  - "写解析：语言读者对齐（language 页 annotation 键，页面或缺席键跟会话语言）、每题标知识点 + sm-N wikilink；判分同语言"
   - "落盘：notes/testing/<名>-试题.md + -答案.md（quiz 块映射 + origin: ai + generated；试题页不含答案）；旧卷不删不覆写"
   - "判分（用户作答后）：对照答案页逐题判定 → 答案页追记 `## 判分`（日期 + 逐题对错 + 得分）；错题点与总体表现经用户确认回写 user.md 证据流（出处 machine 自测）——显著者按收敛纪律改读数；考卷本体是素材，档案只收结论"
   - "不越界：术语/知识点只取自范围内 courseware sm-N，越界弃题重出（除非用户明示；语义约束出题侧自检）"
