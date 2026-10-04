@@ -42,19 +42,9 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 
 ## Injected Section (plugin usage blocks)
 
-> 本区为 wiki_plugin_kernel 自各插件 manifest usage 列表按本命令 consumes 序投影（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
+> 本区为 wiki_plugin_kernel 投影：consumes 拉取与源侧路由 usage_routes 合流，披露序 = owner 在前、路由居中、拉取殿后（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
 
 <!-- cmd-inject:start -->
-<!-- usage:bb -->
-- 进域先读 wiki/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写（未交提醒双源：assignments 无提交 ∪ grades 有 due 无 attempt）→ 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
-- 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名变更件 --refresh 重拉、内容哈希尾缀落新件（旧件保留=修订史）；笔记区 notes/ 两治共居：人的笔记机器永不写入/删除/重命名（读取与分析合法——认知消费口粮）；ai 产物（origin: ai——teach 讲解笔记 / quiz 考卷）经各采集通道落放、只增不覆写；fetch 落放遇保留名冲突时改名并提示
-- 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
-- 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
-- 公告拆信：不存档不立页（真相在 BB 现拉即得）；作业变更→assessments 机械区、考试/调课→info 基本信息（+calendar 派生）、政策/师资/分组→info 基本信息、行动项→todo、资源发布→触发 fetch 即弃、高价值长文→notes 涌现回链
-- 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）——todo/calendar/notes 桥，格式细则归桥
-- 隐私与边界：成绩按需现拉呈现即止、不默认投影；roster 不拉；提交作业等写操作不入本域
-<!-- /usage:bb -->
-
 <!-- usage:bb-map -->
 - 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id/term_status（现役|冻结）+ generated/stale_after），正文 `## 基本信息` 课程政策类要点蒸馏（评分/考核/师资/TA/分组/教学语言/AI 政策，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
 - 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件；平行同类目录合为一页）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元，完全未下载单元可缺省 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 + 源侧章节级提示 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块；扁平多附件单元清单即对应关系）；整页可再生，珍贵内容蒸馏入 notes
@@ -66,6 +56,16 @@ description: "把 bb/ 拉取物与成绩册快照映射为 wiki/bb/<term>/<cours
 - 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
 - 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）——todo/notes 桥
 <!-- /usage:bb-map -->
+
+<!-- usage:bb -->
+- 进域先读 wiki/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写（未交提醒双源：assignments 无提交 ∪ grades 有 due 无 attempt）→ 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
+- 拉取落位：课件 → bb/<term>/<course>/（保留源侧目录树）；提交件 → bb/<term>/<course>/submissions/；拉取物只增不覆写，同名变更件 --refresh 重拉、内容哈希尾缀落新件（旧件保留=修订史）；笔记区 notes/ 两治共居：人的笔记机器永不写入/删除/重命名（读取与分析合法——认知消费口粮）；ai 产物（origin: ai——teach 讲解笔记 / quiz 考卷）经各采集通道落放、只增不覆写；fetch 落放遇保留名冲突时改名并提示
+- 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
+- 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
+- 公告拆信：不存档不立页（真相在 BB 现拉即得）；作业变更→assessments 机械区、考试/调课→info 基本信息（+calendar 派生）、政策/师资/分组→info 基本信息、行动项→todo、资源发布→触发 fetch 即弃、高价值长文→notes 涌现回链
+- 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）——todo/calendar/notes 桥，格式细则归桥
+- 隐私与边界：成绩按需现拉呈现即止、不默认投影；roster 不拉；提交作业等写操作不入本域
+<!-- /usage:bb -->
 
 <!-- usage:trust -->
 - 写页随手写 `generated`（块式：`by: agent/<当前模型>` / `at: 今日`）
