@@ -29,7 +29,7 @@ bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认�
 
 ## Language
 
-中文为主，知识点锚点与专名保留原形。
+产出语言取行文声明页 `wiki/language.md` 的 default 键（页面或缺席键跟会话语言）；知识点锚点与专名保留原形。
 
 ## Parameters
 
