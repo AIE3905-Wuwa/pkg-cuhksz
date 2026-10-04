@@ -42,7 +42,7 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 
 ## Injected Section (plugin usage blocks)
 
-> 本区为 wiki_plugin_kernel 自各插件 manifest usage 列表按本命令 consumes 序投影（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
+> 本区为 wiki_plugin_kernel 投影：consumes 拉取与源侧路由 usage_routes 合流，披露序 = owner 在前、路由居中、拉取殿后（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-quiz -->
