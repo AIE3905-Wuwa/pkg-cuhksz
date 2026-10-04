@@ -1,6 +1,14 @@
 # bb-map：bb 域映射法则
 
-bb 域的映射法则（mapping 之于 vault；bb 域内插件，契约见 bb 插件）。**规范化投影**：`bb/` 保源形（对账前提），属地 `wiki/bb/<term>/<course>/` 统一规范形四桶——不论源目录如何存储。映射与理解解耦：代理是「bb 资产在 md 世界的代表」，courseware 标配「知识点摘要（分点 `<a id="sm-N">` 锚点）+ 专有名词」，深度讲解为可选增强。桶名 v0.4 终裁：`courseware`（原 lec&tut）/ `assessments`（原 work）/ `attachments`（2026-10-01 裁定）。
+## 设计概要
+
+- **为什么存在**：bb 域的映射法则——mapping 之于 vault（域内件，契约见 bb 基座）。拉取物在 `bb/` 保源形（对账前提），属地投影统一规范形：不论源目录如何存储，`wiki/bb/<term>/<course>/` 恒为四桶——**规范化投影**让消费侧（teach / quiz / track / 检索）无需感知源侧形态
+- **关键裁定**：
+  - 映射与理解解耦：代理页是「bb 资产在 md 世界的代表」，courseware 标配知识点摘要（sm-N 锚点）+ 专有名词对照——锚点是认知档案与考卷解析的定位通货；深度讲解归 teach，不进代理
+  - 桶名 v0.4 终裁（2026-10-01）：lec&tut → courseware、work → assessments——桶名描述内容性质而非源侧组织
+  - 落位判据在先：有成绩册列或提交动作 → assessments（汇总列 / 分节登记列除外）、老师非讲义资产 → attachments、内容单元 → courseware、结构事实 → info——桶不靠猜
+  - 两形分区继承 lark 先例：info / assessments 机械区可再生 + 沉淀区只增；courseware / attachments 纯代理（珍贵内容蒸馏入 notes）
+- **弃案**：courseware `## 笔记` 沉淀节（v0.5 撤——笔记是人的造物，落点单独设计：先 bb v0.4 笔记区、后 bb-track 消费契约）；分节登记列建页（2026-10-02 裁定不建——非知识考核的登记）
 
 ## Structure
 
