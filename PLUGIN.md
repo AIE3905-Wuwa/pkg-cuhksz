@@ -13,7 +13,7 @@
 
 ## Structure
 
-- 无自有页面，零自有字段；产物 = ai 笔记落 `bb/<term>/<course>/notes/`——一篇一问，origin: ai，只增；认知回写经 bb-track 契约
+- 无自有页面，零自有字段；产物 = ai 笔记落 `cuhksz/bb/<term>/<course>/notes/`——一篇一问，origin: ai，只增；认知回写经 bb-track 契约
 - 工作流三主步：一，定位知识点——query 检索加 courseware sm-N 收窄；二，读用户认知——读数、证据、目标，stale 先核对，差距与错题现算；三，按二维矩阵讲解——伸缩、术语门槛、错题目标注入、锚点回链
 - 可选第四步：三层反馈闭环，见下
 
@@ -32,6 +32,8 @@
 - 隐私：讲解内容与认知结论属实例数据，不入框架仓库与 test-repo
 
 ## Changelog
+
+- 0.5（2026-10-05）cuhksz 域迁移：路径改写，机制不变
 
 - 0.4 2026-10-04：语言中性化——讲解语言读者对齐（language 页 teaching 键，缺席跟会话语言），拆除隐含「中文讲解」硬编码；术语双层：锚点集优先、全局 terms 表兜底；与 language v0.2 同批
 - 0.3 2026-10-04：立 usage_routes: [bb-track]——用法经源侧路由落枢纽命令，装卸无需改 bb-track frontmatter

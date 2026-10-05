@@ -1,5 +1,5 @@
 id: bb-teach
-version: 0.4
+version: 0.5
 depends:
   - bb-track
   - bb-map
@@ -7,11 +7,11 @@ commands:
   - bb-teach
 usage_routes:
   - bb-track
-updated: 2026-10-04
+updated: 2026-10-05
 attachment:
-  - "bb/<term>/<course>/notes/ —— 讲解沉淀落此（ai 笔记：一篇一问，origin: ai，只增不覆写；bb v0.7 共居区，bb-track 弱证据）"
-  - "wiki/bb/<term>/<course>/user.md —— 认知档案（bb-track 属；本插件只读消费读数/证据/目标，写回经 bb-track 契约）"
-  - "wiki/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读定位与回链（sm-N/req-N 锚点）"
+  - "cuhksz/bb/<term>/<course>/notes/ —— 讲解沉淀落此（ai 笔记：一篇一问，origin: ai，只增不覆写；bb v0.7 共居区，bb-track 弱证据）"
+  - "wiki/cuhksz/cuhksz/bb/<term>/<course>/user.md —— 认知档案（bb-track 属；本插件只读消费读数/证据/目标，写回经 bb-track 契约）"
+  - "wiki/cuhksz/cuhksz/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读定位与回链（sm-N/req-N 锚点）"
 fields: {}
 inject: "教学消费侧 bb-teach（bb-track 的 teaching 消费侧）：提问即讲解——问题定位 courseware sm-N（query 检索 + bb-map 收窄）→ 读 bb-track 认知档案（读数/证据/目标，stale 先核对、未核对前保守档）→ 按熟练度×难度二维伸缩讲解（已知略讲/反问、未知讲透）+ 讲解语言读者对齐（取行文声明页 `wiki/language.md` 的 teaching 键，页面或缺席键跟会话语言）+ 术语先用户已锚点集、缺省查 language 页全局 terms 表兜底（冲突锚点集优先）+ 错题/目标注入 + 锚点回链；三层反馈闭环——单轮反馈不落盘、显著答疑沉淀 ai 笔记落 notes/（origin: ai 弱证据，一篇一问回链锚点）、仅显著信号（跨会话稳定/主动应用/machine 验证）才经确认收敛 user.md（写回委托 bb-track 契约）；讲解对话不写 log、笔记落盘与认知收敛走写后管道；档案缺席（冷启动）全场按未锚点讲、不拒答"
 usage:
