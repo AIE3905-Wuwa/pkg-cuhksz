@@ -34,8 +34,11 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 | Full course history | `sis-cli history` |
 | Enrollment dates / registration window | `sis-cli appt [--term 'Summer']` |
 | Exam schedule | `sis-cli exam` (empty when not yet published) |
+| Download unofficial transcript PDF | `sis-cli transcript [--lang eng] [-o out.pdf]` |
+| Structured student identity (name/id/email/college/major/admitted) | `sis-cli identity` |
+| Degree progress report (currently needs Request Audit) | `sis-cli dpr` |
 | Student center / per-assignment grades | `sis-cli center` / `sis-cli assignments` (text summaries) |
-| Any page as HTML (probe before wrapping) | `sis-cli raw <url> --file out.html` |
+| Any page as HTML, GET or ICAction POST navigation | `sis-cli raw <url> [--post --action BTN --set k=v] --file out.html` |
 
 Component URLs take the form `/psc/csprd/EMPLOYEE/HRMS/c/<COMPONENT>?PORTALPARAM_PTCNAV=<NAV>` — both parts are registered in `siscli/config.py`; use `raw` for anything not yet wrapped.
 

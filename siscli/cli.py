@@ -129,8 +129,59 @@ def cmd_text_component(sis: Sis, args) -> int:
     return 0
 
 
+def cmd_transcript(sis: Sis, args) -> int:
+    data, url = sis.transcript_pdf(args.lang)
+    import pathlib
+    dest = pathlib.Path(args.out) if args.out else pathlib.Path(f"unofficial_transcript_{args.lang}.pdf")
+    dest.write_bytes(data)
+    print(f"saved {dest} ({len(data)}B) | source: {url[:110]}")
+    return 0
+
+
+def cmd_identity(sis: Sis, args) -> int:
+    data = sis.identity()
+    if args.format == "json":
+        print(_fmt(data))
+        return 0
+    for k, v in data.items():
+        print(f"  {k}: {v}")
+    return 0
+
+
+def cmd_dpr(sis: Sis, args) -> int:
+    html = sis.dpr_html()
+    if args.format == "json":
+        print(_fmt({"text": parser.textify(html)}))
+    else:
+        print(parser.textify(html))
+    return 0
+
+
 def cmd_raw(sis: Sis, args) -> int:
-    print(sis.raw(args.url))
+    if args.post:
+        # POST 导航：--action ICAction 名 + --set k=v 覆盖字段（issue #6 ①）
+        comp, nav = None, None
+        from . import config as cfg
+        for name, (c, n) in cfg.COMPONENTS.items():
+            if c in args.url:
+                comp, nav = c, n
+                break
+        if comp is None:
+            print("raw --post 需要已登记组件的 URL（含组件名即可匹配）", file=sys.stderr)
+            return 1
+        extra = {}
+        for kv in args.set or []:
+            k, _, v = kv.partition("=")
+            extra[k] = v
+        out = sis.transport.submit_icaction(comp, nav, args.action, extra or None)
+    else:
+        out = sis.raw(args.url)
+    if args.file:
+        import pathlib
+        pathlib.Path(args.file).write_text(out, encoding="utf-8", errors="replace")
+        print(f"saved {args.file} ({len(out)}B)")
+    else:
+        print(out)
     return 0
 
 
@@ -165,9 +216,22 @@ def main(argv=None) -> int:
     p = sub.add_parser("assignments", help="按作业查成绩（常无数据，观察中）")
     p.add_argument("--format", choices=["text", "json"], default="text")
 
-    p = sub.add_parser("raw", help="任意 GET 透传（新需求先走这里验证再封命令）")
+    p = sub.add_parser("transcript", help="下载非官方成绩单 PDF（--lang eng|chi|ge-edu）")
+    p.add_argument("--lang", choices=["eng", "chi", "ge-edu"], default="eng")
+    p.add_argument("-o", "--out", help="输出路径（默认当前目录）")
+
+    p = sub.add_parser("identity", help="学籍身份结构化（姓名/学号/邮箱/学院/专业/入学）")
+    p.add_argument("--format", choices=["text", "json"], default="json")
+
+    p = sub.add_parser("dpr", help="学位进度报告（当前需 Request Audit，文本如实输出）")
+    p.add_argument("--format", choices=["text", "json"], default="text")
+
+    p = sub.add_parser("raw", help="任意 GET/POST 透传（新需求先走这里验证再封命令）")
     p.add_argument("url")
     p.add_argument("--file", help="落盘到指定文件而非打印")
+    p.add_argument("--post", action="store_true", help="POST 导航（需已登记组件 URL）")
+    p.add_argument("--action", help="ICAction 名（如按钮 id）")
+    p.add_argument("--set", action="append", metavar="k=v", help="表单字段覆盖（可多次）")
 
     args = ap.parse_args(argv)
     sis = Sis()
@@ -175,7 +239,8 @@ def main(argv=None) -> int:
     handlers = {"status": cmd_status, "login": cmd_login, "logout": cmd_logout,
                 "schedule": cmd_schedule, "grades": cmd_grades, "history": cmd_history,
                 "appt": cmd_appt, "exam": cmd_exam, "raw": cmd_raw,
-                "center": cmd_text_component, "assignments": cmd_text_component}
+                "center": cmd_text_component, "assignments": cmd_text_component,
+                "transcript": cmd_transcript, "identity": cmd_identity, "dpr": cmd_dpr}
 
     if args.cmd not in ("login", "logout", "status"):
         sis.ensure_session()

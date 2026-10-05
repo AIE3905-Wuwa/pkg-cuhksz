@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import re
+
 from . import config, parser
 from .auth import login
 from .transport import Transport
@@ -96,6 +98,37 @@ class Sis:
 
     def history(self) -> list[dict]:
         return parser.parse_history(self.component_html("history"))
+
+    def transcript_pdf(self, lang: str = "eng") -> tuple[bytes, str]:
+        """非官方成绩单：View Report POST → 抽 PDF URL → 下载。返回 (bytes, url)。"""
+        code = config.TRANSCRIPT_TYPES.get(lang)
+        if not code:
+            raise SystemExit(f"未知成绩单语言 {lang!r}；可用：{sorted(config.TRANSCRIPT_TYPES)}")
+        html = self.transport.submit_icaction(
+            *config.COMPONENTS["transcript"],
+            action=config.IC_VIEW_REPORT,
+            extra={config.TRANSCRIPT_TYPE_FIELD: code})
+        m = re.search(r'''['"]([^'"]*\.pdf[^'"]*)['"]''', html, re.I)
+        if not m:
+            raise RuntimeError("报表页未见 PDF 链接（结构变化或报表生成失败）")
+        url = m.group(1)
+        r = self.transport.request("GET", url, absolute=True)
+        if r.status_code != 200 or "pdf" not in (r.headers.get("content-type") or "").lower():
+            raise RuntimeError(f"PDF 下载失败 HTTP {r.status_code}")
+        return r.content, url
+
+    def identity(self) -> dict:
+        """学籍身份：prsnldata（HTML：姓名/邮箱/学号/holds）+ transcript PDF（学院/专业/入学）。"""
+        data = parser.parse_prsnldata(self.component_html("prsnldata"))
+        try:
+            pdf, _url = self.transcript_pdf("eng")
+            data.update(parser.parse_pdf_identity(pdf))
+        except Exception as e:
+            data["transcript_identity"] = f"unavailable: {e}"
+        return data
+
+    def dpr_html(self) -> str:
+        return self.component_html("dpr")
 
     def raw(self, url: str) -> str:
         return self.transport.follow_shell(self.transport.request("GET", url)).text

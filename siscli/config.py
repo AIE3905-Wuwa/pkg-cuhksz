@@ -49,7 +49,17 @@ COMPONENTS = {
     "list_schedule": ("SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL", "HC_SSR_SSENRL_LIST_GBL"),
     # 按作业查成绩（View My Assignments）——实证常显 "no information"，留观察
     "assignments": ("SA_LEARNER_SERVICES.SS_LAM_STD_GR_LST.GBL", "HC_SS_LAM_STD_GR_LST_GBL1"),
+    # 非官方成绩单（View Report 出 PDF；report type: UE01 英文/UC01 中文/UFCEC 国情教育）
+    "transcript": ("SA_LEARNER_SERVICES.SSS_TSRQST_UNOFF.GBL", "HC_SSS_TSRQST_UNOFF_GBL"),
+    # 个人信息摘要（姓名/邮箱/holds/todo；identity 命令主源）
+    "prsnldata": ("CC_PORTFOLIO.SSS_PRSNLDATA_SUMM.GBL", "HC_SSS_PRSNLDATA_SUMM_GBL"),
+    # 学位进度报告（My Academic Requirements）——当前实证"page not available"（需 Request Audit，留观察）
+    "dpr": ("SA_LEARNER_SERVICES.SAA_SS_DPR_ADB.GBL", "HC_SAA_SS_DPR_ADB_GBL"),
 }
+# ICAction 常量（2026-10-05 实测）
+IC_VIEW_REPORT = "CUSZ_TSRQST_WRK_VIEW_PB"  # transcript View Report 按钮
+TRANSCRIPT_TYPES = {"eng": "UE01", "chi": "UC01", "ge-edu": "UFCEC"}
+TRANSCRIPT_TYPE_FIELD = "DERIVED_SSTSRPT_TSCRPT_TYPE3"
 # 需要选学期再 Continue 的组件（统一交互：radio SSR_DUMMY_RECV1$sels$0 + DERIVED_SSS_SCT_SSR_PB_GO）
 TERM_COMPONENTS = {"grades", "appt", "exam", "list_schedule"}
 

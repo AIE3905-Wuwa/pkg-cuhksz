@@ -124,6 +124,61 @@ def parse_exam(html: str) -> list[dict]:
     return out
 
 
+def parse_prsnldata(html: str) -> dict:
+    """Personal Data Summary：姓名/邮箱/holds/todo（identity 命令 HTML 源）。"""
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text("\n", strip=True)
+    out: dict = {"holds": [], "todo": [], "emails": []}
+    m = re.search(r"([^\s]+)'s Personal Data Summary", text)
+    if m:
+        out["display_name"] = m.group(1)
+    if re.search(r"No Holds", text):
+        out["holds"] = []
+    for line in text.split("\n"):
+        s = line.strip()
+        if "@" in s and re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", s):
+            out["emails"].append(s)
+    # 学号：邮箱 local part 形如 125090969@link.cuhk.edu.cn
+    for e in out["emails"]:
+        if e.endswith("@link.cuhk.edu.cn") and e.split("@")[0].isdigit():
+            out["student_id"] = e.split("@")[0]
+    return out
+
+
+def parse_pdf_identity(data: bytes) -> dict:
+    """非官方成绩单 PDF 首页身份块（best-effort，需 pypdf；AES 空密码解密）。
+
+    返回 admitted/college/school/major/programme 等身份字段；pypdf 缺席时返回
+    {"unavailable": "pypdf not installed"}。
+    """
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return {"unavailable": "pypdf not installed"}
+    import io
+    r = PdfReader(io.BytesIO(data))
+    if r.is_encrypted:
+        try:
+            r.decrypt("")
+        except Exception:
+            return {"unavailable": "pdf decrypt failed"}
+    text = (r.pages[0].extract_text() or "")
+    out: dict = {}
+    for key, pat in [
+        ("name", r"Name:\s*([A-Z][A-Za-z, ]+?)(?:\s+Chinese|\s*$)"),
+        ("student_id", r"Student ID No\.?:?\s*(\d+)"),
+        ("admitted", r"Admitted in:?\s*([^\n]+)"),
+        ("college", r"College:?\s*([^\n]+)"),
+        ("school", r"School:?\s*([^\n]+)"),
+        ("major", r"Major/Programme:?\s*([^\n]+)"),
+        ("mode_of_study", r"Mode of Study:?\s*([^\n]+)"),
+    ]:
+        m = re.search(pat, text)
+        if m:
+            out[key] = m.group(1).strip()[:60]
+    return out
+
+
 _CENTER_EVENT = re.compile(
     r"^([A-Z]{2,4}\s\d{3,4}-[A-Z]\d{2})\s+(LEC|TUT|SUP|LAB|SEM)\s+\((\d+)\)"
     r"(?:\s+((?:Mo|Tu|We|Th|Fr|Sa|Su){1,4})\s+(\d{1,2}:\d{2}(?:AM|PM))\s*-\s*(\d{1,2}:\d{2}(?:AM|PM)))?"

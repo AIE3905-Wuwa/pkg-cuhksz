@@ -43,8 +43,11 @@ python -m venv .venv
 | `history` | 课程历史全量：课号/课名/学期/等级/学分（页面直出，无需交互） |
 | `appt [--term 子串]` | 注册日期：选课窗口（起止时刻）+ 学分上下限 |
 | `exam [--term 子串]` | 考试安排（当前学期未发布时为空） |
+| `transcript [--lang eng\|chi\|ge-edu] [-o F]` | 下载非官方成绩单官方 PDF（View Report → FILEDB_XMLP PDF，AES 空密码） |
+| `identity` | 学籍身份结构化：姓名/学号/邮箱/holds（prsnldata 页）+ 学院/专业/入学/学制（transcript PDF，需 pypdf） |
+| `dpr` | 学位进度报告（当前需 Request Audit 生成，如实输出页面现状） |
 | `center` / `assignments` | 学生中心页 / 按作业查成绩（文本摘要，assignments 常无数据） |
-| `raw <url> [--file F]` | 任意 GET 透传——新需求先走这里验证，再封命令 |
+| `raw <url> [--post --action IC名 --set k=v] [--file F]` | GET/POST 透传——POST 导航原语（issue #6 ①）：下拉跳转、View Report 类页面经 ICAction POST 可达，探针不再止步于 GET |
 
 **term 交互机制**（grades/appt/exam）：GET 搜索页 → 解析学期 radio（`SSR_DUMMY_RECV1$sels$0`，页面倒序最新在前）→ POST `win0` 表单（ICAction=Continue 按钮 `DERIVED_SSS_SCT_SSR_PB_GO`）→ 结果页。此 POST 是查询动作（等同网页上点"继续"），不改变任何数据。
 
@@ -52,7 +55,9 @@ python -m venv .venv
 
 - `exam` 考试安排：机制与 grades 同款（term POST），当前学期未发布时结果为空——发布后自然出数据。
 - `assignments`（按作业查成绩）直击显示 "There is no information"，留观察；按学期成绩走 `grades`。
-- 学费账单（Finances 类）与购物车只读视图未登记（菜单可见，`raw` 可先行探路）。
+- 学费账单（Finances 类）与购物车只读视图未登记（菜单可见，`raw --post` 可先行探路）。
+- `dpr` 报告当前显示 "not available"——需 Request Audit（提交报表任务）生成后方可查看；该按钮属提交类动作，v0.3 不自动执行，待裁定。
+- `identity` 的 PDF 侧字段依赖 pypdf（可选依赖，缺失时该组字段标 unavailable）。
 - 页面正文含学生真实姓名等隐私——CLI 输出仅落终端/本机，**绝不入仓库**。
 - 学校升级 PIA 或改登录页会断链：带 `SIS_CLI_DEBUG=<目录>` 重跑可留现场。
 - **写操作（选课/退课/换课/提交）刻意不提供**——误操作有真实学籍后果；如确需，须用户明示并另行设计。

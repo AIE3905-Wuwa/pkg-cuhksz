@@ -145,6 +145,37 @@ class Transport:
             return html
         raise DeadSession("unreachable")
 
+    # ---- ICAction POST 导航（查询类动作原语） ----
+    def submit_icaction(self, comp: str, nav: str, action: str,
+                        extra: dict[str, str] | None = None) -> str:
+        """GET 组件页 → 收集 win0 表单 → 设 ICAction（+可选字段覆盖）→ POST。
+
+        PeopleSoft 的下拉跳转、View Report、term 展开皆经此原语（issue #6 ①）。
+        只允许查询类动作；数据变更按钮由调用纪律约束（skill Prohibitions）。
+        """
+        html = self.get_content(comp, nav)
+        soup = BeautifulSoup(html, "html.parser")
+        form = soup.find("form", attrs={"name": "win0"})
+        if form is None or not form.get("action"):
+            raise TransportError("未找到 win0 表单（页面结构变化）")
+        fields: dict[str, str] = {}
+        for i in form.find_all("input"):
+            n = i.get("name")
+            if n and i.get("type") in (None, "hidden", "text"):
+                fields[n] = i.get("value") or ""
+        for sel in form.find_all("select"):
+            if sel.get("name") and sel.find("option"):
+                fields[sel.get("name")] = sel.find("option").get("value") or ""
+        fields["ICAction"] = action
+        if extra:
+            fields.update(extra)
+        r = self._sess.post(form["action"], data=fields, allow_redirects=True,
+                            timeout=config.REQUEST_TIMEOUT)
+        self.save_session()
+        if self.is_signon_shell(r.text):
+            raise DeadSession("ICAction 提交后会话死亡")
+        return r.text
+
     # ---- term 搜索页提交（查询动作，等同网页上选学期点 Continue） ----
     def submit_search(self, search_html: str, radio_value: str,
                       action: str = "DERIVED_SSS_SCT_SSR_PB_GO") -> str:
