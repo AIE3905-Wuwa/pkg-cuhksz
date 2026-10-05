@@ -2,7 +2,7 @@
 
 ## 设计概要
 
-- **为什么存在**：bb 域的映射法则——mapping 之于 vault；域内件，契约见 bb 基座。拉取物在 `bb/` 保源形，是对账前提；属地投影统一规范形：不论源目录如何存储，`wiki/bb/<term>/<course>/` 恒为四桶。**规范化投影**让消费侧——teach、quiz、track、检索——无需感知源侧形态
+- **为什么存在**：bb 域的映射法则——mapping 之于 vault；域内件，契约见 bb 基座。拉取物在 `cuhksz/bb/` 保源形，是对账前提；属地投影统一规范形：不论源目录如何存储，`wiki/cuhksz/cuhksz/bb/<term>/<course>/` 恒为四桶。**规范化投影**让消费侧——teach、quiz、track、检索——无需感知源侧形态
 - **关键裁定**：
   - 映射与理解解耦：代理页是 bb 资产在 md 世界的代表；courseware 标配知识点摘要，用 sm-N 锚点，加专有名词对照——锚点是认知档案与考卷解析的定位通货；深度讲解归 teach，不进代理
   - 桶名 v0.4 终裁，2026-10-01：lec&tut 改 courseware；work 改 assessments。桶名描述内容性质，不描源侧组织
@@ -23,13 +23,15 @@
 
 - 两形分区，lark 档案页先例：info 与 assessments 分区制——info 蒸馏节加备注沉淀；assessments 机械区加 `## 复盘` 沉淀。机械区可再生覆写；沉淀区只增；重建不得触碰。info 蒸馏节、assessments 要求参考提交结果皆机械区，蒸馏进机械区，不增设沉淀区。courseware 与 attachments 为纯代理，整页可再生，珍贵内容蒸馏入 notes，不留在代理页。courseware 代理密度为「知识点摘要加专有名词」，自源蒸馏、可再生，非人的沉淀，不设沉淀区
 - 对账三字段分家：courseware 用 `raw_path`，可指单元目录，路径即出身证明；attachments 用 `raw_file` 与 `raw_sha256`，文件级 1:1，词形语义同 mapping，指向 bb/；assessments 用 `raw` 块映射，角色到 bb/ 路径，多源，允许多页引用同一文件——一份作业总纲 PDF 被多页共同引用为正常形态；另有 `assessment` 块映射——due、submitted_at、score、possible、status、column_id、attempt_id，API 快照
-- 映射不改 `bb/` 源侧；删改自由属于人；不复制原文全文；源侧消失标 `status: deprecated`，不删
+- 映射不改 `cuhksz/bb/` 源侧；删改自由属于人；不复制原文全文；源侧消失标 `status: deprecated`，不删
 - 命名：原名保留，忠实；清洗文件系统非法字符后合并相邻空白——`Test 1: SV` 变 `Test 1_SV`；同桶重名尾缀 column_id 短形，lark-im 先例
 - 信任：机械区含 API 快照的——assessments 结果、info 基本信息——挂 `stale_after` = 拉取日 + TTL，继承 bb 域；纯本地对账代理无 TTL，物化后即终态资产
 - 页面 type 复用 `bb`，lark 域内插件共用 type: lark 先例；不扩注册表 type 值集
-- 骨架是规约，不是预建空目录：桶随内容自然成形；`bb/` 拉取物为实例数据，gitignore 忽略，仅留 `.gitkeep` 种子
+- 骨架是规约，不是预建空目录：桶随内容自然成形；`cuhksz/bb/` 拉取物为实例数据，gitignore 忽略，仅留 `.gitkeep` 种子
 
 ## Changelog
+
+- 0.14（2026-10-05）cuhksz 域迁移：路径改写（wiki/cuhksz/bb/、cuhksz/bb/），规则不变
 
 - 0.13 2026-10-02：全局域批二，派生句加桥指针
 - 0.12 2026-10-02：四桶豁免一句——课程根 user.md 是 bb-track 认知档案、域内原生页，除外；桶归代理页，原生页不入桶
