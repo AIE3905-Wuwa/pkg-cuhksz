@@ -1,50 +1,50 @@
-# bb-map：bb 域映射法则
+# bb-map: Mapping Rules for the bb Domain
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：bb 域的映射法则——mapping 之于 vault；域内件，契约见 bb 基座。拉取物在 `cuhksz/bb/` 保源形，是对账前提；属地投影统一规范形：不论源目录如何存储，`wiki/cuhksz/bb/<term>/<course>/` 恒为四桶。**规范化投影**让消费侧——teach、quiz、track、检索——无需感知源侧形态
-- **关键裁定**：
-  - 映射与理解解耦：代理页是 bb 资产在 md 世界的代表；courseware 标配知识点摘要，用 sm-N 锚点，加专有名词对照——锚点是认知档案与考卷解析的定位通货；深度讲解归 teach，不进代理
-  - 桶名 v0.4 终裁，2026-10-01：lec&tut 改 courseware；work 改 assessments。桶名描述内容性质，不描源侧组织
-  - 落位判断在先：有成绩册列或提交动作进 assessments——汇总列与分节登记列除外；老师非讲义资产进 attachments；内容单元进 courseware；结构事实进 info。桶不靠猜
-  - 两形分区继承 lark 先例：info 与 assessments 机械区可再生、沉淀区只增；courseware 与 attachments 纯代理，珍贵内容蒸馏入 notes
-- **弃案**：courseware 设 `## 笔记` 沉淀节——v0.5 撤，笔记是人的造物，落点单独设计：先有 bb v0.4 笔记区，后有 bb-track 消费契约；分节登记列建页——2026-10-02 裁定不建，那是非知识考核的登记
+- **Why it exists**: the bb domain's mapping rules — what mapping is to vault; an in-domain plugin, contract in the bb base. Pulled artifacts keep their source shape in `cuhksz/bb/`, the premise of reconciliation; the territory projection is a unified canonical form: however the source directories are organized, `wiki/cuhksz/bb/<term>/<course>/` is always the four buckets. **Canonical projection** lets the consumption side — teach, quiz, track, retrieval — ignore the source-side shape
+- **Key rulings**:
+  - mapping and understanding decoupled: proxy pages are the bb assets' representatives in the md world; courseware comes standard with a knowledge-point summary using sm-N anchors plus a glossary — the anchors are the common positioning currency of cognition profiles and paper explanations; deep teaching belongs to teach, not to proxies
+  - bucket names final-ruled in v0.4, 2026-10-01: lec&tut became courseware; work became assessments. Bucket names describe content nature, not source-side organization
+  - placement judgment first: a gradebook column or a submission action sends it to assessments — summary columns and section-registration columns excepted; the teacher's non-handout assets go to attachments; content units go to courseware; structural facts go to info. Buckets are not guessed
+  - two-form partitioning inherits the lark precedent: info and assessments have a regenerable mechanical region and an append-only accumulation region; courseware and attachments are pure proxies, precious content distilled into notes
+- **Rejected alternatives**: a `## Notes` accumulation section in courseware — withdrawn in v0.5; notes are human creations, their landing designed separately: first bb v0.4's notes zone, then bb-track's consumption contract; pages for section-registration columns — ruled out 2026-10-02, that is registration which is not a knowledge assessment
 
 ## Structure
 
-- `info.md`——课程信息页兼身份页，一课一锚点。frontmatter `bb` 块映射放 term_id、course_id、term_status——现役或冻结，学期状态随页走，不依赖 inbox；正文机械蒸馏节收大纲课程政策类要点，词表开放：评分构成、考核、师资、TA、分组、教学语言、AI 政策，分点 `<a id="info-N">` 锚点，缺项如实标「未提供」；`## 备注` 是沉淀区，只增。边界：info 存「何时有何事」，日程视角；被评分事务全要素归 assessments 页
-- `courseware/<单元名>.md`——知识点页，每内容单元一份。内容单元 = bb/ 目录「讲义加附属文件合一」，或扁平单文件；平行同类文件的目录合为一页，如 Reading 系列，判断即「同源侧目录下平行同类」。frontmatter 对账字段 `raw_path` 可指文件或目录；完全未下载单元可缺省——清单逐条标注未下载即构成记录。正文：`## 知识点摘要`——分点 `<a id="sm-N">` 锚点，加一行概括，加源侧章节级提示；锚点即定位指针，页码级不做，教材改版会漂移。另有 `## 知识点联系` 收点间互链；`## 专有名词` 收英中对照表；`## 单元文件` 收两态对账清单——扁平多附件单元与源侧不对应时，清单即对应关系。纯代理，整页可再生，摘要与术语表皆自源蒸馏
-- `assessments/`——学业事务聚合页，每作业、考试、quiz 一页；文件名 = 作业名原形清洗；汇总列不建页——名为 Weighted Total 或 Total 直接排除，辅以无提交记录佐证。四要素归一：要求；参考——有源则自源蒸馏，分点 `<a id="req-N">` 与 `<a id="ref-N">` 锚点；提交；结果——机械快照。due 缺省时预留说明位置，不告警；无提交记录用独立话术列三种可能——未布置、未提交、未收录，不复用纸面提交模板
-- `attachments/`——附件 1:1 代理，每附件一页，平铺；细分结构等真实内容浮现再说
-- 课程根另容 `user.md` 认知档案——bb-track 域内原生页，wiki v0.7 属地两形；不受四桶约束，桶归代理页
-- 落位判断：**有成绩册列或提交动作进 assessments**——汇总列与分节登记列除外；后者为非知识考核的分节出勤登记，2026-10-02 所有者裁定不建页。老师发布的非讲义资产进 attachments；讲义课件即内容单元进 courseware；结构事实进 info 正文，不作附件。讲义与附件边界：随周次推进的课程内容归 courseware；支撑性资源，如 GPU 指南、软件安装，归 attachments
+- `info.md` — course information page doubling as identity page, one anchor per course. The frontmatter `bb` block mapping holds term_id, course_id, term_status — active or frozen; term status travels with the page, not depending on inbox. The body's mechanical distillation section collects syllabus course-policy key points, open vocabulary: grading composition, assessment, faculty, TA, grouping, teaching language, AI policy, itemized `<a id="info-N">` anchors, missing items honestly marked 'not provided'; `## Notes` is the accumulation region, append-only. Boundary: info holds 'what happens when', the schedule view; all elements of graded affairs go to assessments pages
+- `courseware/<unit-name>.md` — knowledge-point page, one per content unit. A content unit = a bb/ directory of 'handouts plus attached files as one', or a flat single file; directories of parallel same-kind files merge into one page, e.g. the Reading series, the judgment being 'parallel same-kind under the same source-side directory'. The frontmatter reconciliation field `raw_path` may point at a file or a directory; entirely undownloaded units may omit it — the list marking each entry undownloaded is itself a record. Body: `## Knowledge Point Summary` — itemized `<a id="sm-N">` anchors plus a one-line gist plus source-side section-level hints; anchors are positioning pointers, page-level precision not attempted, textbook re-editions drift. Also `## Knowledge Point Links` collecting cross-links between points; `## Terminology` collecting the English-Chinese glossary; `## Unit Files` collecting the two-state reconciliation list — for flat multi-attachment units not corresponding to the source side, the list is the correspondence. Pure proxy, whole page regenerable, summary and glossary both distilled from source
+- `assessments/` — academic-affair aggregate pages, one per assignment, exam, quiz; file name = sanitized original name; no pages for summary columns — those named Weighted Total or Total are excluded outright, corroborated by the absence of submission records. Four elements in one: requirements; references — distilled from source when present, itemized `<a id="req-N">` and `<a id="ref-N">` anchors; submission; results — mechanical snapshot. An absent due reserves an explanation slot, no alert; with no submission record, the dedicated wording lists three possibilities — not assigned, not submitted, not captured — not reusing the written-submission template
+- `attachments/` — attachment 1:1 proxies, one page per attachment, flat; finer structure emerges with real content
+- The course root also holds the `user.md` cognition profile — a bb-track domain-native page, the wiki v0.7 territory's two forms; not bound by the four buckets, the buckets belong to proxy pages
+- Placement judgment: **a gradebook column or a submission action goes to assessments** — summary columns and section-registration columns excepted; the latter is section/attendance registration that is not a knowledge assessment, ruled by the owner on 2026-10-02 to get no page. Teacher-released non-handout assets go to attachments; handouts and slides, i.e. content units, go to courseware; structural facts go into the info body, not as attachments. Handout/attachment boundary: course content advancing with the weeks goes to courseware; supporting resources, e.g. GPU guides and software installs, go to attachments
 
 ## Invariants
 
-- 两形分区，lark 档案页先例：info 与 assessments 分区制——info 蒸馏节加备注沉淀；assessments 机械区加 `## 复盘` 沉淀。机械区可再生覆写；沉淀区只增；重建不得触碰。info 蒸馏节、assessments 要求参考提交结果皆机械区，蒸馏进机械区，不增设沉淀区。courseware 与 attachments 为纯代理，整页可再生，珍贵内容蒸馏入 notes，不留在代理页。courseware 代理密度为「知识点摘要加专有名词」，自源蒸馏、可再生，非人的沉淀，不设沉淀区
-- 对账三字段分家：courseware 用 `raw_path`，可指单元目录，路径即出身证明；attachments 用 `raw_file` 与 `raw_sha256`，文件级 1:1，词形语义同 mapping，指向 bb/；assessments 用 `raw` 块映射，角色到 bb/ 路径，多源，允许多页引用同一文件——一份作业总纲 PDF 被多页共同引用为正常形态；另有 `assessment` 块映射——due、submitted_at、score、possible、status、column_id、attempt_id，API 快照
-- 映射不改 `cuhksz/bb/` 源侧；删改自由属于人；不复制原文全文；源侧消失标 `status: deprecated`，不删
-- 命名：原名保留，忠实；清洗文件系统非法字符后合并相邻空白——`Test 1: SV` 变 `Test 1_SV`；同桶重名尾缀 column_id 短形，lark-im 先例
-- 信任：机械区含 API 快照的——assessments 结果、info 基本信息——挂 `stale_after` = 拉取日 + TTL，继承 bb 域；纯本地对账代理无 TTL，物化后即终态资产
-- 页面 type 复用 `bb`，lark 域内插件共用 type: lark 先例；不扩注册表 type 值集
-- 骨架是规约，不是预建空目录：桶随内容自然成形；`cuhksz/bb/` 拉取物为实例数据，gitignore 忽略，仅留 `.gitkeep` 种子
+- Two-form partitioning, the lark archive-page precedent: info and assessments are partitioned — info has a distillation section plus a notes accumulation; assessments a mechanical region plus a `## Review` accumulation. The mechanical region is regenerable and overwritten; the accumulation region is append-only; rebuilds must not touch them. The info distillation section and assessments' requirements/references/submission/results are all mechanical regions; distillates go into the mechanical region, no extra accumulation region added. courseware and attachments are pure proxies, whole-page regenerable; precious content is distilled into notes, not kept on proxy pages. courseware's proxy density is 'knowledge-point summary plus glossary', distilled from source and regenerable, not human sediment, so no accumulation region
+- Three reconciliation fields with separate homes: courseware uses `raw_path`, which may point at a unit directory — the path is the birth certificate; attachments use `raw_file` and `raw_sha256`, file-level 1:1, word-form and semantics same as mapping, pointing into bb/; assessments use the `raw` block mapping, role to bb/ path, multi-source, multiple pages allowed to reference the same file — one assignment master PDF referenced by several pages is a normal shape; plus the `assessment` block mapping — due, submitted_at, score, possible, status, column_id, attempt_id, the API snapshot
+- Mapping never modifies the `cuhksz/bb/` source side; deletion and editing are human freedom; no full original text copied; vanished source entries marked `status: deprecated`, not deleted
+- Naming: original names kept, faithful; sanitize filesystem-illegal characters then collapse adjacent whitespace — `Test 1: SV` becomes `Test 1_SV`; same-bucket duplicates get a short column_id suffix, the lark-im precedent
+- Trust: mechanical regions containing API snapshots — assessments results, info basic information — carry `stale_after` = pull date + TTL, inheriting the bb domain; purely local reconciliation proxies have no TTL, terminal assets once materialized
+- The page type reuses `bb`, the lark in-domain plugins sharing type: lark precedent; the registry's type value set is not extended
+- The skeleton is a convention, not pre-built empty directories: buckets take shape as content arrives; `cuhksz/bb/` pulled artifacts are instance data, gitignored, with only `.gitkeep` seeds kept
 
 ## Changelog
 
-- 0.15（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
+- 0.15 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
-- 0.14（2026-10-05）cuhksz 域迁移：路径改写（wiki/cuhksz/bb/、cuhksz/bb/），规则不变
+- 0.14 (2026-10-05) cuhksz domain migration: paths rewritten (wiki/cuhksz/bb/, cuhksz/bb/), rules unchanged
 
-- 0.13 2026-10-02：全局域批二，派生句加桥指针
-- 0.12 2026-10-02：四桶豁免一句——课程根 user.md 是 bb-track 认知档案、域内原生页，除外；桶归代理页，原生页不入桶
-- 0.11 2026-10-02：补录所有者裁定——分节登记列如 Tutorial Section 不建页，判断句与建页规则补例外条款
-- 0.10 2026-10-02：规则批 M1-M12 加 D2。汇总列排除 Weighted Total 与 Total；共享要求文件成文，多页引同一文件；未下载单元 raw_path 缺省；清单即对应关系；合集切分规则；讲义附件边界判断；命名合并空白；无提交独立话术；due 缺省不告警；info 类别制蒸馏；知识点章节级提示；写后管道校验置后；info 页 bb 块映射增 term_status
-- 0.9 2026-10-02：info 蒸馏完备化六项，`<a id="info-N">` 锚点；assessments 要求参考蒸馏，req-N 与 ref-N 锚点；attachments 不变，用户裁定
-- 0.8 2026-10-02：courseware 代理升级——简要介绍改为知识点摘要，`<a id="sm-N">` 锚点加一行概括，加知识点联系与专有名词对照表；仍纯代理整页可再生，用户裁定
-- 0.7 2026-10-01：单元清单两态——本地在位或未物化指针条目，配套 bb v0.2 媒体指针化；命令锚点 inbox 缺席即建
-- 0.6 2026-10-01：命令 bb-map 立设，自本插件契约蒸馏；与 map、lark-map 同构——拉取核对、四桶落位、对账、写后管道；consumes 为 bb、bb-map、trust、index、hot、log；实验前先行，用户裁定
-- 0.5 2026-10-01：courseware 回归纯代理——撤 `## 笔记` 沉淀节；笔记是人的造物，落点单独设计，不进本契约；两形分区收窄回 info 与 assessments
-- 0.4 2026-10-01：桶名终裁与笔记落点——lec&tut 改 courseware；work 改 assessments，字段 work 改 assessment；courseware 知识点页补 `## 笔记` 沉淀节，两形分区统一，attachments 仍纯代理
-- 0.3 2026-10-01：四桶并流——并入 bb-map-local 分支：info 与 lec&tut 内容单元制、raw_path、gitignore bb/、bb 注入行去「后议」；考试边界句与判断句入册；lec&tut 纯代理形态、笔记缺口后补
-- 0.2 2026-10-01：前两桶格式落地，bb-map-local 分支——info.md 加 lec&tut/，raw_path 指针，内容单元映射，用户裁定
-- 0.1 2026-10-01：四桶骨架立设——work 与 attachments 细则、判断句、两形分区与对账字段，讨论收敛；桶名沿团队现名
+- 0.13 2026-10-02: global-domain batch two, derivation sentences gain bridge pointers
+- 0.12 2026-10-02: four-bucket exemption sentence — the course-root user.md is the bb-track cognition profile, a domain-native page, excepted; buckets belong to proxy pages, native pages enter no bucket
+- 0.11 2026-10-02: recording the owner ruling — section-registration columns such as Tutorial Section get no page; the judgment sentence and page-creation rules gain the exception clause
+- 0.10 2026-10-02: rule batch M1-M12 plus D2. Summary columns excluded: Weighted Total and Total; shared requirement files written down, multiple pages referencing the same file; undownloaded units may omit raw_path; the list is the correspondence; collection splitting rules; handout/attachment boundary judgment; naming whitespace collapse; dedicated no-submission wording; absent due raises no alert; info category-based distillation; knowledge-point section-level hints; post-write pipeline validates last; the info page's bb block mapping gains term_status
+- 0.9 2026-10-02: info distillation completed in six items, `<a id="info-N">` anchors; assessments requirement/reference distillation, req-N and ref-N anchors; attachments unchanged, user ruling
+- 0.8 2026-10-02: courseware proxy upgrade — the brief intro replaced by the knowledge-point summary, `<a id="sm-N">` anchors plus a one-line gist, plus knowledge-point links and glossary; still pure proxy, whole page regenerable, user ruling
+- 0.7 2026-10-01: unit lists two-state — present locally or unmaterialized pointer entries, accompanying bb v0.2's media pointer-ization; the command anchor creates inbox when absent
+- 0.6 2026-10-01: command bb-map established, distilled from this plugin's contract; isomorphic with map and lark-map — pull-verify, four-bucket placement, reconciliation, post-write pipeline; the command's consumes: bb, bb-map, trust, index, hot, log; run before the experiments, user ruling
+- 0.5 2026-10-01: courseware returns to pure proxy — the `## Notes` accumulation section withdrawn; notes are human creations, their landing designed separately, not in this contract; two-form partitioning narrowed back to info and assessments
+- 0.4 2026-10-01: bucket names final-ruled and the notes landing — lec&tut became courseware; work became assessments, the field work became assessment; courseware knowledge-point pages gained a `## Notes` accumulation section, two-form partitioning unified, attachments still pure proxy
+- 0.3 2026-10-01: four buckets merged — absorbing the bb-map-local branch: info and lec&tut content-unit system, raw_path, gitignore bb/, the bb injection line dropping 'deferred'; the exam boundary sentence and judgment sentence entered the record; lec&tut pure-proxy shape, the notes gap to be filled later
+- 0.2 2026-10-01: the first two buckets' formats landed, on the bb-map-local branch — info.md plus lec&tut/, raw_path pointers, content-unit mapping, user ruling
+- 0.1 2026-10-01: four-bucket skeleton established — work and attachments details, judgment sentences, two-form partitioning and reconciliation fields, discussion converged; bucket names follow the team's current names
