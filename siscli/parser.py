@@ -138,7 +138,7 @@ def parse_prsnldata(html: str) -> dict:
         s = line.strip()
         if "@" in s and re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", s):
             out["emails"].append(s)
-    # 学号：邮箱 local part 形如 125090969@link.cuhk.edu.cn
+    # 学号：学校邮箱 local part 形如 <学号>@link.cuhk.edu.cn
     for e in out["emails"]:
         if e.endswith("@link.cuhk.edu.cn") and e.split("@")[0].isdigit():
             out["student_id"] = e.split("@")[0]
