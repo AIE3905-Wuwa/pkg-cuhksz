@@ -104,11 +104,15 @@ class Transport:
 
     @staticmethod
     def is_signon_shell(html: str) -> bool:
-        """登录壳特征：Oracle PeopleSoft 登录/Sign-in 标题的瘦页面。"""
+        """登录壳特征：Oracle PeopleSoft 登录/Sign-in/Sign In 标题的瘦页面。
+
+        两种形态都要抓：bootstrap 壳（title 'Oracle PeopleSoft 登录'）与
+        语言选择登录页（title 'Sign In'，正文'学生信息系统'）。
+        """
         if len(html) > 6000:
             return False
         t = Transport.page_title(html)
-        return "登录" in t or "Sign-in" in t
+        return "登录" in t or "Sign-in" in t or "Sign In" in t
 
     # ---- 组件取件 ----
     def get_content(self, comp: str, nav: str) -> str:
