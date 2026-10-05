@@ -1,29 +1,29 @@
-# cuhksz：CUHK-SZ 学校域
+# cuhksz: CUHK-SZ School Domain
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：学子在一所学校的完整图景 = 学籍身份（sis）+ 课业运行（bb）+ 制度规则（registry），三者共享同一身份源（学号）与同一统一认证（STS ADFS，bb-cli/sis-cli 实测共用）。域的使命是"一类外源的完整适配"，学校即这一类——bb 与 sis 是域内子系统而非平行域，对齐 lark 先例（企业基座 + docs/im/calendar 子域族）。本件是域基座：只立契约六问答案与身份证明，不持内容
-- **关键裁定**：
-  - 2026-10-05 所有者裁定：bb 由独立域**降为域内插件族**——迁移成本在单学期数据时点最低；伞域挂靠（域挂域）被否，语义分裂
-  - bb 族五件**保留原名不冠前缀**（bb、bb-map……）——全链改名（manifest/命令/skill/changelog）零收益；"结构由插件各自规范"，命名惯例非强制
-  - 域根只持身份页与子系统导航，速写归各子域（bb inbox / sis inbox）——避免双层维护
-  - 个人官方 PDF（在读证明/非官方成绩单）落 `cuhksz/sis/` 域内物化（2026-10-05 所有者裁定修正）：域有自立容器则域内落地，vault 仅兜底无容器域——原走 vault 是 device 先例（无容器）的惯性，cuhksz 有容器后不适用；不入 registry（制度文件区）
-- **弃案**：cuhksz 与 sis 二名之争——域取 cuhksz（学校域，源不止 SIS）；bb 伞域挂靠——域挂域语义怪；bb 族冠前缀更名——改名爆炸
+- **Why it exists**: a student's complete picture at one school = enrollment identity (sis) + course operations (bb) + institutional rules (registry); the three share one identity source (the student ID) and one unified authentication (STS ADFS — bb-cli/sis-cli verified to share it in practice). The domain's mission is 'the complete adaptation of one class of external sources', and a school is exactly that class — bb and sis are subsystems inside the domain, not parallel domains, aligned with the lark precedent (enterprise base + docs/im/calendar subdomain family). This plugin is the domain base: it only establishes the answers to the six contract questions and the identity proof, holding no content
+- **Key rulings**:
+  - 2026-10-05 owner ruling: bb demoted from an independent domain **to an in-domain plugin family** — migration cost is lowest at the single-term data point; umbrella-domain attachment (a domain hanging off a domain) was rejected as semantically fractured
+  - the bb family's five plugins **keep their original names without a prefix** (bb, bb-map...) — a full-chain rename (manifest/command/skill/changelog) yields nothing; 'structure is specified by each plugin', the naming convention is not mandatory
+  - the domain root holds only the identity page and subsystem navigation; digests belong to each subdomain (bb inbox / sis inbox) — avoiding double-layer maintenance
+  - personal official PDFs (certificate of enrollment / unofficial transcript) land in `cuhksz/sis/` as in-domain materialization (2026-10-05 owner ruling revision): when a domain has its own self-standing container, materialization lands inside the domain; vault is only the fallback for containerless domains — the old vault route was inertia from the device precedent (no container), inapplicable once cuhksz has a container; not into registry (an institutional-document zone)
+- **Rejected alternatives**: the cuhksz-vs-sis naming dispute — the domain takes cuhksz (school domain; sources go beyond SIS); bb umbrella-domain attachment — a domain hanging off a domain is semantically odd; prefixing and renaming the bb family — a rename explosion
 
 ## Structure
 
-- 数据区 `cuhksz/`（root 容器）：`bb/`（课程运行工作区，bb 域件辖）+ `sis/`（官方个人文件物化区，sis 域件辖——仅收学校出具的学籍文件，不收一般数据）+ `registry/`（教务制度物化区，registry 域件辖）
-- 属地 `wiki/cuhksz/`：`identity.md`（域声明页）+ `bb/` + `sis/` + `registry/`（各域件辖）
-- 身份证明：identity.md 的 `sis` 块映射（student_id/college/school/major/admitted/status）与连接器身份一比一；数据源 sis-cli transcript
+- Data zone `cuhksz/` (root container): `bb/` (course operations workspace, governed by the bb domain plugin) + `sis/` (official personal document materialization zone, governed by the sis domain plugin — receives only school-issued enrollment documents, not general data) + `registry/` (academic regulations materialization zone, governed by the registry domain plugin)
+- Territory `wiki/cuhksz/`: `identity.md` (domain declaration page) + `bb/` + `sis/` + `registry/` (each governed by its domain plugin)
+- Identity proof: the `sis` block mapping of identity.md (student_id/college/school/major/admitted/status) is one-to-one with the connector identity; data source is the sis-cli transcript
 
 ## Invariants
 
-- 契约六问：外领地 cuhk.edu.cn 学校系统族；落地 = 双侧目录（数据区 + 属地）；身份证明 = identity.md sis 块映射；属地 wiki/cuhksz/；写模型归各子系统（bb 过程容器 / sis 只读查询 / registry 只增物化）；信任模型归各子系统，身份页 machine-confirmed
-- 域内互引免桥：子系统插件相互读写（sis 成绩 → bb-track 证据流）是域内直引，不经准则 11 桥；跨域派生（todo/calendar/notes/认知桥）仍走桥
-- 域可发现性：identity.md 即声明页（type: cuhksz）
-- 隐私红线：学籍身份信息属实例数据不入框架仓库；identity.md 在实例库建档
+- Six contract questions: external territory is the cuhk.edu.cn school-system family; landing = two-sided directories (data zone + territory); identity proof = the identity.md sis block mapping; territory is wiki/cuhksz/; write model belongs to each subsystem (bb process container / sis read-only querying / registry append-only materialization); trust model belongs to each subsystem, identity page machine-confirmed
+- Intra-domain cross-references are bridge-exempt: subsystem plugins reading and writing each other (sis grades → bb-track evidence stream) is direct intra-domain reference, not through a principle-11 bridge; cross-domain derivation (todo/calendar/notes/cognition bridge) still goes through bridges
+- Domain discoverability: identity.md is the declaration page (type: cuhksz)
+- Privacy red line: enrollment identity data is instance data and never enters the framework repository; identity.md is created in the instance library
 
 ## Changelog
 
-- 0.2（2026-10-05）个人官方文件物化改域内（cuhksz/sis/，所有者裁定）：落地判据定为「域有自立容器则域内落地，vault 兜底无容器域」
-- 0.1（2026-10-05）立设：域基座，bb 族五件挂靠迁入（wiki/bb/ → wiki/cuhksz/bb/，bb/ → cuhksz/bb/），sis/registry 子域首立
+- 0.2 (2026-10-05) personal official documents materialized in-domain instead (cuhksz/sis/, owner ruling): the landing criterion fixed as 'when a domain has its own self-standing container, materialization lands in-domain; vault is the fallback for containerless domains'
+- 0.1 (2026-10-05) established: domain base; the bb family's five plugins attached and migrated in (wiki/bb/ → wiki/cuhksz/bb/, bb/ → cuhksz/bb/); sis/registry subdomains first established
