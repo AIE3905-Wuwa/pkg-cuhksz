@@ -2,86 +2,86 @@
 name: bb-map
 owner: bb-map
 consumes: [bb, bb-map, trust, index, hot, log]
-description: "把 bb/ 拉取物与成绩册快照映射为 wiki/cuhksz/bb/<term>/<course>/ 规范形四桶页：拉取核对 → info/courseware/assessments/attachments 落位 → 对账 → 写后管道。Triggers on: bb-map, 映射课程, bb 落位, 落位这门课, map bb course."
+description: "Map bb/ fetched artifacts and gradebook snapshots into wiki/cuhksz/bb/<term>/<course>/ canonical four-bucket pages: fetch verification → info/courseware/assessments/attachments placement → reconciliation → post-write pipeline. Triggers on: bb-map, 映射课程, bb 落位, 落位这门课, map bb course."
 ---
 
-# bb-map：课程域映射
+# bb-map: course-domain mapping
 
-把 `cuhksz/bb/` 拉取物与成绩册快照映射为 `wiki/cuhksz/bb/<term>/<course>/` 规范形四桶页——映射与理解解耦，登记 + courseware 知识点摘要（粗粒度蒸馏）+ 对账动作（四桶契约与对账字段见注入区 bb-map 块）。数据拉取经 bbcli skill（`connectors/bb-cli/SKILL.md`——会话纪律与命令速查）；深度讲解不属本命令（高价值复盘走 save 进 notes，回链属地页）。
+Map `cuhksz/bb/` fetched artifacts and gradebook snapshots into `wiki/cuhksz/bb/<term>/<course>/` canonical four-bucket pages — mapping and understanding are decoupled: registration + courseware knowledge-point summaries (coarse-grained distillation) + reconciliation actions (the four-bucket contract and reconciliation fields are in the bb-map block of the injection region). Data fetching goes through the bbcli skill (`connectors/bb-cli/SKILL.md` — session discipline and command quick reference); in-depth teaching is not part of this command (high-value retrospectives go through save into notes, backlinking the territory page).
 
 ## Scope
 
-写：bb-map（info / courseware / assessments / attachments 四桶页，机械区覆写）、log、hot、index
-读：registry（`.meta/protocol/registry.yaml`，字段与值集锚点）、bb/ 拉取物、bbcli（courses / tree / files / dues / assignments / grades / submission）、`wiki/cuhksz/bb/inbox.md`（域配置）
+Write: bb-map (info / courseware / assessments / attachments four-bucket pages, mechanical-section overwrite), log, hot, index
+Read: registry (`.meta/protocol/registry.yaml`, field and value-set anchor), bb/ fetched artifacts, bbcli (courses / tree / files / dues / assignments / grades / submission), `wiki/cuhksz/bb/inbox.md` (domain configuration)
 
 ## Steps
 
-1. **锚点（一次读取）**：读 registry 与 `wiki/cuhksz/bb/inbox.md`（`terms` 块映射——现役学期与冻结标记）；**inbox 缺席即建**（terms 自 `bb-cli terms`/`courses` 现查登记 + 首刷速写与公告分拣，流程见注入区 bb 块）
-2. 会话核对：`bb-cli status`（未登录按 bbcli skill 登录纪律处理）；定位目标课（目录名 = 课程代码，如 AIE3005；新课先建属地目录与身份页字段）
-3. 拉取物核对：`cuhksz/bb/<term>/<course>/` 源树在位（缺则经 bbcli skill `fetch` 落位，默认带媒体过滤——策略见注入区 bb 块）；assessments 机械区数据自 `grades` / `submission` 快照现拉
-4. 按注入区契约逐桶落位：info（身份 bb 块映射 term_id/course_id/term_status + `## 基本信息` 课程政策类要点蒸馏 `info-N` 锚点）→ courseware（读源识别知识点 → `## 知识点摘要`（sm-N 锚点 + 一行概括 + 章节提示）+ `## 知识点联系` + `## 专有名词` + `## 单元文件`）→ assessments（汇总列排除；`## 要求`/`## 参考` 有源蒸馏 `req-N`/`ref-N` 锚点 + `## 提交`/`## 结果` 机械快照，due 缺省不告警）→ attachments（1:1 代理）；机械区对账覆写，沉淀区不触碰
-5. **呈落位预览**（新增 / 变更 / 废弃清单），等用户确认
-6. **写后管道**（确定性，机械自动不询问）：按注入区序执行各插件写入调用（index/tags/hot/log 派生层重建在前），毕即 `python .meta/scripts/pipeline.py verify` 收尾（写后自证，未过即回修）；随即按提交纪律入库（`映射: <term>/<course>`，词表见 `.meta/protocol/actions.md`）
-7. 回报：课程 / 四桶新增·变更·废弃计数 / stale 清单（stale 项经 bbcli 现拉刷新后消除）
+1. **Anchor (one-time read)**: read the registry and `wiki/cuhksz/bb/inbox.md` (`terms` block mapping — active terms and freeze flags); **if the inbox is absent, create it** (register `terms` from a live `bb-cli terms`/`courses` query + first-refresh digest and announcement triage; flow in the bb block of the injection region)
+2. Session verification: `bb-cli status` (if not logged in, follow the login discipline in the bbcli skill); locate the target course (directory name = course code, e.g. AIE3005; for a new course, first create the territory directory and identity-page fields)
+3. Fetch verification: the `cuhksz/bb/<term>/<course>/` source tree is in place (if missing, place it via the bbcli skill `fetch`, with media filtering on by default — policy in the bb block of the injection region); assessments mechanical-section data is pulled live from `grades` / `submission` snapshots
+4. Place bucket by bucket per the injection-region contract: info (identity bb block mapping term_id/course_id/term_status + `## Basic Information` distillation of course-policy key points with `info-N` anchors) → courseware (read sources to identify knowledge points → `## Knowledge Point Summary` (sm-N anchors + one-line gist + chapter hints) + `## Knowledge Point Links` + `## Terminology` + `## Unit Files`) → assessments (summary columns excluded; `## Requirements`/`## References` source-based distillation with `req-N`/`ref-N` anchors + `## Submission`/`## Results` mechanical snapshots; a missing due raises no alert) → attachments (1:1 proxies); mechanical sections are overwritten on reconciliation, accumulation sections are never touched
+5. **Present the placement preview** (added / changed / deprecated lists) and wait for user confirmation
+6. **Post-write pipeline** (deterministic, mechanical and automatic, no prompting): execute each plugin's write calls in injection-region order (index/tags/hot/log derived-layer rebuilds first), then finish with `python .meta/scripts/pipeline.py verify` (post-write self-verification; on failure, go back and fix); then commit per the commit discipline (`映射: <term>/<course>`, see the vocabulary in `.meta/protocol/actions.md`)
+7. Report: course / added·changed·deprecated counts per bucket / stale list (stale items clear after a live bbcli refresh)
 
 ## Prohibitions
 
-- 不写 `cuhksz/bb/` 源侧任何文件（拉取物只增，删改自由属于人）；不复制原文全文
-- 沉淀区（info `## 备注` / assessments `## 复盘`）只增不改，重建不得触碰
-- 不拉 roster；成绩只进 assessments 机械区（隐私红线：课程 / 成绩 / 提交数据属实例数据，不入框架仓库）
-- 凭据会话只存本机；提交作业等写操作不属本命令（永远须用户明示并另行设计）
+- Never write any file on the `cuhksz/bb/` source side (fetched artifacts are append-only; deletion and modification are human freedom); never copy full original text
+- Accumulation sections (info `## Notes` / assessments `## Review`) are append-only; rebuilds must not touch them
+- Never pull the roster; grades go only into the assessments mechanical section (privacy red line: course / grade / submission data is instance data and never enters the framework repository)
+- Credential sessions stay on the local machine; write operations such as submitting assignments are not part of this command (always require explicit user instruction and separate design)
 
 ## Language
 
-产出语言取行文声明页 `wiki/language.md` 的 default 键（页面或缺席键跟会话语言）；专名与路径保留原形。
+Output language takes the default key of the language declaration page `wiki/language.md` (a missing page or missing key falls back to the session language); proper nouns and paths keep their original form.
 
 ## Parameters
 
-- 课程（课程代码 / 属地目录名，如 `AIE3005`；可省 = 现役学期全部课）
-- 桶（`info` / `courseware` / `assessments` / `attachments`；可省 = 全部——单桶重跑用）
+- Course (course code / territory directory name, e.g. `AIE3005`; omittable = all courses in the active term)
+- Bucket (`info` / `courseware` / `assessments` / `attachments`; omittable = all — for single-bucket reruns)
 
 ## Injected Section (plugin usage blocks)
 
-> 本区为 wiki_plugin_kernel 投影：consumes 拉取与源侧路由 usage_routes 合流，披露序 = owner 在前、路由居中、拉取殿后（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
+> This region is a wiki_plugin_kernel projection: consumes pulls merged with usage_routes source-side routing; disclosure order = owner first, routed blocks in the middle, pulled blocks last (rebuilt by inject / all); handwritten content does not belong here — to change the write-side contract, edit PLUGIN.yaml.
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-map -->
-- 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id/term_status（现役|冻结）+ generated/stale_after），正文 `## 基本信息` 课程政策类要点蒸馏（评分/考核/师资/TA/分组/教学语言/AI 政策，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
-- 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件；平行同类目录合为一页）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元，完全未下载单元可缺省 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 + 源侧章节级提示 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块；扁平多附件单元清单即对应关系）；整页可再生，珍贵内容蒸馏入 notes
-- assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗；汇总列 Weighted Total/Total 与分节登记列——非知识考核的分节/出勤登记如 Tutorial Section——排除不建页）；`## 要求`/`## 参考` 有源则蒸馏（分点 `<a id="req-N">`/`<a id="ref-N">` 锚点，无源标「无单独要求文件」）；raw 块映射登记要求/参考/提交文件（提交件在 cuhksz/bb/<term>/<course>/submissions/；允许多页引用同一文件）；`## 提交`/`## 结果` 自 grades/submission 快照刷新机械区（due 缺省预留说明位不告警；无提交记录用独立话术列三种可能）；毕写 log 行（类型 map）
-- attachments 代理：老师发布的非讲义资产每件一页（raw_file/raw_sha256），平铺；TA/分组等结构事实不作附件页
-- 落位判据（见注入行）
-- 重建纪律：机械区对账覆写；沉淀区（info 备注 / assessments 复盘）只增，重建不得触碰；attachments 代理整页可再生
-- stale 处置：assessments 结果与 info 基本信息挂 stale_after，stale 经 bbcli 现拉刷新（agent 即同步器）；courseware/attachments 纯本地对账无 TTL
-- 写后管道（机械自动）：python .meta/scripts/pipeline.py index + tags + hot + log + verify（先重建派生层再校验——校验置后收尾，避免先校验误报派生区漂移）
-- 派生只出不回：行动项→todo、高价值复盘→notes（回链 assessments 页）——todo/notes 桥
+- Course information page: create info.md per course (type: bb + bb block mapping term_id/course_id/term_status (active|frozen) + generated/stale_after); the body's `## Basic Information` distills course-policy key points (grading/assessment/faculty/TA/grouping/teaching language/AI policy, itemized `<a id="info-N">` anchors, reading bb/ syllabi and assessment files, missing items marked 'not provided'); 'what happens when' is recorded here, all elements of graded affairs go to assessments pages
+- Knowledge-point pages: each bb/ content unit (directory = handouts + attached files as one, or a flat single file; parallel same-kind directories merge into one page) → courseware/<unit-name>.md (type: bb + raw_path pointing at that unit, may be absent for entirely undownloaded units + generated); read sources to identify knowledge points → `## Knowledge Point Summary` itemized `<a id="sm-N">` anchors + one-line gist + source-side section-level hints → `## Knowledge Point Links` cross-links between points → `## Terminology` English-Chinese glossary → `## Unit Files` two-state reconciliation list (present locally / unmaterialized pointer entries — media pointer-based by default, see the bb block; for flat multi-attachment units the list is the correspondence); whole page regenerable, precious content distilled into notes
+- assessments page maintenance: gradebook-column-driven page creation (file name = sanitized original assignment name; summary columns Weighted Total/Total and section-registration columns — registration of sections/attendance that is not a knowledge assessment, e.g. Tutorial Section — excluded, no pages); `## Requirements`/`## References` distilled when sources exist (itemized `<a id="req-N">`/`<a id="ref-N">` anchors, sourceless marked 'no separate requirement file'); the raw block mapping registers requirement/reference/submission files (submissions live in cuhksz/bb/<term>/<course>/submissions/; multiple pages may reference the same file); `## Submission`/`## Results` mechanical regions refreshed from grades/submission snapshots (an absent due reserves an explanation slot and raises no alert; with no submission record use the dedicated wording listing three possibilities); always write a log line (type map) afterwards
+- attachments proxies: one page per teacher-released non-handout asset (raw_file/raw_sha256), flat; structural facts like TA/grouping get no attachment pages
+- Placement criteria (see the injection line)
+- Rebuild discipline: the mechanical region is reconciled and overwritten; the accumulation regions (info notes / assessments review) are append-only, rebuilds must not touch them; attachments proxies are whole-page regenerable
+- stale handling: assessments results and info basic information carry stale_after; when stale, refresh via a fresh bbcli pull (the agent is the synchronizer); courseware/attachments are purely local reconciliation, no TTL
+- Post-write pipeline (mechanical, automatic): python .meta/scripts/pipeline.py index + tags + hot + log + verify (rebuild the derived layer first, then validate — validation closes at the end, avoiding premature false drift reports from the derived zones)
+- Derivation out-only: action items → todo, high-value reviews → notes (backlinks to assessments pages) — the todo/notes bridges
 <!-- /usage:bb-map -->
 
 <!-- usage:bb -->
-- 进域先读 wiki/cuhksz/bb/inbox.md（速写与域配置一体；缺席即建——bb-map 命令锚点触发或 agent 自发）；刷新流程 = 现拉公告+dues → 蒸馏重写速写（未交提醒双源：assignments 无提交 ∪ grades 有 due 无 attempt）→ 公告分拣派生 → log 行（类型 other）；stale 同此（agent 即同步器）
-- 拉取落位：课件 → cuhksz/bb/<term>/<course>/（保留源侧目录树）；提交件 → cuhksz/bb/<term>/<course>/submissions/；拉取物只增不覆写，同名变更件 --refresh 重拉、内容哈希尾缀落新件（旧件保留=修订史）；笔记区 notes/ 两治共居：人的笔记机器永不写入/删除/重命名（读取与分析合法——认知消费口粮）；ai 产物（origin: ai——teach 讲解笔记 / quiz 考卷）经各采集通道落放、只增不覆写；fetch 落放遇保留名冲突时改名并提示
-- 新学期/新课 = 建属地目录 + 身份页（bb 块映射 term_id/course_id）；bbcli 解析直接用目录名（--term 学期名、课程代码子串）
-- 物化分层：文档类全量；媒体类（video/audio）默认指针化不落 bb/——fetch 过滤参数（--exclude-mime/--exclude-ext/--max-size）见 bbcli skill，单元页清单登记未物化条目，按需 --match 单取
-- 公告拆信：不存档不立页（真相在 BB 现拉即得）；作业变更→assessments 机械区、考试/调课→info 基本信息（+calendar 派生）、政策/师资/分组→info 基本信息、行动项→todo、资源发布→触发 fetch 即弃、高价值长文→notes 涌现回链
-- 单向派生（只出不回）：行动项 → todo；课业日程 → calendar；高价值结论 → notes（回链属地页）——todo/calendar/notes 桥，格式细则归桥
-- 隐私与边界：成绩按需现拉呈现即止、不默认投影；roster 不拉；提交作业等写操作不入本域
+- Enter the domain by first reading wiki/cuhksz/bb/inbox.md (digest and domain config in one; created when absent — triggered by the bb-map command anchor or agent initiative); refresh flow = fresh-pull announcements + dues → distill and rewrite the digest (dual-source unsubmitted reminders: assignments without submission ∪ grades with due but no attempt) → sort announcements into derivations → log line (type other); staleness follows the same flow (the agent is the synchronizer)
+- Pull and placement: courseware → cuhksz/bb/<term>/<course>/ (source-side directory tree preserved); submissions → cuhksz/bb/<term>/<course>/submissions/; pulled artifacts append-only, never overwritten; changed files with the same name re-pulled via --refresh and landed as new files with a content-hash suffix (old files kept = revision history); the notes zone notes/ is a two-regime coexistence: the machine never writes/deletes/renames human notes (reading and analysis are legitimate — fodder for cognition consumption); ai artifacts (origin: ai — teach explanation notes / quiz papers) are placed through their collection channels, append-only, never overwritten; when fetch placement hits a reserved-name conflict, rename on landing and notify
+- New term/new course = create the territory directory + identity page (bb block mapping term_id/course_id); bbcli resolution uses directory names directly (--term term name, course-code substring)
+- Materialization layering: documents in full; media (video/audio) pointer-based by default, not landed in bb/ — fetch filter flags (--exclude-mime/--exclude-ext/--max-size) in the bbcli skill; unit-page lists register unmaterialized entries, single-fetch on demand via --match
+- Announcement triage: no archiving, no pages (truth lives on BB, pull-fresh on demand); assignment changes → assessments mechanical region, exams/rescheduling → info basic information (+ calendar derivation), policies/faculty/grouping → info basic information, action items → todo, resource releases → trigger fetch then discard, high-value long texts → notes emergence with backlinks
+- One-way derivation (out-only): action items → todo; course schedules → calendar; high-value conclusions → notes (backlinks to territory pages) — the todo/calendar/notes bridges, format details belong to the bridges
+- Privacy and boundaries: grades pulled on demand and presented only, no default projection; roster never pulled; write actions such as submitting assignments never enter this domain
 <!-- /usage:bb -->
 
 <!-- usage:trust -->
-- 写页随手写 `generated`（块式：`by: agent/<当前模型>` / `at: 今日`）
-- 复核动作发生时追加 `verified` 事件（单行 `by: <actor>, at: <日期>`），不为凑水位伪造
-- 复核由用户发起（人指令触发），agent 不自发追加 verified 事件
+- When writing a page, write `generated` along the way (block style: `by: agent/<current-model>` / `at: <today>`)
+- When a review action happens, append a `verified` event (single line `by: <actor>, at: <date>`), never fabricated to inflate the level
+- Reviews are initiated by the user (triggered by human instruction); agents never append verified events on their own
 <!-- /usage:trust -->
 
 <!-- usage:index -->
-- 写后重建（机械自动）：`python .meta/scripts/pipeline.py index`（索引——溢出减负制，含并回后多余旧索引删除）与同脚本 `tags`（tag 反向索引）；LLM 不手写索引
+- Post-write rebuild (mechanical, automatic): `python .meta/scripts/pipeline.py index` (index — overflow-offloading scheme, including deletion of obsolete old indexes after merge-back) and the same script's `tags` (tag reverse index); LLMs never hand-write indexes
 <!-- /usage:index -->
 
 <!-- usage:hot -->
-- 写条目（机械自动）：`python .meta/scripts/pipeline.py hot <类型> "<wikilink + 一句话核心>"`（类型值集同 log，见 AGENTS 注入区 log 块）；窗口淘汰与截短由脚本执行
+- Writing entries (mechanical, automatic): `python .meta/scripts/pipeline.py hot <type> "<wikilink + one-sentence essence>"` (type value set same as log, see the log block of the AGENTS injection region); window eviction and truncation are performed by the script
 <!-- /usage:hot -->
 
 <!-- usage:log -->
-- 写行（机械自动）：`python .meta/scripts/pipeline.py log <类型> "<一句话>" [--domain 域]`（类型值集见 AGENTS 注入区 log 块；域标 = 域件名如 bb/lark/vault，域内事务必带、框架与原生事务缺省）；滚动窗口与归档由脚本执行
+- Writing lines (mechanical, automatic): `python .meta/scripts/pipeline.py log <type> "<one sentence>" [--domain <domain>]` (type value set in the log block of the AGENTS injection region; domain tag = domain-plugin name such as bb/lark/vault, mandatory for in-domain transactions, omitted for framework and native transactions); rolling window and archiving are performed by the script
 <!-- /usage:log -->
 <!-- cmd-inject:end -->
