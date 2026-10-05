@@ -1,5 +1,4 @@
-"""API 层：组件访问与解析编排。只读——本连接器不提供任何写操作。
-"""
+"""API layer: component access and parsing orchestration. Read-only — this connector provides no write operations."""
 
 from __future__ import annotations
 
@@ -15,7 +14,7 @@ class Sis:
         self.cfg = cfg or config.load_config()
         self.transport = Transport(relogin=self._relogin)
 
-    # ---- 会话 ----
+    # ---- Session ----
     def _relogin(self) -> None:
         username, password = config.resolve_credentials(self.cfg, None, None)
         login(self.transport, username, password)
@@ -44,20 +43,21 @@ class Sis:
         self.cfg.pop("password", None)
         config.save_config(self.cfg)
 
-    # ---- 组件 ----
+    # ---- Components ----
     def component_html(self, name: str) -> str:
         comp, nav = config.COMPONENTS[name]
         return self.transport.get_content(comp, nav)
 
     def term_query(self, name: str, term: str | None = None) -> dict:
-        """term 交互组件：GET 搜索页 → 选学期 POST Continue → 返回 {terms, term, html}。
+        """term-interaction component: GET the search page → pick a term → POST Continue → return {terms, term, html}.
 
-        term=None 取页面第一个（最新）；传子串（如 'Term 2'）模糊匹配学期名。
+        term=None picks the page's first entry (the newest); passing a
+        substring (e.g. 'Term 2') fuzzy-matches the term name.
         """
         html = self.component_html(name)
         terms = parser.parse_terms(html)
         if not terms:
-            return {"terms": [], "term": None, "html": html}  # 无 radio：页面即结果
+            return {"terms": [], "term": None, "html": html}  # no radios: the page is already the result
         pick = terms[0]
         if term:
             for t in terms:
@@ -65,7 +65,7 @@ class Sis:
                     pick = t
                     break
             else:
-                raise SystemExit(f"学期不匹配：{term!r}；可用：{[t['term'] for t in terms]}")
+                raise SystemExit(f"Term not matched: {term!r}; available: {[t['term'] for t in terms]}")
         result = self.transport.submit_search(html, pick["idx"])
         return {"terms": terms, "term": pick["term"], "html": result}
 
@@ -73,7 +73,7 @@ class Sis:
         return parser.parse_weekly(self.component_html("schedule"))
 
     def schedule_with_days(self) -> dict:
-        """周课表 + 学生中心页的星期归属（center 页为权威源）。"""
+        """Weekly schedule + day-of-week attribution from the student center page (the center page is the authoritative source)."""
         data = self.schedule()
         data["timetable"] = parser.parse_center_schedule(self.component_html("center"))
         return data
@@ -100,25 +100,25 @@ class Sis:
         return parser.parse_history(self.component_html("history"))
 
     def transcript_pdf(self, lang: str = "eng") -> tuple[bytes, str]:
-        """非官方成绩单：View Report POST → 抽 PDF URL → 下载。返回 (bytes, url)。"""
+        """Unofficial transcript: View Report POST → extract the PDF URL → download. Returns (bytes, url)."""
         code = config.TRANSCRIPT_TYPES.get(lang)
         if not code:
-            raise SystemExit(f"未知成绩单语言 {lang!r}；可用：{sorted(config.TRANSCRIPT_TYPES)}")
+            raise SystemExit(f"Unknown transcript language {lang!r}; available: {sorted(config.TRANSCRIPT_TYPES)}")
         html = self.transport.submit_icaction(
             *config.COMPONENTS["transcript"],
             action=config.IC_VIEW_REPORT,
             extra={config.TRANSCRIPT_TYPE_FIELD: code})
         m = re.search(r'''['"]([^'"]*\.pdf[^'"]*)['"]''', html, re.I)
         if not m:
-            raise RuntimeError("报表页未见 PDF 链接（结构变化或报表生成失败）")
+            raise RuntimeError("No PDF link found on the report page (structure changed or report generation failed)")
         url = m.group(1)
         r = self.transport.request("GET", url, absolute=True)
         if r.status_code != 200 or "pdf" not in (r.headers.get("content-type") or "").lower():
-            raise RuntimeError(f"PDF 下载失败 HTTP {r.status_code}")
+            raise RuntimeError(f"PDF download failed: HTTP {r.status_code}")
         return r.content, url
 
     def identity(self) -> dict:
-        """学籍身份：prsnldata（HTML：姓名/邮箱/学号/holds）+ transcript PDF（学院/专业/入学）。"""
+        """Student identity: prsnldata (HTML: name/email/student id/holds) + transcript PDF (college/major/admitted)."""
         data = parser.parse_prsnldata(self.component_html("prsnldata"))
         try:
             pdf, _url = self.transcript_pdf("eng")

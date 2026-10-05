@@ -1,6 +1,7 @@
-"""内容页解析：周课表全解析，其余组件 v0.1 提供通用文本化。
+"""Content-page parsing: full weekly-schedule parsing; the other components get a generic textifier in v0.1.
 
-解析锚点均来自 2026-10-05 实测页面结构（PeopleSoft CS 经典 PIA）。
+Parsing anchors all come from live page structures verified on 2026-10-05
+(PeopleSoft CS classic PIA).
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ _TERM_LABEL = re.compile(r"\d{4}-\d{2}\s+(?:Term\s+\d|Summer Session)")
 
 
 def parse_terms(html: str) -> list[dict]:
-    """term 搜索页的学期清单：radio idx → 学期名（页面倒序，最新在前）。"""
+    """Term list from the term search page: radio idx → term name (the page is reverse-ordered, newest first)."""
     soup = BeautifulSoup(html, "html.parser")
     out: list[dict] = []
     seen: set[str] = set()
@@ -35,7 +36,7 @@ def parse_terms(html: str) -> list[dict]:
 
 
 def parse_grade_report(html: str) -> dict:
-    """View My Grades 结果页：Class Grades 表 + GPA（嵌套表重复命中，按键去重）。"""
+    """View My Grades result page: Class Grades table + GPA (nested tables hit repeatedly; dedupe by key)."""
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text(" ", strip=True)
     term = ""
@@ -65,7 +66,7 @@ def parse_grade_report(html: str) -> dict:
 
 
 def parse_history(html: str) -> list[dict]:
-    """课程历史（页面直接含全表）：Course/Description/Term/Grade/Units/Status。"""
+    """Course history (the page directly contains the full table): Course/Description/Term/Grade/Units/Status."""
     soup = BeautifulSoup(html, "html.parser")
     out = []
     for td in soup.find_all("td"):
@@ -78,7 +79,7 @@ def parse_history(html: str) -> list[dict]:
         if len(cells) >= 6 and _TERM_LABEL.search(cells[2] or ""):
             out.append({"course": cells[0], "description": cells[1], "term": cells[2],
                         "grade": cells[3], "units": cells[4], "status": cells[5]})
-    # 去重（嵌套表可能重复命中）
+    # Dedupe (nested tables may hit repeatedly)
     seen, dedup = set(), []
     for r in out:
         key = (r["course"], r["term"])
@@ -89,7 +90,7 @@ def parse_history(html: str) -> list[dict]:
 
 
 def parse_appt(html: str) -> dict:
-    """Enrollment Dates 结果页：学期名 + 注册窗口 + 学分上下限。"""
+    """Enrollment Dates result page: term name + enrollment windows + unit limits."""
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n", strip=True)
     term = ""
@@ -110,7 +111,7 @@ def parse_appt(html: str) -> dict:
 
 
 def parse_exam(html: str) -> list[dict]:
-    """考试安排结果页：按表头锚定（Class/Date/Time/Room…，以实页为准）。"""
+    """Exam schedule result page: anchored on table headers (Class/Date/Time/Room…, per the live page)."""
     soup = BeautifulSoup(html, "html.parser")
     out = []
     for tb in soup.find_all("table"):
@@ -125,7 +126,7 @@ def parse_exam(html: str) -> list[dict]:
 
 
 def parse_prsnldata(html: str) -> dict:
-    """Personal Data Summary：姓名/邮箱/holds/todo（identity 命令 HTML 源）。"""
+    """Personal Data Summary: name/email/holds/todo (the HTML source for the identity command)."""
     soup = BeautifulSoup(html, "html.parser")
     text = soup.get_text("\n", strip=True)
     out: dict = {"holds": [], "todo": [], "emails": []}
@@ -138,7 +139,7 @@ def parse_prsnldata(html: str) -> dict:
         s = line.strip()
         if "@" in s and re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", s):
             out["emails"].append(s)
-    # 学号：学校邮箱 local part 形如 <学号>@link.cuhk.edu.cn
+    # Student id: the school email local part looks like <student-id>@link.cuhk.edu.cn
     for e in out["emails"]:
         if e.endswith("@link.cuhk.edu.cn") and e.split("@")[0].isdigit():
             out["student_id"] = e.split("@")[0]
@@ -146,10 +147,10 @@ def parse_prsnldata(html: str) -> dict:
 
 
 def parse_pdf_identity(data: bytes) -> dict:
-    """非官方成绩单 PDF 首页身份块（best-effort，需 pypdf；AES 空密码解密）。
+    """Identity block on the first page of the unofficial transcript PDF (best-effort; needs pypdf; AES decrypt with empty password).
 
-    返回 admitted/college/school/major/programme 等身份字段；pypdf 缺席时返回
-    {"unavailable": "pypdf not installed"}。
+    Returns identity fields such as admitted/college/school/major/programme;
+    when pypdf is absent, returns {"unavailable": "pypdf not installed"}.
     """
     try:
         from pypdf import PdfReader
@@ -186,10 +187,12 @@ _CENTER_EVENT = re.compile(
 
 
 def parse_center_schedule(html: str) -> list[dict]:
-    """学生中心页 This Week's Schedule：课程-节次/类型/classNbr/星期/时段/教室。
+    """This Week's Schedule on the student center page: course-section/type/classNbr/weekday/time-slot/room.
 
-    星期缩写（Mo/Tu/We/Th/Fr/Sa/Su）直接在行内——周视图 DOM 无列锚点，此页是
-    星期归属的权威源。SUP 型无固定 meeting（星期/时段缺省）。
+    Weekday abbreviations (Mo/Tu/We/Th/Fr/Sa/Su) sit inline in the row — the
+    week-view DOM has no column anchors; this page is the authoritative
+    source for day-of-week attribution. SUP sections have no fixed meeting
+    (weekday/time empty).
     """
     soup = BeautifulSoup(html, "html.parser")
     out = []
@@ -201,7 +204,7 @@ def parse_center_schedule(html: str) -> list[dict]:
         out.append({"class": m.group(1), "type": m.group(2), "class_nbr": m.group(3),
                     "days": m.group(4) or "", "time": (m.group(5) + " - " + m.group(6)) if m.group(5) else "",
                     "location": m.group(7).strip()})
-    # 大容器行会以更长文本重复命中（前缀带页头），保留最短匹配集：按 class+type 去重
+    # Oversized container rows re-hit as longer text (prefixed with the page header); keep the shortest match set: dedupe by class+type
     seen, dedup = set(), []
     for r in out:
         key = (r["class"], r["type"], r["days"], r["time"])
@@ -212,10 +215,12 @@ def parse_center_schedule(html: str) -> list[dict]:
 
 
 def parse_weekly(html: str) -> dict:
-    """周课表：本周事件清单 + 学期课程总表 + 周范围。
+    """Weekly schedule: this week's event list + the term course table + the week range.
 
-    事件块 = span.SSSTEXTWEEKLY 的父容器四行（编号/类型/时段/教室）；
-    DOM 有重复渲染，按四元组去重。星期网格归属 v0.2（DOM 嵌套无列锚点）。
+    An event block = the four lines of the span.SSSTEXTWEEKLY parent
+    container (code/type/time-slot/room); the DOM renders duplicates — dedupe
+    by the 4-tuple. Day-of-week grid attribution is v0.2 (nested DOM, no
+    column anchors).
     """
     soup = BeautifulSoup(html, "html.parser")
     week = ""
@@ -252,7 +257,7 @@ def parse_weekly(html: str) -> dict:
 
 
 def textify(html: str, limit: int = 4000) -> str:
-    """通用文本化兜底：逐行剔除门户菜单/导航短语，留近似正文（v0.1）。"""
+    """Generic textifier fallback: strip portal menu/navigation phrases line by line, keeping approximate body text (v0.1)."""
     soup = BeautifulSoup(html, "html.parser")
     for tag in soup.find_all(["script", "style", "head"]):
         tag.decompose()

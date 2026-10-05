@@ -1,67 +1,67 @@
-# sis-cli — CUHK-SZ SIS 只读 CLI 连接器
+# sis-cli — CUHK-SZ SIS Read-Only CLI Connector
 
-`sis.cuhk.edu.cn`（Oracle PeopleSoft Campus Solutions）的命令行连接器：**纯只读数据面，无 agent 逻辑、无 MCP、无监控**——给上层（wiki 域插件 / 人工 / 脚本）当事实接口用。技术路线与登录实证承 bb-cli（同一 ADFS `sts.cuhk.edu.cn`、`cuhksz\` 域前缀规则同源）；PeopleSoft 侧登录与组件访问按 2026-10-05 实地逆向编写。
+A command-line connector for `sis.cuhk.edu.cn` (Oracle PeopleSoft Campus Solutions): **a purely read-only data plane — no agent logic, no MCP, no monitoring** — serving as a fact interface for upper layers (wiki domain plugins / humans / scripts). The technical route and login findings carry over from bb-cli (the same ADFS `sts.cuhk.edu.cn`, the same `cuhksz\` domain-prefix rule); the PeopleSoft-side login and component access were written from live reverse engineering on 2026-10-05.
 
-## 安装
+## Installation
 
 ```bash
 cd connectors/sis-cli
 python -m venv .venv
-.venv/Scripts/pip install -e .   # Windows；*nix 为 .venv/bin/pip
+.venv/Scripts/pip install -e .   # Windows; on *nix use .venv/bin/pip
 .venv/Scripts/sis-cli --help
 ```
 
-依赖仅 `curl_cffi`（Chrome TLS 指纹）与 `beautifulsoup4`。
+Dependencies are only `curl_cffi` (Chrome TLS fingerprint) and `beautifulsoup4`.
 
-## 认证（ADFS OAuth2 → PeopleSoft 会话）
+## Authentication (ADFS OAuth2 → PeopleSoft session)
 
-流程（全部 HTTP 可复刻，无浏览器）：
+Flow (fully HTTP-reproducible, no browser):
 
-1. `sts.cuhk.edu.cn/adfs/oauth2/authorize`（client_id 注册于 SIS）→ ADFS 表单登录（与 bb-cli 同源：单次 POST，学号自动补 `cuhksz\` 前缀）；
-2. 回调 `sis.cuhk.edu.cn/sso/dologin.html?code=…` 静态页——照抄其 JS 表单，POST `/psp/csprd/?cmd=login&languageCd=…&code=…`（固定服务账号 `CUSZ_SSO_LOGIN` + 随机密码；POST 前先 GET 该地址预热 `PSJSESSIONID`）；
-3. PeopleSoft 后端以 code 换会话，`PS_TOKEN` 落地即成功。
+1. `sts.cuhk.edu.cn/adfs/oauth2/authorize` (client_id registered to SIS) → ADFS form login (same source as bb-cli: a single POST, the student id automatically gets the `cuhksz\` prefix);
+2. the callback `sis.cuhk.edu.cn/sso/dologin.html?code=…` is a static page — replicate its JS form and POST `/psp/csprd/?cmd=login&languageCd=…&code=…` (fixed service account `CUSZ_SSO_LOGIN` + a random password; GET that URL first to warm up `PSJSESSIONID` before POSTing);
+3. the PeopleSoft backend exchanges the code for a session; once `PS_TOKEN` lands, the login has succeeded.
 
-凭据与会话只存本机 `~/.sis-cli/`（`SIS_CLI_HOME` 可覆写）：`config.json`（凭据，权限 0600）+ `session.json`（cookie jar）。**绝不写入任何仓库。** 免落盘：环境变量 `SIS_CLI_USERNAME` / `SIS_CLI_PASSWORD` 或 `sis-cli login --no-store`。
+Credentials and sessions live only in the local `~/.sis-cli/` (`SIS_CLI_HOME` can override): `config.json` (credentials, permission 0600) + `session.json` (cookie jar). **Never written into any repository.** Off-disk option: the environment variables `SIS_CLI_USERNAME` / `SIS_CLI_PASSWORD`, or `sis-cli login --no-store`.
 
-**会话短寿**：实测 `PS_TOKEN` 约 5 分钟过期，且 `PORTAL-PSJSESSIONID` 随响应滚动换发。CLI 策略：每次请求后写穿 session.json；组件访问遇登录壳自动重登一次并重放（ADFS 会话常驻，重登成本 ≈ 两次请求）。
+**Short-lived sessions**: in live testing `PS_TOKEN` expires in about 5 minutes, and `PORTAL-PSJSESSIONID` is re-issued on a rolling basis with each response. CLI strategy: write through session.json after every request; when component access hits the login shell, automatically re-login once and replay (the ADFS session persists, so a re-login costs ≈ two requests).
 
-## PeopleSoft 访问要点（2026-10-05 实证）
+## PeopleSoft access essentials (verified 2026-10-05)
 
-- **PS_DEVICEFEATURES cookie**：壳页 JS 以它判别浏览器环境，缺失则 psc 直击永远只回 bootstrap 壳。格式 = JSON 剥 `{}`/引号、逗号换空格（见 `/csprd/signin.js`）。CLI 在会话上恒种一个典型桌面 Chrome 值。
-- **psc/psp 乒乓**：直击 `/psc/…/c/组件` 先回壳（`self.location` 指向 psp 版 URL），跟随后可达真身或门户框架页（`ptifrmtgtframe` TargetContent iframe，取其 src 再 GET）。
-- **PORTALPARAM_PTCNAV**：学生角色的权限判定带导航上下文——psc 直击必须带 `?PORTALPARAM_PTCNAV=<HC_…>`，缺它报 not authorized（实证：SSR_STUDENT_SCHEDULE 无 PTCNAV 被拒；SSR_SSENRL_SCHD_W 带则通）。FolderPath/EOPP 长参数可全省。
-- 组件无公开 REST：数据在 PIA HTML 内，逐组件写解析。
+- **PS_DEVICEFEATURES cookie**: the shell-page JS uses it to detect the browser environment; without it, direct psc hits only ever return the bootstrap shell. Format = JSON stripped of `{}`/quotes, commas replaced by spaces (see `/csprd/signin.js`). The CLI always seeds a typical desktop Chrome value on the session.
+- **psc/psp ping-pong**: hitting `/psc/…/c/<component>` directly first returns a shell (`self.location` points to the psp-version URL); following it reaches the real content or a portal framework page (the `ptifrmtgtframe` TargetContent iframe — take its src and GET it).
+- **PORTALPARAM_PTCNAV**: the student-role permission check carries the navigation context — direct psc hits must include `?PORTALPARAM_PTCNAV=<HC_…>`; without it you get "not authorized" (verified: SSR_STUDENT_SCHEDULE without PTCNAV was rejected; SSR_SSENRL_SCHD_W with it passed). The long FolderPath/EOPP parameters can be omitted entirely.
+- Components expose no public REST: the data lives inside PIA HTML; write a parser per component.
 
-## 命令（全只读，`--format text|json`）
+## Commands (all read-only, `--format text|json`)
 
-| 命令 | 用途 |
+| Command | Purpose |
 |---|---|
-| `status` | 会话状态与可用组件清单 |
-| `login` / `logout` | 交互登录（`--no-store` 免落盘）/ 登出清本地 |
-| `schedule [--days]` | 我的每周课程表：本周事件 + 学期课程总表；`--days` 附学生中心页的**星期归属课表**（Mo/Tu/We…） |
-| `grades [--term 子串]` | 查看我的成绩：按学期课程行（课号/学分/评分制/等级/绩点），缺省取最新学期 |
-| `history` | 课程历史全量：课号/课名/学期/等级/学分（页面直出，无需交互） |
-| `appt [--term 子串]` | 注册日期：选课窗口（起止时刻）+ 学分上下限 |
-| `exam [--term 子串]` | 考试安排（当前学期未发布时为空） |
-| `transcript [--lang eng\|chi\|ge-edu] [-o F]` | 下载非官方成绩单官方 PDF（View Report → FILEDB_XMLP PDF，AES 空密码） |
-| `identity` | 学籍身份结构化：姓名/学号/邮箱/holds（prsnldata 页）+ 学院/专业/入学/学制（transcript PDF，需 pypdf） |
-| `dpr` | 学位进度报告（当前需 Request Audit 生成，如实输出页面现状） |
-| `center` / `assignments` | 学生中心页 / 按作业查成绩（文本摘要，assignments 常无数据） |
-| `raw <url> [--post --action IC名 --set k=v] [--file F]` | GET/POST 透传——POST 导航原语（issue #6 ①）：下拉跳转、View Report 类页面经 ICAction POST 可达，探针不再止步于 GET |
+| `status` | Session status and the list of available components |
+| `login` / `logout` | Interactive login (`--no-store` keeps credentials off disk) / logout and clear local state |
+| `schedule [--days]` | My weekly class schedule: this week's events + the term course table; `--days` adds the **day-of-week timetable** from the student center page (Mo/Tu/We…) |
+| `grades [--term substring]` | View my grades: per-term course rows (course/units/grading basis/grade/grade points); defaults to the newest term |
+| `history` | Full course history: course/description/term/grade/units (page-direct, no interaction needed) |
+| `appt [--term substring]` | Enrollment dates: registration windows (start/end times) + unit limits |
+| `exam [--term substring]` | Exam schedule (empty when the current term has not published it yet) |
+| `transcript [--lang eng\|chi\|ge-edu] [-o F]` | Download the unofficial transcript PDF (View Report → FILEDB_XMLP PDF, AES with empty password) |
+| `identity` | Structured student identity: name/id/email/holds (prsnldata page) + college/major/admitted/mode of study (transcript PDF, needs pypdf) |
+| `dpr` | Degree progress report (currently requires Request Audit to generate; outputs the page's current state as-is) |
+| `center` / `assignments` | Student center page / per-assignment grades (text summaries; assignments often has no data) |
+| `raw <url> [--post --action IC-name --set k=v] [--file F]` | GET/POST pass-through — the POST navigation primitive (issue #6 ①): dropdown jumps and View Report style pages are reachable via ICAction POST; probes no longer stop at GET |
 
-**term 交互机制**（grades/appt/exam）：GET 搜索页 → 解析学期 radio（`SSR_DUMMY_RECV1$sels$0`，页面倒序最新在前）→ POST `win0` 表单（ICAction=Continue 按钮 `DERIVED_SSS_SCT_SSR_PB_GO`）→ 结果页。此 POST 是查询动作（等同网页上点"继续"），不改变任何数据。
+**term interaction mechanism** (grades/appt/exam): GET the search page → parse the term radios (`SSR_DUMMY_RECV1$sels$0`, the page is reverse-ordered, newest first) → POST the `win0` form (ICAction=Continue button `DERIVED_SSS_SCT_SSR_PB_GO`) → result page. This POST is a query action (equivalent to clicking "Continue" on the web page) and changes no data.
 
-## 已知边界（2026-10-05 实测）
+## Known limits (live-tested 2026-10-05)
 
-- `exam` 考试安排：机制与 grades 同款（term POST），当前学期未发布时结果为空——发布后自然出数据。
-- `assignments`（按作业查成绩）直击显示 "There is no information"，留观察；按学期成绩走 `grades`。
-- 学费账单（Finances 类）与购物车只读视图未登记（菜单可见，`raw --post` 可先行探路）。
-- `dpr` 报告当前显示 "not available"——需 Request Audit（提交报表任务）生成后方可查看；该按钮属提交类动作，v0.3 不自动执行，待裁定。
-- `identity` 的 PDF 侧字段依赖 pypdf（可选依赖，缺失时该组字段标 unavailable）。
-- 页面正文含学生真实姓名等隐私——CLI 输出仅落终端/本机，**绝不入仓库**。
-- 学校升级 PIA 或改登录页会断链：带 `SIS_CLI_DEBUG=<目录>` 重跑可留现场。
-- **写操作（选课/退课/换课/提交）刻意不提供**——误操作有真实学籍后果；如确需，须用户明示并另行设计。
+- `exam` exam schedule: same mechanism as grades (the term POST); empty until the current term publishes it — data will appear naturally once published.
+- `assignments` (per-assignment grades) directly shows "There is no information"; keep under observation; use `grades` for per-term grades.
+- Tuition bills (Finances-type) and the shopping-cart read views are not registered (visible in the menu; `raw --post` can scout ahead).
+- The `dpr` report currently shows "not available" — viewable only after Request Audit (submitting the report task) generates it; that button is a submit-type action, not auto-executed in v0.3, pending a ruling.
+- The PDF-side fields of `identity` depend on pypdf (optional dependency; when missing, that group of fields is marked unavailable).
+- Page bodies contain the student's real name and other private data — CLI output goes to the terminal/local machine only, **never into any repository**.
+- A school PIA upgrade or a login-page redesign will break the chain: re-run with `SIS_CLI_DEBUG=<dir>` to capture evidence.
+- **Write operations (enroll/drop/swap/submit) are deliberately not provided** — misuse has real academic-record consequences; if genuinely needed, explicit user instruction and separate design are required.
 
-## Git Bash 注意
+## Git Bash note
 
-以 `/` 开头的 raw 路径会被 MSYS 改写，用 `MSYS_NO_PATHCONV=1` 前缀或去掉首斜杠（相对路径）。
+Raw paths starting with `/` get rewritten by MSYS; prefix the command with `MSYS_NO_PATHCONV=1` or drop the leading slash (relative path).

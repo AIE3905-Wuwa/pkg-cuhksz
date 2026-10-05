@@ -1,3 +1,3 @@
-"""sis-cli：sis.cuhk.edu.cn（PeopleSoft Campus Solutions）只读 CLI 连接器。"""
+"""sis-cli: read-only CLI connector for sis.cuhk.edu.cn (PeopleSoft Campus Solutions)."""
 
 __version__ = "0.3.0"

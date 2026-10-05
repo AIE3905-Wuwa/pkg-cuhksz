@@ -1,7 +1,7 @@
 ---
 name: sis-cli
 owner: framework
-description: "Read-only access to sis.cuhk.edu.cn (CUHK-SZ SIS, PeopleSoft Campus Solutions) via the connectors/sis-cli CLI: pull weekly class schedule, grades (summary), course history, enrollment dates and relay them. Query-and-answer only; writes nothing to wiki. Triggers on: sis-cli, sis, sis.cuhk.edu.cn, check sis schedule, check my timetable, check enrollment dates, 学生信息系统, 课表查询."
+description: "Read-only access to sis.cuhk.edu.cn (CUHK-SZ SIS, PeopleSoft Campus Solutions) via the connectors/sis-cli CLI: pull weekly class schedule, grades (summary), course history, enrollment dates and relay them. Query-and-answer only; writes nothing to wiki. Triggers on: sis-cli, sis, sis.cuhk.edu.cn, check sis schedule, check my timetable, check enrollment dates, student information system, timetable query, 学生信息系统, 课表查询."
 ---
 
 # sis-cli: SIS (PeopleSoft) Read-Only Connector

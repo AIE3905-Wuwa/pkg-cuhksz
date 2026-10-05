@@ -1,11 +1,13 @@
-"""传输层：curl_cffi 会话 + PS_DEVICEFEATURES + 壳页 JS 跳转跟随 + cookie 写穿。
+"""Transport layer: curl_cffi session + PS_DEVICEFEATURES + shell-page JS redirect following + cookie write-through.
 
-SIS/PeopleSoft 三个实证要点（2026-10-05）：
-- psc 直击组件时服务端先回 bootstrap 壳（self.location 指向 psp 版 URL），
-  跟随后可达真身或门户框架页（TargetContent iframe）；
-- PORTAL-PSJSESSIONID 随响应滚动换发，跨进程旧 jar 会撞回登录壳——
-  故每次请求后立即写穿 session.json；
-- 会话仅分钟级，调用方须备好重登回调。
+Three empirically verified essentials for SIS/PeopleSoft (2026-10-05):
+- On a direct psc hit the server first returns a bootstrap shell
+  (self.location points at the psp-version URL); following it reaches the
+  real content or a portal framework page (the TargetContent iframe);
+- PORTAL-PSJSESSIONID is re-issued on a rolling basis with each response;
+  a stale cross-process jar bounces back to the login shell — hence
+  session.json is written through immediately after every request;
+- Sessions last only minutes; callers must provide a re-login callback.
 """
 
 from __future__ import annotations
@@ -26,7 +28,7 @@ class TransportError(Exception):
 
 
 class DeadSession(TransportError):
-    """响应是 PeopleSoft 登录壳（会话过期/未建立）。"""
+    """The response is a PeopleSoft login shell (session expired or never established)."""
 
 
 class Transport:
@@ -37,7 +39,7 @@ class Transport:
         self._relogin = relogin
         self._in_relogin = False
 
-    # ---- 会话持久化（写穿） ----
+    # ---- Session persistence (write-through) ----
     def export_cookies(self) -> list[dict]:
         return [
             {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path}
@@ -62,7 +64,7 @@ class Transport:
         for c in jar:
             self._sess.cookies.set(c["name"], c["value"],
                                    domain=c.get("domain", ""), path=c.get("path", "/"))
-        # 设备特征 cookie 不随 jar 走，恒重种
+        # the device-features cookie does not travel with the jar; always re-seeded
         self._sess.cookies.set("PS_DEVICEFEATURES", config.PS_DEVICEFEATURES,
                                domain="sis.cuhk.edu.cn", path="/")
         return any(c["name"] == "PS_TOKEN" and c["value"] for c in jar)
@@ -72,7 +74,7 @@ class Transport:
         self._sess.cookies.set("PS_DEVICEFEATURES", config.PS_DEVICEFEATURES,
                                domain="sis.cuhk.edu.cn", path="/")
 
-    # ---- 请求 ----
+    # ---- Requests ----
     def request(self, method: str, url: str, *, absolute: bool = False, **kw):
         if not absolute:
             url = urljoin(config.SIS_HOST + "/", url.lstrip("/"))
@@ -81,11 +83,11 @@ class Transport:
             kw["proxy"] = config.proxy()
         kw.setdefault("allow_redirects", True)
         r = self._sess.request(method, url, **kw)
-        self.save_session()  # PSJSESSIONID 滚动换发，写穿
+        self.save_session()  # PSJSESSIONID rolls per response; write through
         return r
 
     def follow_shell(self, r, max_hops: int = 4):
-        """跟随 PeopleSoft 壳页的 self.location JS 跳转（bootstrap/登录壳）。"""
+        """Follow the PeopleSoft shell page's self.location JS jump (bootstrap/login shell)."""
         for _ in range(max_hops):
             m = re.search(r"self\.location='([^']+)'", r.text)
             if not m:
@@ -96,7 +98,7 @@ class Transport:
             r = self.request("GET", target, absolute=True)
         return r
 
-    # ---- 页面判定 ----
+    # ---- Page detection ----
     @staticmethod
     def page_title(html: str) -> str:
         soup = BeautifulSoup(html, "html.parser")
@@ -104,21 +106,23 @@ class Transport:
 
     @staticmethod
     def is_signon_shell(html: str) -> bool:
-        """登录壳特征：Oracle PeopleSoft 登录/Sign-in/Sign In 标题的瘦页面。
+        """Login-shell signature: a thin page titled with PeopleSoft sign-in / Sign-in / Sign In.
 
-        两种形态都要抓：bootstrap 壳（title 'Oracle PeopleSoft 登录'）与
-        语言选择登录页（title 'Sign In'，正文'学生信息系统'）。
+        Both shapes must be caught: the bootstrap shell (title 'Oracle PeopleSoft 登录')
+        and the language-selection sign-in page (title 'Sign In', body '学生信息系统').
+        (The quoted literals are actual page strings the code matches on.)
         """
         if len(html) > 6000:
             return False
         t = Transport.page_title(html)
         return "登录" in t or "Sign-in" in t or "Sign In" in t
 
-    # ---- 组件取件 ----
+    # ---- Component fetching ----
     def get_content(self, comp: str, nav: str) -> str:
-        """psc+PTCNAV 直击组件，跟壳、下钻 TargetContent，返回内容真身 HTML。
+        """Hit a component directly via psc+PTCNAV, follow the shell, drill into TargetContent, and return the real content HTML.
 
-        会话死亡抛 DeadSession；已设 relogin 回调时自动重登一次并重放。
+        Raises DeadSession when the session is dead; with a relogin callback
+        set, re-logs in once automatically and replays.
         """
         for attempt in (1, 2):
             url = f"{config.SIS_HOST}/psc/csprd/EMPLOYEE/HRMS/c/{comp}?PORTALPARAM_PTCNAV={nav}"
@@ -133,11 +137,11 @@ class Transport:
                     finally:
                         self._in_relogin = False
                     continue
-                raise DeadSession("会话过期且重登无效（登录页结构可能已变化）")
+                raise DeadSession("Session expired and re-login ineffective (login page structure may have changed)")
             soup = BeautifulSoup(html, "html.parser")
             frame = soup.find("iframe", id="ptifrmtgtframe")
             if frame and self.page_title(html) == "Employee-facing registry content":
-                html = self.request("GET", frame["src"]).text  # 门户框架页 → 内容真身
+                html = self.request("GET", frame["src"]).text  # portal framework page → real content
             d = config.debug_dir()
             if d:
                 (Path(d) / f"content-{comp.split('.')[-2] if '.' in comp else comp}.html") \
@@ -145,19 +149,21 @@ class Transport:
             return html
         raise DeadSession("unreachable")
 
-    # ---- ICAction POST 导航（查询类动作原语） ----
+    # ---- ICAction POST navigation (query-type action primitive) ----
     def submit_icaction(self, comp: str, nav: str, action: str,
                         extra: dict[str, str] | None = None) -> str:
-        """GET 组件页 → 收集 win0 表单 → 设 ICAction（+可选字段覆盖）→ POST。
+        """GET the component page → collect the win0 form → set ICAction (+ optional field overrides) → POST.
 
-        PeopleSoft 的下拉跳转、View Report、term 展开皆经此原语（issue #6 ①）。
-        只允许查询类动作；数据变更按钮由调用纪律约束（skill Prohibitions）。
+        PeopleSoft dropdown jumps, View Report, and term expansion all go
+        through this primitive (issue #6 ①). Query-type actions only;
+        data-changing buttons are constrained by caller discipline (the
+        skill's Prohibitions).
         """
         html = self.get_content(comp, nav)
         soup = BeautifulSoup(html, "html.parser")
         form = soup.find("form", attrs={"name": "win0"})
         if form is None or not form.get("action"):
-            raise TransportError("未找到 win0 表单（页面结构变化）")
+            raise TransportError("win0 form not found (page structure changed)")
         fields: dict[str, str] = {}
         for i in form.find_all("input"):
             n = i.get("name")
@@ -173,20 +179,21 @@ class Transport:
                             timeout=config.REQUEST_TIMEOUT)
         self.save_session()
         if self.is_signon_shell(r.text):
-            raise DeadSession("ICAction 提交后会话死亡")
+            raise DeadSession("Session dead after ICAction submission")
         return r.text
 
-    # ---- term 搜索页提交（查询动作，等同网页上选学期点 Continue） ----
+    # ---- term search-page submission (a query action, same as picking a term and clicking Continue on the web) ----
     def submit_search(self, search_html: str, radio_value: str,
                       action: str = "DERIVED_SSS_SCT_SSR_PB_GO") -> str:
-        """从搜索页 HTML 收集 win0 表单，设学期 radio + ICAction 后 POST，返回结果页。
+        """Collect the win0 form from the search-page HTML, set the term radio + ICAction, POST, and return the result page.
 
-        只用于查询类按钮（Continue/Change Term）；任何数据变更按钮禁止传入。
+        Query-type buttons only (Continue/Change Term); any data-changing
+        button is forbidden here.
         """
         soup = BeautifulSoup(search_html, "html.parser")
         form = soup.find("form", attrs={"name": "win0"})
         if form is None or not form.get("action"):
-            raise TransportError("未找到 win0 表单（搜索页结构变化）")
+            raise TransportError("win0 form not found (search page structure changed)")
         fields: dict[str, str] = {}
         for i in form.find_all("input"):
             n = i.get("name")
@@ -201,8 +208,8 @@ class Transport:
                             timeout=config.REQUEST_TIMEOUT)
         self.save_session()
         if self.is_signon_shell(r.text):
-            raise DeadSession("term 提交后会话死亡")
+            raise DeadSession("Session dead after term submission")
         return r.text
 
     def download(self, url: str, dest: Path) -> int:
-        raise NotImplementedError("v0.1 未含下载；报表导出走 raw 手工验证后再封")
+        raise NotImplementedError("v0.1 ships no downloads; report exports go through raw for manual verification before wrapping")

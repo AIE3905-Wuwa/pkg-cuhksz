@@ -1,7 +1,8 @@
-"""配置与路径：一切可变项集中于此。
+"""Configuration and paths: every tunable lives here.
 
-凭据/会话只存用户目录（默认 ~/.sis-cli，SIS_CLI_HOME 可覆写），
-绝不写入当前工作目录或任何仓库。环境变量优先于配置文件。
+Credentials/sessions live only in the user directory (default ~/.sis-cli,
+SIS_CLI_HOME overrides); never written into the working directory or any
+repository. Environment variables take precedence over the config file.
 """
 
 from __future__ import annotations
@@ -20,54 +21,59 @@ ADFS_AUTHORIZE_URL = (
     f"&client_id={ADFS_CLIENT_ID}"
     f"&redirect_uri={ADFS_REDIRECT_URI}"
 )
-# PeopleSoft 会话仅分钟级（PS_TOKENEXPIRE 实测 ~5 分钟）：跨进程复用 jar 不可靠，
-# 命令内轻登录为主、jar 复用为辅。
-SESSION_SOFT_TTL = 240  # 秒；超过即视为过期，直接重登
+# PeopleSoft sessions last only minutes (PS_TOKENEXPIRE measured at ~5 minutes):
+# reusing a jar across processes is unreliable — a light in-command login is
+# primary, jar reuse secondary.
+SESSION_SOFT_TTL = 240  # seconds; beyond this, treat as expired and re-login directly
 IMPERSONATE = "chrome124"
 REQUEST_TIMEOUT = 40
 
-# PeopleSoft 壳页 JS 以 PS_DEVICEFEATURES cookie 判别浏览器环境；
-# 缺失则 psc 直击永远只回 bootstrap 壳。格式 = JSON 剥 {}/引号、逗号换空格
-# （见 /csprd/signin.js 的 ptDeviceFeatures），值为典型桌面 Chrome 特征。
+# The PeopleSoft shell-page JS detects the browser environment via the
+# PS_DEVICEFEATURES cookie; without it, direct psc hits only ever return the
+# bootstrap shell. Format = JSON stripped of {}/quotes, commas replaced by
+# spaces (see ptDeviceFeatures in /csprd/signin.js); the value is a typical
+# desktop Chrome fingerprint.
 PS_DEVICEFEATURES = (
     "width:1920 height:1080 pixelratio:1 touch:0 geolocation:1 websockets:1 "
     "webworkers:1 datepicker:1 dtpicker:1 timepicker:1 dnd:1 sessionstorage:1 "
     "localstorage:1 history:1 canvas:1 svg:1 postmessage:1 hc:0"
 )
 
-# 学生角色可用组件（2026-10-05 双实证：浏览器菜单导航 + HTTP psc+PTCNAV 直击）。
-# PTCNAV 是权限判定的导航上下文——缺它即报 not authorized。
+# Components available to the student role (2026-10-05, verified both ways:
+# browser menu navigation + direct HTTP psc+PTCNAV hits).
+# PTCNAV is the navigation context for the permission check — without it you
+# get "not authorized".
 COMPONENTS = {
-    # 直出组件（GET 即内容）
+    # Direct-output components (GET returns content)
     "schedule": ("SA_LEARNER_SERVICES.SSR_SSENRL_SCHD_W.GBL", "HC_SSR_SSENRL_SCHD_W_GBL"),
     "center": ("SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL", "HC_SSS_STUDENT_CENTER"),
     "history": ("SA_LEARNER_SERVICES_2.SSS_MY_CRSEHIST.GBL", "HC_SSS_MY_CRSEHIST_GBL2"),
-    # term 交互组件（GET 搜索页 → POST 学期 radio + Continue）
+    # term-interaction components (GET the search page → POST the term radio + Continue)
     "grades": ("SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL", "HC_SSR_SSENRL_GRADE_GBL"),
     "appt": ("SA_LEARNER_SERVICES.SSR_SSENRL_APPT.GBL", "HC_SSR_SSENRL_APPT"),
     "exam": ("SA_LEARNER_SERVICES.SSR_SSENRL_EXAM_L.GBL", "HC_SSR_SSENRL_EXAM_L_GBL"),
     "list_schedule": ("SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL", "HC_SSR_SSENRL_LIST_GBL"),
-    # 按作业查成绩（View My Assignments）——实证常显 "no information"，留观察
+    # Per-assignment grades (View My Assignments) — live tests usually show "no information"; under observation
     "assignments": ("SA_LEARNER_SERVICES.SS_LAM_STD_GR_LST.GBL", "HC_SS_LAM_STD_GR_LST_GBL1"),
-    # 非官方成绩单（View Report 出 PDF；report type: UE01 英文/UC01 中文/UFCEC 国情教育）
+    # Unofficial transcript (View Report produces the PDF; report types: UE01 English / UC01 Chinese / UFCEC national-condition education)
     "transcript": ("SA_LEARNER_SERVICES.SSS_TSRQST_UNOFF.GBL", "HC_SSS_TSRQST_UNOFF_GBL"),
-    # 个人信息摘要（姓名/邮箱/holds/todo；identity 命令主源）
+    # Personal data summary (name/email/holds/todo; main source for the identity command)
     "prsnldata": ("CC_PORTFOLIO.SSS_PRSNLDATA_SUMM.GBL", "HC_SSS_PRSNLDATA_SUMM_GBL"),
-    # 学位进度报告（My Academic Requirements）——当前实证"page not available"（需 Request Audit，留观察）
+    # Degree progress report (My Academic Requirements) — currently shows "page not available" (needs Request Audit; under observation)
     "dpr": ("SA_LEARNER_SERVICES.SAA_SS_DPR_ADB.GBL", "HC_SAA_SS_DPR_ADB_GBL"),
 }
-# ICAction 常量（2026-10-05 实测）
-IC_VIEW_REPORT = "CUSZ_TSRQST_WRK_VIEW_PB"  # transcript View Report 按钮
+# ICAction constants (verified 2026-10-05)
+IC_VIEW_REPORT = "CUSZ_TSRQST_WRK_VIEW_PB"  # transcript View Report button
 TRANSCRIPT_TYPES = {"eng": "UE01", "chi": "UC01", "ge-edu": "UFCEC"}
 TRANSCRIPT_TYPE_FIELD = "DERIVED_SSTSRPT_TSCRPT_TYPE3"
-# 需要选学期再 Continue 的组件（统一交互：radio SSR_DUMMY_RECV1$sels$0 + DERIVED_SSS_SCT_SSR_PB_GO）
+# Components that require term selection + Continue (uniform interaction: radio SSR_DUMMY_RECV1$sels$0 + DERIVED_SSS_SCT_SSR_PB_GO)
 TERM_COMPONENTS = {"grades", "appt", "exam", "list_schedule"}
 
 ENV_HOME = "SIS_CLI_HOME"
 ENV_USERNAME = "SIS_CLI_USERNAME"
 ENV_PASSWORD = "SIS_CLI_PASSWORD"
 ENV_PROXY = "SIS_CLI_PROXY"
-ENV_DEBUG = "SIS_CLI_DEBUG"  # 设为目录路径则落调试 HTML
+ENV_DEBUG = "SIS_CLI_DEBUG"  # set to a directory path to dump debug HTML
 
 
 def sis_home() -> Path:
@@ -86,7 +92,7 @@ def session_path() -> Path:
 
 
 def _restrict(path: Path) -> None:
-    """best-effort 收紧权限（POSIX 0600；Windows 仅继承用户目录 ACL）。"""
+    """Best-effort permission tightening (POSIX 0600; Windows merely inherits the user-directory ACL)."""
     try:
         path.chmod(stat.S_IRUSR | stat.S_IWUSR)
     except OSError:
@@ -110,7 +116,7 @@ def save_config(cfg: dict) -> None:
 
 
 def resolve_credentials(cfg: dict, cli_user: str | None, password_env: str | None) -> tuple[str, str]:
-    """凭据解析优先级：命令行/环境变量 > 配置文件。密码永不在日志中回显。"""
+    """Credential resolution priority: CLI/env vars > config file. The password is never echoed into logs."""
     username = cli_user or os.environ.get(ENV_USERNAME) or cfg.get("username")
     password = None
     if password_env:
@@ -121,8 +127,8 @@ def resolve_credentials(cfg: dict, cli_user: str | None, password_env: str | Non
         password = cfg.get("password")
     if not username or not password:
         raise SystemExit(
-            "缺少凭据：用 `sis-cli login` 交互录入，或设 "
-            f"{ENV_USERNAME}/{ENV_PASSWORD}，或 --password-env 指定变量名"
+            "Missing credentials: use `sis-cli login` to enter them interactively, or set "
+            f"{ENV_USERNAME}/{ENV_PASSWORD}, or pass --password-env to name a variable"
         )
     return username, password
 

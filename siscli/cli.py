@@ -1,4 +1,4 @@
-"""sis-cli 命令面：全只读。写操作（选课/退课/提交类）刻意不提供。
+"""sis-cli command surface: all read-only. Write operations (enroll/drop/submit-type actions) are deliberately not provided.
 """
 
 from __future__ import annotations
@@ -34,10 +34,10 @@ def _try_silent_login(sis: Sis) -> bool:
 
 
 def cmd_login(sis: Sis, args) -> int:
-    username = args.username or input("学号: ").strip()
+    username = args.username or input("Student id: ").strip()
     password = os.environ.get(args.password_env) if args.password_env else None
     if not password:
-        password = getpass.getpass("密码: ")
+        password = getpass.getpass("Password: ")
     info = sis.login(username, password, store=not args.no_store)
     print(_fmt(info))
     return 0
@@ -45,7 +45,7 @@ def cmd_login(sis: Sis, args) -> int:
 
 def cmd_logout(sis: Sis, args) -> int:
     sis.logout()
-    print("logged out (本地会话与凭据已清)")
+    print("logged out (local session and credentials cleared)")
     return 0
 
 
@@ -54,15 +54,15 @@ def cmd_schedule(sis: Sis, args) -> int:
     if args.format == "json":
         print(_fmt(data))
         return 0
-    print(f"[{data['week'] or '当前周'}] 事件 {len(data['events'])} 条 / 课程 {len(data['courses'])} 门")
+    print(f"[{data['week'] or 'current week'}] {len(data['events'])} event(s) / {len(data['courses'])} course(s)")
     for e in data["events"]:
         print(f"  {e['class']:<18} {e['type']:<12} {e['time']:<20} {e['location']}")
     if data.get("timetable"):
-        print("课表（含星期，学生中心页）:")
+        print("Timetable (with weekdays, student center page):")
         for t in data["timetable"]:
             print(f"  {t['class']:<16} {t['type']:<5} {t['days']:<6} {t['time']:<22} {t['location']}")
     if data["courses"]:
-        print("学期课程:")
+        print("Term courses:")
         for c in data["courses"]:
             print(f"  {c['class']:<28} {c['title'][:36]:<38} {c['start']}~{c['end']}")
     return 0
@@ -73,13 +73,13 @@ def cmd_grades(sis: Sis, args) -> int:
     if args.format == "json":
         print(_fmt(data))
         return 0
-    print(f"[{data['term']}] 成绩行 {len(data['rows'])} 条")
+    print(f"[{data['term']}] {len(data['rows'])} grade row(s)")
     for r in data["rows"]:
         print(f"  {r['course']:<10} {r['description'][:34]:<36} {r['units']:>5} {r['grading'][:22]:<24} {r['grade']:>4} {r['points']:>7}")
     if data["gpa"]:
         print("GPA:", "  ".join(f"{k}={v}" for k, v in data["gpa"].items()))
     if not data["rows"]:
-        print(f"(本学期暂无成绩；可选学期: {', '.join(data['terms_available'])})")
+        print(f"(No grades yet for this term; available terms: {', '.join(data['terms_available'])})")
     return 0
 
 
@@ -88,7 +88,7 @@ def cmd_history(sis: Sis, args) -> int:
     if args.format == "json":
         print(_fmt(rows))
         return 0
-    print(f"课程历史 {len(rows)} 门")
+    print(f"Course history: {len(rows)} course(s)")
     for r in rows:
         print(f"  {r['course']:<10} {r['description'][:34]:<36} {r['term']:<18} {r['grade'] or '-':>4} {r['units']:>5}")
     return 0
@@ -99,13 +99,13 @@ def cmd_appt(sis: Sis, args) -> int:
     if args.format == "json":
         print(_fmt(data))
         return 0
-    print(f"[{data['term']}] 注册窗口")
+    print(f"[{data['term']}] enrollment windows")
     for a in data["appointments"]:
         print(f"  {a['session']}: {a['begins']} {a['begin_time']} ~ {a['ends']} {a['end_time']}")
     for k, v in data["limits"].items():
         print(f"  {k}: {v}")
     if not data["appointments"]:
-        print(f"(该学期无注册窗口信息；可选学期: {', '.join(data['terms_available'])})")
+        print(f"(No enrollment-window info for this term; available terms: {', '.join(data['terms_available'])})")
     return 0
 
 
@@ -114,7 +114,7 @@ def cmd_exam(sis: Sis, args) -> int:
     if args.format == "json":
         print(_fmt(data))
         return 0
-    print(f"[{data['term']}] 考试安排 {len(data['rows'])} 条")
+    print(f"[{data['term']}] exam schedule: {len(data['rows'])} row(s)")
     for r in data["rows"]:
         print("  " + "  ".join(f"{k}={v}" for k, v in r.items() if v))
     return 0
@@ -159,7 +159,7 @@ def cmd_dpr(sis: Sis, args) -> int:
 
 def cmd_raw(sis: Sis, args) -> int:
     if args.post:
-        # POST 导航：--action ICAction 名 + --set k=v 覆盖字段（issue #6 ①）
+        # POST navigation: --action names the ICAction + --set k=v overrides fields (issue #6 ①)
         comp, nav = None, None
         from . import config as cfg
         for name, (c, n) in cfg.COMPONENTS.items():
@@ -167,7 +167,7 @@ def cmd_raw(sis: Sis, args) -> int:
                 comp, nav = c, n
                 break
         if comp is None:
-            print("raw --post 需要已登记组件的 URL（含组件名即可匹配）", file=sys.stderr)
+            print("raw --post needs the URL of a registered component (containing the component name is enough to match)", file=sys.stderr)
             return 1
         extra = {}
         for kv in args.set or []:
@@ -187,51 +187,51 @@ def cmd_raw(sis: Sis, args) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="sis-cli",
-                                 description="sis.cuhk.edu.cn 只读 CLI 连接器（PeopleSoft CS）")
+                                 description="sis.cuhk.edu.cn read-only CLI connector (PeopleSoft CS)")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("status", help="会话状态与可用组件")
-    sub.add_parser("logout", help="登出并清本地凭据/会话")
+    sub.add_parser("status", help="session status and available components")
+    sub.add_parser("logout", help="log out and clear local credentials/session")
 
-    p = sub.add_parser("login", help="交互登录")
+    p = sub.add_parser("login", help="interactive login")
     p.add_argument("--username", "-u")
-    p.add_argument("--no-store", action="store_true", help="凭据不落盘（默认存 ~/.sis-cli）")
+    p.add_argument("--no-store", action="store_true", help="keep credentials off disk (default: stored in ~/.sis-cli)")
     p.add_argument("--password-env")
 
-    p = sub.add_parser("schedule", help="我的每周课程表（--days 附学生中心页的星期归属）")
+    p = sub.add_parser("schedule", help="my weekly class schedule (--days adds day-of-week attribution from the student center page)")
     p.add_argument("--format", choices=["text", "json"], default="text")
-    p.add_argument("--days", action="store_true", help="附带星期/节次的课表总表")
+    p.add_argument("--days", action="store_true", help="include the timetable with weekday/session attribution")
 
     for comp, label in [
-            ("grades", "查看我的成绩（按学期，--term 子串可选）"),
-            ("appt", "注册日期 Enrollment Dates（--term 子串可选）"),
-            ("exam", "我的考试计划（--term 子串可选）"),
-            ("history", "我的课程历史记录（全量直出）")]:
+            ("grades", "view my grades (per term; --term substring optional)"),
+            ("appt", "enrollment dates (--term substring optional)"),
+            ("exam", "my exam schedule (--term substring optional)"),
+            ("history", "my course history (full, direct output)")]:
         p = sub.add_parser(comp, help=label)
         p.add_argument("--format", choices=["text", "json"], default="text")
         if comp != "history":
-            p.add_argument("--term", help="学期子串（缺省取最新；如 'Term 2'）")
+            p.add_argument("--term", help="term substring (defaults to the newest; e.g. 'Term 2')")
 
-    p = sub.add_parser("center", help="学生中心页（文本摘要）")
+    p = sub.add_parser("center", help="student center page (text summary)")
     p.add_argument("--format", choices=["text", "json"], default="text")
-    p = sub.add_parser("assignments", help="按作业查成绩（常无数据，观察中）")
+    p = sub.add_parser("assignments", help="per-assignment grades (often no data; under observation)")
     p.add_argument("--format", choices=["text", "json"], default="text")
 
-    p = sub.add_parser("transcript", help="下载非官方成绩单 PDF（--lang eng|chi|ge-edu）")
+    p = sub.add_parser("transcript", help="download the unofficial transcript PDF (--lang eng|chi|ge-edu)")
     p.add_argument("--lang", choices=["eng", "chi", "ge-edu"], default="eng")
-    p.add_argument("-o", "--out", help="输出路径（默认当前目录）")
+    p.add_argument("-o", "--out", help="output path (defaults to the current directory)")
 
-    p = sub.add_parser("identity", help="学籍身份结构化（姓名/学号/邮箱/学院/专业/入学）")
+    p = sub.add_parser("identity", help="structured student identity (name/id/email/college/major/admitted)")
     p.add_argument("--format", choices=["text", "json"], default="json")
 
-    p = sub.add_parser("dpr", help="学位进度报告（当前需 Request Audit，文本如实输出）")
+    p = sub.add_parser("dpr", help="degree progress report (currently needs Request Audit; text output as-is)")
     p.add_argument("--format", choices=["text", "json"], default="text")
 
-    p = sub.add_parser("raw", help="任意 GET/POST 透传（新需求先走这里验证再封命令）")
+    p = sub.add_parser("raw", help="arbitrary GET/POST pass-through (validate new needs here first, then wrap a command)")
     p.add_argument("url")
-    p.add_argument("--file", help="落盘到指定文件而非打印")
-    p.add_argument("--post", action="store_true", help="POST 导航（需已登记组件 URL）")
-    p.add_argument("--action", help="ICAction 名（如按钮 id）")
-    p.add_argument("--set", action="append", metavar="k=v", help="表单字段覆盖（可多次）")
+    p.add_argument("--file", help="save to the given file instead of printing")
+    p.add_argument("--post", action="store_true", help="POST navigation (requires a registered component URL)")
+    p.add_argument("--action", help="ICAction name (e.g. a button id)")
+    p.add_argument("--set", action="append", metavar="k=v", help="form field overrides (repeatable)")
 
     args = ap.parse_args(argv)
     sis = Sis()
