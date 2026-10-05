@@ -2,91 +2,91 @@
 name: bb-track
 owner: bb-track
 consumes: [bb-track, trust, log]
-description: "认知档案：读/建/更 wiki/cuhksz/bb/<term>/<course>/user.md 学习状态（认知读数+证据流+目标层），差距现算；采集通道（讲解答疑 bb-teach / 出题自测 bb-quiz）用法挂载于此。Triggers on: 认知档案, 学习状态, 我学得怎么样, user.md, bb-track."
+description: "Cognition profile: read/create/update the learning state in wiki/cuhksz/bb/<term>/<course>/user.md (cognition readings + evidence stream + goal layer), gap computed on the spot; the collection channels (bb-teach explaining / bb-quiz self-testing) mount their usage here. Triggers on: 认知档案, 学习状态, 我学得怎么样, user.md, bb-track."
 ---
 
-# bb-track：认知档案
+# bb-track: cognition profile
 
-bb 域认知枢纽——每课 user.md 是「用户对该课各知识点的认知状态」唯一档案（读数收敛覆写 + 证据流只增 + 目标层），建档懒惰式、学期即边界。本命令管档案的读 / 建 / 更与差距分析；两个采集通道（bb-teach 讲解答疑、bb-quiz 出题自测）的用法投影挂载于本命令注入区——教与考的产物落 bb 侧素材层（notes/），认知结论经确认回写本档案。
+The bb domain's cognition hub — each course's user.md is the single profile of "the user's cognitive state on each knowledge point of that course" (convergent readings overwritten in place + append-only evidence stream + goal layer); profile creation is lazy, the term is the boundary. This command manages the profile's read / create / update and gap analysis; the usage projections of the two collection channels (bb-teach explaining and Q&A, bb-quiz question self-testing) are mounted in this command's injection region — teaching and testing artifacts land in the bb-side material layer (notes/), and cognition conclusions are written back into this profile after confirmation.
 
 ## Scope
 
-写：wiki/cuhksz/bb/<term>/<course>/user.md（读数收敛 + 证据流追加，经用户确认）、log（写后一行）
-读：registry（`.meta/protocol/registry.yaml`，字段锚点）、courseware（知识点全集，差距现算）、assessments（复盘/成绩信号）、notes/（人的笔记属性 + ai 笔记弱证据 + testing/ 考卷判分）、profile（域认知登记，在场时）
+Write: wiki/cuhksz/bb/<term>/<course>/user.md (reading convergence + evidence append, after user confirmation), log (one post-write line)
+Read: registry (`.meta/protocol/registry.yaml`, field anchor), courseware (full knowledge-point set for on-the-spot gap computation), assessments (retrospective/grade signals), notes/ (human note attributes + ai notes as weak evidence + testing/ exam grading), profile (domain-cognition registration, when present)
 
 ## Steps
 
-1. **定位与读档**：定位课程 `<term>/<course>`，读 user.md 认知读数、证据流、目标层——细则见注入区 bb-track 块
-2. **差距分析**：courseware 知识点全集减已锚点集，现算；错题点自 assessments 复盘
-3. **建档或更新**：建档懒惰式；证据追加与读数收敛按注入区 bb-track 块纪律，均经用户确认
-4. **写后**：verify 加 log 行
+1. **Locate and read the profile**: locate the course `<term>/<course>`, read the user.md cognition readings, evidence stream, goal layer — details in the bb-track block of the injection region
+2. **Gap analysis**: courseware full knowledge-point set minus the anchored set, computed on the spot; wrong-answer points come from assessments reviews
+3. **Create or update**: profile creation is lazy; evidence append and reading convergence follow the bb-track block discipline of the injection region, all after user confirmation
+4. **Post-write**: verify plus a log line
 
 ## Prohibitions
 
-- 证据流条目不改写不删除；读数每条须可溯证据；笔记 stage 属人不代标
-- 不写 bb/ 拉取物与 notes/（素材层归采集通道）；未经确认不写 user.md
-- 隐私：认知内容属实例数据，不入框架仓库与 test-repo
+- Evidence-stream entries are never rewritten or deleted; every reading must have traceable evidence; note stage belongs to the human and is never marked on their behalf
+- Never write bb/ fetched artifacts or notes/ (the material layer belongs to the collection channels); never write user.md without confirmation
+- Privacy: cognition content is instance data, never entering the framework repository or test-repo
 
 ## Language
 
-产出语言取行文声明页 `wiki/language.md` 的 default 键（页面或缺席键跟会话语言）；知识点锚点与专名保留原形。
+Output language takes the default key of the language declaration page `wiki/language.md` (a missing page or missing key falls back to the session language); knowledge-point anchors and proper nouns keep their original form.
 
 ## Parameters
 
-- 课程（可省 = 现役学期全部或指定课）
-- 动作（读档 / 差距分析 / 建档 / 更新读数，可省 = 读档 + 差距概览）
+- Course (omittable = all courses in the active term, or a specified course)
+- Action (read profile / gap analysis / create profile / update readings; omittable = read profile + gap overview)
 
 ## Injected Section (plugin usage blocks)
 
-> 本区为 wiki_plugin_kernel 投影：consumes 拉取与源侧路由 usage_routes 合流，披露序 = owner 在前、路由居中、拉取殿后（inject / all 重建）；手写内容不进此区，改写侧契约改 PLUGIN.yaml。
+> This region is a wiki_plugin_kernel projection: consumes pulls merged with usage_routes source-side routing; disclosure order = owner first, routed blocks in the middle, pulled blocks last (rebuilt by inject / all); handwritten content does not belong here — to change the write-side contract, edit PLUGIN.yaml.
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-track -->
-- 建档：首个显著信号或用户明示时建 user.md（type: bb + generated/updated/stale_after）；缺席即无认知数据，消费侧降级处理不报错
-- 追加证据：`- MM-DD 出处（human 对话|machine grades|human 笔记|ai 笔记|human 复核）：断言 → [[回链]]`；出处开放词表
-- 收敛读数：新证据到 → 读数行改写（新值取代旧值，行内留最近证据摘要与日期）；证据流不动
-- 消费纪律：teaching/testing/复盘类输出前先读 user.md；stale 先核对近窗证据或询问，未核对前按保守档消费（状态降半档）；差距分析 = courseware 知识点全集 − 已锚点集，现算
-- 笔记消费：读 notes/ 概览与 stage/origin 属性作信号；不改不删不代标 stage；ai 笔记仅弱证据
-- 采集通道（bb-teach / bb-quiz，用法投影挂 bb-track 命令注入区）：讲解沉淀 = notes/ ai 笔记（origin: ai，弱证据）；自测判分 = notes/testing/ 考卷（machine 证据，出处标 machine 自测）——两者经用户确认入证据流、按收敛纪律改读数
-- 写后管道：verify；log 行（类型 profile，--domain bb）
-- 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/cuhksz/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
+- Profile creation: create user.md on the first significant signal or user instruction (type: bb + generated/updated/stale_after); absence simply means no cognition data — the consumption side degrades gracefully without erroring
+- Append evidence: `- MM-DD source (human conversation|machine grades|human note|ai note|human review): assertion → [[backlink]]`; the source vocabulary is open
+- Converge readings: new evidence arrives → rewrite the reading line (the new value replaces the old, the line keeps a recent evidence digest and date); the evidence stream is untouched
+- Consumption discipline: before teaching/testing/review-type output, read user.md first; when stale, first verify against recent-window evidence or ask; before verification consume at the conservative tier (states downgraded half a tier); gap analysis = courseware's full knowledge-point set − the anchored set, computed on the fly
+- Notes consumption: read the notes/ overview and stage/origin attributes as signals; never modify, delete, or mark stage on their behalf; ai notes are weak evidence only
+- Collection channels (bb-teach / bb-quiz, usage projections hang off the bb-track command injection region): explanation deposits = notes/ ai notes (origin: ai, weak evidence); self-test grading = notes/testing/ papers (machine evidence, source marked machine self-test) — both enter the evidence stream after user confirmation and adjust readings per the convergence discipline
+- Post-write pipeline: verify; log line (type profile, --domain bb)
+- Cognition-bridge registration (user-profile on-demand bridge): at profile creation, if the profile page is present, maintain one line in its `## Domain Cognition` section: `- bb: wiki/cuhksz/bb/<term>/<course>/user.md` (path form wildcarding multiple courses and profiles); if the profile is absent, skip, never create on its behalf (on-demand bridges tolerate absence)
 <!-- /usage:bb-track -->
 
 <!-- usage:bb-quiz -->
-- 解析输入：范围（章节/单元/sm-N 列表）+ 样例（可选）；课程定位经 bb 目录结构（<term>/<course>，现役学期可缺省）
-- 读知识点全集：courseware sm-N + `## 专有名词` 对照表，取范围内子集
-- 读用户认知：user.md 熟练度/目标层/证据流，stale 先核对（未核对前保守档）、冷启动按未锚点（纪律见注入区 bb-track 块）
-- 定题型与难度中值：样例 → assessments 已知作业 → 用户习惯；难度 = 认知层级 1-5（记忆/理解/应用/分析/综合），中值 M = 样例各题层级中位数（LLM 语义判断，软约束——粗保证 = 生疏偏易打底、掌握偏难挑战）
-- 读教学纪要（best-effort）：notes/ ai 笔记（origin: ai）近期教了什么/卡在哪，避免重复或重点测刚教；缺席或无笔记静默跳过
-- 选题：范围内知识点按 生疏/未锚点/错题/短期优先 排序覆盖
-- 出题：题干语言源对齐（样例 → 已知作业 → 课程材料）、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M
-- 写解析：语言读者对齐（language 页 annotation 键，页面或缺席键跟会话语言）、每题标知识点 + sm-N wikilink；判分同语言
-- 落盘：notes/testing/<名>-试题.md + -答案.md（quiz 块映射 + origin: ai + generated；试题页不含答案）；旧卷不删不覆写
-- 判分（用户作答后）：对照答案页逐题判定 → 答案页追记 `## 判分`（日期 + 逐题对错 + 得分）；错题点与总体表现经用户确认回写 user.md 证据流（出处 machine 自测）——显著者按收敛纪律改读数；考卷本体是素材，档案只收结论
-- 不越界：术语/知识点只取自范围内 courseware sm-N，越界弃题重出（除非用户明示；语义约束出题侧自检）
-- 写后：log 行（类型 other --domain bb）+ pipeline.py verify
+- Parse input: scope (chapter/unit/sm-N list) + sample (optional); the course is located via the bb directory structure (<term>/<course>, the active term may be omitted)
+- Read the full knowledge-point set: courseware sm-N + the `## Terminology` glossary, take the in-scope subset
+- Read the user's cognition: user.md proficiency/goal layer/evidence stream; verify stale first (conservative tier before verification), cold start treated as unanchored (discipline in the injection region's bb-track block)
+- Fix types and the difficulty median: sample → assessments known assignments → user habits; difficulty = cognitive level 1-5 (remember/understand/apply/analyze/synthesize), median M = the median of the sample's per-question levels (LLM semantic judgment, a soft constraint — the coarse guarantee = unfamiliar leans easy, mastered leans challenging)
+- Read teaching minutes (best-effort): notes/ ai notes (origin: ai) — what was recently taught / where the user got stuck — avoiding repetition or emphasizing what was just taught; silently skip when absent or empty
+- Select points: in-scope knowledge points covered in the order unfamiliar / unanchored / wrong answers / short-term priorities
+- Generate questions: stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware glossary, types aligned to the sample, difficulty around M
+- Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language), each question marked with its knowledge point + sm-N wikilink; grading in the same language
+- Land: notes/testing/<name>-questions.md + -answers.md (quiz block mapping + origin: ai + generated; the questions page contains no answers); old papers never deleted or overwritten
+- Grade (after the user answers): judge per question against the answers page → append `## Grading` on the answers page (date + per-question correctness + score); wrong-answer points and overall performance written back into user.md's evidence stream after user confirmation (source machine self-test) — the significant ones adjust readings per the convergence discipline; the paper itself is material, the profile takes only conclusions
+- No out-of-scope: terminology/knowledge points drawn only from in-scope courseware sm-N; out-of-scope questions are discarded and regenerated (unless the user says so; the semantic constraint is self-checked on the generation side)
+- Post-write: log line (type other --domain bb) + pipeline.py verify
 <!-- /usage:bb-quiz -->
 
 <!-- usage:bb-teach -->
-- 定位：问题→提取关键词→query 分层检索（hot→index→grep→读页）→ bb-map courseware sm-N 锚点与 `## 专有名词` 对照表收窄；跨页跨点皆列
-- 读态：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；stale 核对、差距现算（courseware 全集 − 已锚点集）、错题点级结论——纪律见注入区 bb-track 块
-- 二维伸缩（熟练度×难度）：未锚点/生疏→完整讲透（硬核概念加类比+数字例子+前置链补全）；熟悉→重点怎么用+易错点；熟练→为什么+易错点+跨点联系+开放问题；掌握→反问/挑战题/引导自查（不灌输）
-- 讲解语言：读者对齐——取行文声明页 `wiki/language.md` 的 teaching 键（页面或缺席键跟会话语言）；跨域读取不立 depends，框架不预设具体语言
-- 术语门槛：允许出现的术语 = 用户已锚点集（非「本课前面出现」）；超出者当场解释、绝不假定已知；锚点集未收的全局术语查 language 页 terms 表兜底，冲突锚点集优先
-- 目标与错题注入：短期优先（带时效）命中者篇幅 +1 档标「近期重点」、过期降级；命中 assessments 复盘错题点易错点 +1 档并点出
-- 输出：行内加粗标签骨架（直觉/是什么/为什么/怎么用/类比/易错点/前置）按矩阵伸缩，每条回链 courseware sm-N
-- 三层反馈闭环：单轮反馈（懂了/追问/答错）只调当轮讲法、不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 notes/ ai 笔记——一篇一问（问题+讲解骨架+易错点+锚点回链），origin: ai / form: text，命名 <日期>-<主题>.md，只增不覆写；仅显著信号（跨会话稳定/主动正确应用/machine 验证）才提议收敛 user.md——写回委托 bb-track 写契约、经用户确认；单轮「懂了」不写、单轮「没懂」不判生疏
-- 档案姿态：user.md stale 先核对（未核对前按保守档讲），缺席（冷启动）全场按未锚点档讲透——不因无档案拒绝讲解
-- log 纪律：讲解对话不写 log（不采集行为信号）；显著答疑落 notes/ 后写一行（other --domain bb）；认知收敛走 bb-track 写后管道（log profile --domain bb + verify）
+- Locate: question → extract keywords → layered query retrieval (hot → index → grep → read pages) → narrow via bb-map courseware sm-N anchors and the `## Terminology` glossary; list all across pages and points
+- Read state: read user.md cognition readings (anchor → status word) + evidence stream + goal layer; verify stale, compute gaps on the fly (courseware full set − anchored set), point-level conclusions from wrong answers — discipline in the injection region's bb-track block
+- Two-dimensional scaling (proficiency × difficulty): unanchored/unfamiliar → explain thoroughly (hardcore concepts get analogies + numeric examples + prerequisite-chain completion); familiar → focus on how to use + pitfalls; proficient → why + pitfalls + cross-point links + open questions; mastered → ask back / challenge questions / guided self-check (no lecturing)
+- Explanation language: reader-aligned — take the teaching key of the language declaration page `wiki/language.md` (page or key absent → session language); cross-domain reads erect no depends, the framework presumes no specific language
+- Terminology threshold: terms allowed to appear = the user's anchored set (not 'appeared earlier in this course'); anything beyond is explained on the spot, never presumed known; global terms not in the anchored set fall back to the language page's terms table, the anchored set wins on conflict
+- Goal and wrong-answer injection: hits on time-scoped short-term priorities get one depth tier up, marked 'recent focus', expired ones downgraded; hits on assessments-review wrong-answer points get their pitfalls one tier up and called out
+- Output: an inline bold-label skeleton (intuition/what/why/how-to-use/analogy/pitfalls/prerequisites) scaled by the matrix, each item backlinking courseware sm-N
+- Three-tier feedback loop: single-turn feedback (got it / follow-up / wrong answer) only adjusts the current turn's delivery, never landed; significant Q&A (structured deposit value or user-explicit 'note it down') lands as notes/ ai notes — one per question (question + explanation skeleton + pitfalls + anchor backlinks), origin: ai / form: text, named <date>-<topic>.md, append-only never overwritten; only significant signals (stable across sessions / proactive correct application / machine verification) may propose converging user.md — write-back delegated to the bb-track write contract, after user confirmation; a single 'got it' writes nothing, a single 'did not get it' does not mark unfamiliar
+- Profile posture: verify user.md stale first (conservative tier before verification); absence (cold start) → explain everything thoroughly at the unanchored tier — never refuse to explain for lack of a profile
+- log discipline: explanation conversations write no log (no behavioral signals collected); after a significant Q&A lands in notes/, write one line (other --domain bb); cognition convergence goes through the bb-track post-write pipeline (log profile --domain bb + verify)
 <!-- /usage:bb-teach -->
 
 <!-- usage:trust -->
-- 写页随手写 `generated`（块式：`by: agent/<当前模型>` / `at: 今日`）
-- 复核动作发生时追加 `verified` 事件（单行 `by: <actor>, at: <日期>`），不为凑水位伪造
-- 复核由用户发起（人指令触发），agent 不自发追加 verified 事件
+- When writing a page, write `generated` along the way (block style: `by: agent/<current-model>` / `at: <today>`)
+- When a review action happens, append a `verified` event (single line `by: <actor>, at: <date>`), never fabricated to inflate the level
+- Reviews are initiated by the user (triggered by human instruction); agents never append verified events on their own
 <!-- /usage:trust -->
 
 <!-- usage:log -->
-- 写行（机械自动）：`python .meta/scripts/pipeline.py log <类型> "<一句话>" [--domain 域]`（类型值集见 AGENTS 注入区 log 块；域标 = 域件名如 bb/lark/vault，域内事务必带、框架与原生事务缺省）；滚动窗口与归档由脚本执行
+- Writing lines (mechanical, automatic): `python .meta/scripts/pipeline.py log <type> "<one sentence>" [--domain <domain>]` (type value set in the log block of the AGENTS injection region; domain tag = domain-plugin name such as bb/lark/vault, mandatory for in-domain transactions, omitted for framework and native transactions); rolling window and archiving are performed by the script
 <!-- /usage:log -->
 <!-- cmd-inject:end -->
