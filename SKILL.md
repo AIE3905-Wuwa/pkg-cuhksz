@@ -11,7 +11,7 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 
 ## Scope
 
-写：bb/<term>/<course>/notes/testing/（`<名>-试题.md` + `-答案.md` + `## 判分` 追记，origin: ai，只增）、log（写后一行）；user.md 判分回写（经 bb-track 写契约、用户确认后）
+写：cuhksz/bb/<term>/<course>/notes/testing/（`<名>-试题.md` + `-答案.md` + `## 判分` 追记，origin: ai，只增）、log（写后一行）；user.md 判分回写（经 bb-track 写契约、用户确认后）
 读：registry（`.meta/protocol/registry.yaml`，字段锚点）、courseware（sm-N + 专有名词）、assessments（已知作业）、user.md（bb-track 认知档案）、notes/ ai 笔记（best-effort）
 
 ## Steps
@@ -63,7 +63,7 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 <!-- usage:bb-map -->
 - 课程信息页：每课建 info.md（type: bb + bb 块映射 term_id/course_id/term_status（现役|冻结）+ generated/stale_after），正文 `## 基本信息` 课程政策类要点蒸馏（评分/考核/师资/TA/分组/教学语言/AI 政策，分点 `<a id="info-N">` 锚点，读 bb/ 大纲与 assessment 文件，缺项标「未提供」）；「何时有何事」记此处，被评分事务全要素归 assessments 页
 - 知识点页：bb/ 每个内容单元（目录 = 讲义+附属文件合一，或扁平单文件；平行同类目录合为一页）→ courseware/<单元名>.md（type: bb + raw_path 指向该单元，完全未下载单元可缺省 + generated）；读源识别知识点 → `## 知识点摘要` 分点 `<a id="sm-N">` 锚点 + 一行概括 + 源侧章节级提示 → `## 知识点联系` 点间互链 → `## 专有名词` 英中对照 → `## 单元文件` 两态对账清单（本地在位 / 未物化指针条目——媒体默认指针化，见 bb 块；扁平多附件单元清单即对应关系）；整页可再生，珍贵内容蒸馏入 notes
-- assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗；汇总列 Weighted Total/Total 与分节登记列——非知识考核的分节/出勤登记如 Tutorial Section——排除不建页）；`## 要求`/`## 参考` 有源则蒸馏（分点 `<a id="req-N">`/`<a id="ref-N">` 锚点，无源标「无单独要求文件」）；raw 块映射登记要求/参考/提交文件（提交件在 bb/<term>/<course>/submissions/；允许多页引用同一文件）；`## 提交`/`## 结果` 自 grades/submission 快照刷新机械区（due 缺省预留说明位不告警；无提交记录用独立话术列三种可能）；毕写 log 行（类型 map）
+- assessments 页维护：成绩册列驱动建页（文件名 = 作业名原形清洗；汇总列 Weighted Total/Total 与分节登记列——非知识考核的分节/出勤登记如 Tutorial Section——排除不建页）；`## 要求`/`## 参考` 有源则蒸馏（分点 `<a id="req-N">`/`<a id="ref-N">` 锚点，无源标「无单独要求文件」）；raw 块映射登记要求/参考/提交文件（提交件在 cuhksz/bb/<term>/<course>/submissions/；允许多页引用同一文件）；`## 提交`/`## 结果` 自 grades/submission 快照刷新机械区（due 缺省预留说明位不告警；无提交记录用独立话术列三种可能）；毕写 log 行（类型 map）
 - attachments 代理：老师发布的非讲义资产每件一页（raw_file/raw_sha256），平铺；TA/分组等结构事实不作附件页
 - 落位判据（见注入行）
 - 重建纪律：机械区对账覆写；沉淀区（info 备注 / assessments 复盘）只增，重建不得触碰；attachments 代理整页可再生
@@ -80,7 +80,7 @@ description: "出题自测：读 bb-track 认知档案与 courseware 知识点�
 - 笔记消费：读 notes/ 概览与 stage/origin 属性作信号；不改不删不代标 stage；ai 笔记仅弱证据
 - 采集通道（bb-teach / bb-quiz，用法投影挂 bb-track 命令注入区）：讲解沉淀 = notes/ ai 笔记（origin: ai，弱证据）；自测判分 = notes/testing/ 考卷（machine 证据，出处标 machine 自测）——两者经用户确认入证据流、按收敛纪律改读数
 - 写后管道：verify；log 行（类型 profile，--domain bb）
-- 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
+- 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/cuhksz/cuhksz/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
 <!-- /usage:bb-track -->
 
 <!-- usage:trust -->
