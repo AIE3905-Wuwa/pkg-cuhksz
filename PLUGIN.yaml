@@ -7,26 +7,26 @@ commands:
   - bb-quiz
 usage_routes:
   - bb-track
-updated: 2026-10-05
+updated: 2026-10-06
 attachment:
-  - "cuhksz/bb/<term>/<course>/notes/testing/ —— 考卷子区（bb v0.7 共居；每测一组：<名>-试题.md + <名>-答案.md，判分追记于答案页 `## 判分`；ai 产物只增，重测出新卷旧卷留档）"
-  - "wiki/cuhksz/bb/<term>/<course>/user.md —— 认知档案（bb-track 属；本插件只读消费熟练度/目标层/错题，判分回写经 bb-track 契约）"
-  - "wiki/cuhksz/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读（sm-N 锚点、专有名词表、已知作业）"
+  - "cuhksz/bb/<term>/<course>/notes/testing/ — papers subzone (bb v0.7 coexistence; one pair per test: <name>-questions.md + <name>-answers.md, grading appended on the answers page's `## Grading`; ai artifacts append-only, a retest issues a new paper, old papers kept)"
+  - "wiki/cuhksz/bb/<term>/<course>/user.md — cognition profile (bb-track's own; this plugin read-only consumes proficiency/goal layer/wrong answers, grading write-back via the bb-track contract)"
+  - "wiki/cuhksz/bb/<term>/<course>/courseware/, assessments/ — bb-map's own; this plugin read-only (sm-N anchors, glossary, known assignments)"
 fields:
-  quiz: "块映射（考卷页）——course（课程代码）/ scope（出题范围）/ difficulty_median（难度中值 1-5，认知层级）/ types（题型列表，开放词表）/ source（样例 sample|作业 assignment|习惯 habit）/ answer_of（答案页回链试题文件名）"
-inject: "出题自测 bb-quiz（bb-track 的 testing 消费侧）：用户指定范围 + 可选样例 → 生成试题（题型与难度中值对齐样例，无样例回落已知作业、再回落用户习惯；题干语言源对齐——跟样例/已知作业/课程材料）+ 解析（语言读者对齐——取行文声明页 `wiki/language.md` 的 annotation 键，页面或缺席键跟会话语言；每题标知识点 sm-N 位置）；知识点全集 = courseware sm-N、范围 = 用户指定子集、不越界（除非用户明示）；选题与难度分布参照 bb-track 熟练度/目标层/错题（stale 保守档、冷启动全场未锚点均匀出题），教学纪要（notes/ ai 笔记）best-effort 按需读；考卷落 cuhksz/bb/<term>/<course>/notes/testing/<名>-试题.md + -答案.md（origin: ai，只增）；判分（作答后）= 答案页追记 `## 判分` + 经确认回写 user.md 证据流（machine 自测）；写后 log 行（other --domain bb）+ verify"
+  quiz: "block mapping (paper page) — course (course code) / scope (question scope) / difficulty_median (difficulty median 1-5, cognitive levels) / types (question-type list, open vocabulary) / source (sample|assignment|habit) / answer_of (answers page backlinking the questions file name)"
+inject: "Self-test generation bb-quiz (bb-track's testing consumer): the user specifies a scope + optional sample → generate questions (types and difficulty median aligned to the sample; without a sample fall back to known assignments, then to user habits; question-stem language source-aligned — following the sample/known assignments/course materials) + explanations (language reader-aligned — take the annotation key of the language declaration page `wiki/language.md`, page or key absent → session language; each question marked with its sm-N knowledge point); the full knowledge-point set = courseware sm-N, the scope = the user-specified subset, no out-of-scope (unless the user says so); question selection and difficulty distribution follow bb-track proficiency/goal layer/wrong answers (stale → conservative tier; cold start → uniform coverage over all-unanchored), teaching minutes (notes/ ai notes) read best-effort on demand; papers land at cuhksz/bb/<term>/<course>/notes/testing/<name>-questions.md + -answers.md (origin: ai, append-only); grading (after answering) = the answers page appends `## Grading` + write-back into user.md's evidence stream after confirmation (machine self-test); post-write log line (other --domain bb) + verify"
 usage:
-  - "解析输入：范围（章节/单元/sm-N 列表）+ 样例（可选）；课程定位经 bb 目录结构（<term>/<course>，现役学期可缺省）"
-  - "读知识点全集：courseware sm-N + `## 专有名词` 对照表，取范围内子集"
-  - "读用户认知：user.md 熟练度/目标层/证据流，stale 先核对（未核对前保守档）、冷启动按未锚点（纪律见注入区 bb-track 块）"
-  - "定题型与难度中值：样例 → assessments 已知作业 → 用户习惯；难度 = 认知层级 1-5（记忆/理解/应用/分析/综合），中值 M = 样例各题层级中位数（LLM 语义判断，软约束——粗保证 = 生疏偏易打底、掌握偏难挑战）"
-  - "读教学纪要（best-effort）：notes/ ai 笔记（origin: ai）近期教了什么/卡在哪，避免重复或重点测刚教；缺席或无笔记静默跳过"
-  - "选题：范围内知识点按 生疏/未锚点/错题/短期优先 排序覆盖"
-  - "出题：题干语言源对齐（样例 → 已知作业 → 课程材料）、术语对齐 courseware 专有名词表、题型对齐样例、难度围绕 M"
-  - "写解析：语言读者对齐（language 页 annotation 键，页面或缺席键跟会话语言）、每题标知识点 + sm-N wikilink；判分同语言"
-  - "落盘：notes/testing/<名>-试题.md + -答案.md（quiz 块映射 + origin: ai + generated；试题页不含答案）；旧卷不删不覆写"
-  - "判分（用户作答后）：对照答案页逐题判定 → 答案页追记 `## 判分`（日期 + 逐题对错 + 得分）；错题点与总体表现经用户确认回写 user.md 证据流（出处 machine 自测）——显著者按收敛纪律改读数；考卷本体是素材，档案只收结论"
-  - "不越界：术语/知识点只取自范围内 courseware sm-N，越界弃题重出（除非用户明示；语义约束出题侧自检）"
-  - "写后：log 行（类型 other --domain bb）+ pipeline.py verify"
+  - "Parse input: scope (chapter/unit/sm-N list) + sample (optional); the course is located via the bb directory structure (<term>/<course>, the active term may be omitted)"
+  - "Read the full knowledge-point set: courseware sm-N + the `## Terminology` glossary, take the in-scope subset"
+  - "Read the user's cognition: user.md proficiency/goal layer/evidence stream; verify stale first (conservative tier before verification), cold start treated as unanchored (discipline in the injection region's bb-track block)"
+  - "Fix types and the difficulty median: sample → assessments known assignments → user habits; difficulty = cognitive level 1-5 (remember/understand/apply/analyze/synthesize), median M = the median of the sample's per-question levels (LLM semantic judgment, a soft constraint — the coarse guarantee = unfamiliar leans easy, mastered leans challenging)"
+  - "Read teaching minutes (best-effort): notes/ ai notes (origin: ai) — what was recently taught / where the user got stuck — avoiding repetition or emphasizing what was just taught; silently skip when absent or empty"
+  - "Select points: in-scope knowledge points covered in the order unfamiliar / unanchored / wrong answers / short-term priorities"
+  - "Generate questions: stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware glossary, types aligned to the sample, difficulty around M"
+  - "Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language), each question marked with its knowledge point + sm-N wikilink; grading in the same language"
+  - "Land: notes/testing/<name>-questions.md + -answers.md (quiz block mapping + origin: ai + generated; the questions page contains no answers); old papers never deleted or overwritten"
+  - "Grade (after the user answers): judge per question against the answers page → append `## Grading` on the answers page (date + per-question correctness + score); wrong-answer points and overall performance written back into user.md's evidence stream after user confirmation (source machine self-test) — the significant ones adjust readings per the convergence discipline; the paper itself is material, the profile takes only conclusions"
+  - "No out-of-scope: terminology/knowledge points drawn only from in-scope courseware sm-N; out-of-scope questions are discarded and regenerated (unless the user says so; the semantic constraint is self-checked on the generation side)"
+  - "Post-write: log line (type other --domain bb) + pipeline.py verify"
 checks:
-  - "语义项（v0.1 人工，附检后置）：考卷落 notes/testing/ 之外 → error；覆写或删除已有考卷 → error；题干/解析引用范围外或课程外知识点 → warning（语义判断）；解析缺知识点 sm-N 标注 → warning；quiz 块映射缺 course 或 scope → warning；试题页出现答案/解析 → warning；判分后未经确认即写 user.md → error；判分缺逐题对错 → warning"
+  - "Semantic items (v0.1 manual, attached audit deferred): a paper landed outside notes/testing/ → error; overwriting or deleting an existing paper → error; stems/explanations citing knowledge points outside the scope or the course → warning (semantic judgment); an explanation missing its sm-N knowledge-point mark → warning; the quiz block mapping missing course or scope → warning; answers/explanations appearing on the questions page → warning; writing user.md after grading without confirmation → error; grading missing per-question correctness → warning"

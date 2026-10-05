@@ -1,40 +1,40 @@
-# bb-quiz：出题自测
+# bb-quiz: Self-Test Generation
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：bb-track 的 **testing 消费侧**——与 bb-teach 教正交的考：自测出题加判分回流，是认知数据环的 machine 证据入口。teach 产物是弱证据；判分是 machine 证据；权重见 bb-track。零领地纯工作流件，见 mechanics 第 8 节；用法经源侧路由挂 bb-track 命令现场
-- **关键裁定**：
-  - 考卷不是课程原有物，是认知采集所需的过程素材——落 bb 侧素材层 `notes/testing/` 子区，term/course 双维随域；不立 wiki 页，不立根容器。2026-10-04 所有者改造：exams/ 容器废除；bb-exam 更名 bb-quiz，informal 自测与 bb-map assessments 管的 formal exam 划界
-  - 对齐样例而非自创风格：题型与难度中值随样例，无样例回落已知作业，再回落用户习惯；难度 = 认知层级 1-5，M 为软约束——粗保证：生疏偏易打底，掌握偏难挑战
-  - 不越界：知识点全集 = courseware sm-N 交用户范围；越界弃题重出——测的是范围内掌握，不是知识面
-  - 判分回流闭环：答案页追记 `## 判分`，错题点经确认回写 user.md，machine 自测证据；考卷本体是素材，档案只收结论
-  - 教学纪要 best-effort：读 teach 的 ai 笔记避免重复、重点测刚教——两条采集通道经素材层弱耦合
-  - 语言分层（2026-10-04 中性化批）：题干**源对齐**——跟样例/已知作业/课程材料，是域件普世纪律；解析与判分**读者对齐**——取行文声明页 `wiki/language.md` 的 annotation 键，页面或缺席键跟会话语言。原「英文试题 + 中文解析」硬编码拆除——国际生实例零改动可用；跨域读取不立 depends（user-profile 先例）
+- **Why it exists**: bb-track's **testing consumption side** — an examination orthogonal to bb-teach's teaching: self-test generation plus grading flowing back, the machine-evidence entrance of the cognition data loop. teach's artifacts are weak evidence; grading is machine evidence; weights in bb-track. A zero-territory pure-workflow plugin, see mechanics section 8; usage routed source-side onto the bb-track command site
+- **Key rulings**:
+  - the paper is not a course-native object but process material needed for cognition collection — landed in the bb-side material layer's `notes/testing/` subzone, term/course dual dimensions following the domain; no wiki page, no root container. The 2026-10-04 owner redesign: the exams/ container abolished; bb-exam renamed bb-quiz, drawing the line between informal self-tests and the formal exams governed by bb-map assessments
+  - align to the sample rather than invent a style: types and the difficulty median follow the sample; without a sample fall back to known assignments, then to user habits; difficulty = cognitive level 1-5, M a soft constraint — the coarse guarantee: unfamiliar leans easy, mastered leans challenging
+  - no out-of-scope: the full set = courseware sm-N intersected with the user scope; out-of-scope questions discarded and regenerated — what is tested is in-scope mastery, not breadth
+  - the grading feedback loop: the answers page appends `## Grading`, wrong-answer points written back into user.md after confirmation, machine self-test evidence; the paper itself is material, the profile takes only conclusions
+  - teaching minutes best-effort: read teach's ai notes to avoid repetition and to emphasize what was just taught — the two collection channels loosely coupled through the material layer
+  - language layering (2026-10-04 neutralization batch): stems **source-aligned** — following the sample/known assignments/course materials, a domain plugin's universal discipline; explanations and grading **reader-aligned** — take the annotation key of the language declaration page `wiki/language.md`, page or key absent → session language. The old 'English questions + Chinese explanations' hard-coding removed — international-student instances work with zero changes; cross-domain reads erect no depends (user-profile precedent)
 
 ## Structure
 
-- 零自有领地，考卷子区除外：考卷落 `cuhksz/bb/<term>/<course>/notes/testing/`；每测一组两份——`<名>-试题.md` 收题目（语言跟源），`<名>-答案.md` 收解析（语言跟读者配置）加 `## 判分` 追记区；ai 产物只增；重测出新卷，旧卷留档，有复盘价值
-- 工作流：解析输入；读知识点全集；读用户认知；定题型与难度中值；读教学纪要 best-effort；选题；出题；写解析；落盘；判分，作答后；回写
+- Zero territory of its own, except the papers subzone: papers land in `cuhksz/bb/<term>/<course>/notes/testing/`; one pair per test — `<name>-questions.md` holds the questions (language follows the source), `<name>-answers.md` holds the explanations (language follows the reader config) plus the `## Grading` append region; ai artifacts append-only; a retest issues a new paper, old papers kept, of review value
+- Workflow: parse input; read the full knowledge-point set; read the user's cognition; fix types and the difficulty median; read teaching minutes best-effort; select points; generate questions; write explanations; land; grade, after answering; write back
 
 ## Invariants
 
-- 题型参照样例——单选、多选、填空、简答、计算、证明等，不枚举；难度 = 认知层级 1-5：记忆、理解、应用、分析、综合；中值 M 对齐样例，fallback 依次为已知作业、用户习惯。M 为 LLM 语义判断、三层近似叠合的软约束；实际保证粒度：生疏偏易打底，掌握偏难挑战
-- 题干语言源对齐（样例 → 已知作业 → 课程材料），术语对齐 courseware `## 专有名词` 对照表；解析与判分语言读者对齐（language 页 annotation 键，缺席跟会话）
-- 不越界：知识点全集 = courseware sm-N 交用户范围；越界弃题重出，除非用户明示——语义约束，出题侧自检，附检 warning 级
-- 解析标注知识点加 sm-N wikilink；位置即出身
-- 参照 bb-track：熟练度决定选题与难度分布；stale 未核对前保守档；冷启动即无档案，全场未锚点、均匀出题
-- **判分回流**，v0.2 立设：作答后逐题判定，答案页追记 `## 判分`——日期、逐题对错、得分；错题点与总体表现经用户确认回写 user.md 证据流，出处 machine 自测——machine 证据，显著者按收敛纪律改读数；考卷本体是素材不是档案，档案只收结论
-- 教学纪要 best-effort：读 notes/ ai 笔记，origin: ai，teach 沉淀——避免重复，重点测刚教；缺席或无笔记静默跳过；teach 默认产物即笔记，断链不存在
-- 写边界：不写 bb/ 拉取物；不碰 notes/ 中人的笔记与其他 ai 笔记，考卷子区只增；user.md 回写经 bb-track 契约，经用户确认
-- 隐私：考卷与判分内容属实例数据，不入框架仓库与 test-repo；notes/testing/ 随 bb/ 数据区语义忽略
+- Types follow the sample — single choice, multiple choice, fill-in, short answer, calculation, proof, etc., never enumerated; difficulty = cognitive level 1-5: remember, understand, apply, analyze, synthesize; the median M aligns to the sample, fallbacks in order being known assignments, user habits. M is an LLM semantic judgment, a soft constraint of three-layer approximate overlap; the effective guarantee granularity: unfamiliar leans easy, mastered leans challenging
+- Stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware `## Terminology` glossary; explanation and grading language reader-aligned (the language page's annotation key, absent → session)
+- No out-of-scope: the full set = courseware sm-N intersected with the user scope; out-of-scope questions discarded and regenerated, unless the user says so — a semantic constraint, self-checked on the generation side, attached-audit warning level
+- Explanations mark the knowledge point with an sm-N wikilink; the position is the birth certificate
+- Following bb-track: proficiency drives selection and difficulty distribution; conservative tier before stale verification; cold start, i.e. no profile, everything unanchored, uniform question generation
+- **Grading feedback**, established in v0.2: after answering, judge per question; the answers page appends `## Grading` — date, per-question correctness, score; wrong-answer points and overall performance written back into user.md's evidence stream after user confirmation, source machine self-test — machine evidence, the significant ones adjusting readings per the convergence discipline; the paper itself is material, not the profile; the profile takes only conclusions
+- Teaching minutes best-effort: read notes/ ai notes, origin: ai, teach's deposits — avoid repetition, emphasize what was just taught; silently skip when absent or empty; teach's default artifact is precisely the notes, so dangling links do not arise
+- Write boundary: never write bb/ pulled artifacts; never touch human notes or other ai notes in notes/; the papers subzone append-only; user.md write-back via the bb-track contract, after user confirmation
+- Privacy: paper and grading content are instance data, never entering the framework repository or test-repo; notes/testing/ is semantically ignored along with the bb/ data zone
 
 ## Changelog
 
-- 0.6（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
+- 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
-- 0.5（2026-10-05）cuhksz 域迁移：路径改写，机制不变
+- 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged
 
-- 0.4 2026-10-04：语言中性化——「英文试题 + 中文解析」硬编码拆除：题干源对齐（跟样例/已知作业/材料）、解析读者对齐（language 页 annotation 键，缺席跟会话语言）；与 language v0.2 同批
-- 0.3 2026-10-04：立 usage_routes: [bb-track]——同 bb-teach，用法经源侧路由落枢纽命令
-- 0.2 2026-10-04：改造，自 bb-exam v0.1 更名重构。exams/ 根容器废除，考卷落 cuhksz/bb/<term>/<course>/notes/testing/，bb v0.7 素材层，term 维度恢复；更名 quiz——informal 自测，与 bb-map assessments 管的 formal exam 划界；判分回流立设，machine 证据经确认入 user.md，闭环补全；越界与字段检查降 warning；教学纪要改读 notes/ ai 笔记，best-effort
-- 0.1 2026-10-04，bb-exam 名下：立设——testing 消费侧插件加命令加 exams/ 容器；五要求落地：题型难度对齐、术语一致、不越界、解析回链、参照认知档案
+- 0.4 2026-10-04: language neutralization — the 'English questions + Chinese explanations' hard-coding removed: stems source-aligned (sample/known assignments/materials), explanations reader-aligned (the language page's annotation key, absent → session language); same batch as language v0.2
+- 0.3 2026-10-04: established usage_routes: [bb-track] — same as bb-teach, usage routed source-side into the hub command
+- 0.2 2026-10-04: redesign, renamed and rebuilt from bb-exam v0.1. The exams/ root container abolished, papers landed in cuhksz/bb/<term>/<course>/notes/testing/, the bb v0.7 material layer, the term dimension restored; renamed quiz — informal self-tests, drawing the line against the formal exams governed by bb-map assessments; the grading feedback established, machine evidence entering user.md after confirmation, the loop completed; out-of-scope and field checks lowered to warning; teaching minutes now read notes/ ai notes, best-effort
+- 0.1 2026-10-04, under the bb-exam name: established — testing consumption-side plugin plus command plus exams/ container; five requirements landed: type-and-difficulty alignment, terminology consistency, no out-of-scope, explanation backlinks, following the cognition profile
