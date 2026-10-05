@@ -7,23 +7,23 @@ commands:
   - bb-teach
 usage_routes:
   - bb-track
-updated: 2026-10-05
+updated: 2026-10-06
 attachment:
-  - "cuhksz/bb/<term>/<course>/notes/ —— 讲解沉淀落此（ai 笔记：一篇一问，origin: ai，只增不覆写；bb v0.7 共居区，bb-track 弱证据）"
-  - "wiki/cuhksz/bb/<term>/<course>/user.md —— 认知档案（bb-track 属；本插件只读消费读数/证据/目标，写回经 bb-track 契约）"
-  - "wiki/cuhksz/bb/<term>/<course>/courseware/、assessments/ —— bb-map 属；本插件只读定位与回链（sm-N/req-N 锚点）"
+  - "cuhksz/bb/<term>/<course>/notes/ — explanation deposits land here (ai notes: one per question, origin: ai, append-only never overwritten; bb v0.7 coexistence zone, weak evidence for bb-track)"
+  - "wiki/cuhksz/bb/<term>/<course>/user.md — cognition profile (bb-track's own; this plugin read-only consumes readings/evidence/goals, write-back via the bb-track contract)"
+  - "wiki/cuhksz/bb/<term>/<course>/courseware/, assessments/ — bb-map's own; this plugin read-only locates and backlinks (sm-N/req-N anchors)"
 fields: {}
-inject: "教学消费侧 bb-teach（bb-track 的 teaching 消费侧）：提问即讲解——问题定位 courseware sm-N（query 检索 + bb-map 收窄）→ 读 bb-track 认知档案（读数/证据/目标，stale 先核对、未核对前保守档）→ 按熟练度×难度二维伸缩讲解（已知略讲/反问、未知讲透）+ 讲解语言读者对齐（取行文声明页 `wiki/language.md` 的 teaching 键，页面或缺席键跟会话语言）+ 术语先用户已锚点集、缺省查 language 页全局 terms 表兜底（冲突锚点集优先）+ 错题/目标注入 + 锚点回链；三层反馈闭环——单轮反馈不落盘、显著答疑沉淀 ai 笔记落 notes/（origin: ai 弱证据，一篇一问回链锚点）、仅显著信号（跨会话稳定/主动应用/machine 验证）才经确认收敛 user.md（写回委托 bb-track 契约）；讲解对话不写 log、笔记落盘与认知收敛走写后管道；档案缺席（冷启动）全场按未锚点讲、不拒答"
+inject: "Teaching consumption side bb-teach (bb-track's teaching consumer): a question triggers an explanation — locate the question's courseware sm-N (query retrieval + bb-map narrowing) → read the bb-track cognition profile (readings/evidence/goals, stale verified first, conservative tier before verification) → explain with two-dimensional scaling by proficiency × difficulty (known: brief/ask back; unknown: thorough) + reader-aligned explanation language (take the teaching key of the language declaration page `wiki/language.md`, page or key absent → session language) + terminology first from the user's anchored set, falling back to the language page's global terms table (the anchored set wins on conflict) + wrong-answer/goal injection + anchor backlinks; a three-tier feedback loop — single-turn feedback is never landed, significant Q&A deposited as ai notes in notes/ (origin: ai, weak evidence, one per question, backlinking the anchor), only significant signals (stable across sessions/proactive application/machine verification) converge user.md after confirmation (write-back delegated to the bb-track contract); explanation conversations write no log, note deposits and cognition convergence go through the post-write pipeline; when the profile is absent (cold start) explain everything at the unanchored tier, never refuse to answer"
 usage:
-  - "定位：问题→提取关键词→query 分层检索（hot→index→grep→读页）→ bb-map courseware sm-N 锚点与 `## 专有名词` 对照表收窄；跨页跨点皆列"
-  - "读态：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；stale 核对、差距现算（courseware 全集 − 已锚点集）、错题点级结论——纪律见注入区 bb-track 块"
-  - "二维伸缩（熟练度×难度）：未锚点/生疏→完整讲透（硬核概念加类比+数字例子+前置链补全）；熟悉→重点怎么用+易错点；熟练→为什么+易错点+跨点联系+开放问题；掌握→反问/挑战题/引导自查（不灌输）"
-  - "讲解语言：读者对齐——取行文声明页 `wiki/language.md` 的 teaching 键（页面或缺席键跟会话语言）；跨域读取不立 depends，框架不预设具体语言"
-  - "术语门槛：允许出现的术语 = 用户已锚点集（非「本课前面出现」）；超出者当场解释、绝不假定已知；锚点集未收的全局术语查 language 页 terms 表兜底，冲突锚点集优先"
-  - "目标与错题注入：短期优先（带时效）命中者篇幅 +1 档标「近期重点」、过期降级；命中 assessments 复盘错题点易错点 +1 档并点出"
-  - "输出：行内加粗标签骨架（直觉/是什么/为什么/怎么用/类比/易错点/前置）按矩阵伸缩，每条回链 courseware sm-N"
-  - "三层反馈闭环：单轮反馈（懂了/追问/答错）只调当轮讲法、不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 notes/ ai 笔记——一篇一问（问题+讲解骨架+易错点+锚点回链），origin: ai / form: text，命名 <日期>-<主题>.md，只增不覆写；仅显著信号（跨会话稳定/主动正确应用/machine 验证）才提议收敛 user.md——写回委托 bb-track 写契约、经用户确认；单轮「懂了」不写、单轮「没懂」不判生疏"
-  - "档案姿态：user.md stale 先核对（未核对前按保守档讲），缺席（冷启动）全场按未锚点档讲透——不因无档案拒绝讲解"
-  - "log 纪律：讲解对话不写 log（不采集行为信号）；显著答疑落 notes/ 后写一行（other --domain bb）；认知收敛走 bb-track 写后管道（log profile --domain bb + verify）"
+  - "Locate: question → extract keywords → layered query retrieval (hot → index → grep → read pages) → narrow via bb-map courseware sm-N anchors and the `## Terminology` glossary; list all across pages and points"
+  - "Read state: read user.md cognition readings (anchor → status word) + evidence stream + goal layer; verify stale, compute gaps on the fly (courseware full set − anchored set), point-level conclusions from wrong answers — discipline in the injection region's bb-track block"
+  - "Two-dimensional scaling (proficiency × difficulty): unanchored/unfamiliar → explain thoroughly (hardcore concepts get analogies + numeric examples + prerequisite-chain completion); familiar → focus on how to use + pitfalls; proficient → why + pitfalls + cross-point links + open questions; mastered → ask back / challenge questions / guided self-check (no lecturing)"
+  - "Explanation language: reader-aligned — take the teaching key of the language declaration page `wiki/language.md` (page or key absent → session language); cross-domain reads erect no depends, the framework presumes no specific language"
+  - "Terminology threshold: terms allowed to appear = the user's anchored set (not 'appeared earlier in this course'); anything beyond is explained on the spot, never presumed known; global terms not in the anchored set fall back to the language page's terms table, the anchored set wins on conflict"
+  - "Goal and wrong-answer injection: hits on time-scoped short-term priorities get one depth tier up, marked 'recent focus', expired ones downgraded; hits on assessments-review wrong-answer points get their pitfalls one tier up and called out"
+  - "Output: an inline bold-label skeleton (intuition/what/why/how-to-use/analogy/pitfalls/prerequisites) scaled by the matrix, each item backlinking courseware sm-N"
+  - "Three-tier feedback loop: single-turn feedback (got it / follow-up / wrong answer) only adjusts the current turn's delivery, never landed; significant Q&A (structured deposit value or user-explicit 'note it down') lands as notes/ ai notes — one per question (question + explanation skeleton + pitfalls + anchor backlinks), origin: ai / form: text, named <date>-<topic>.md, append-only never overwritten; only significant signals (stable across sessions / proactive correct application / machine verification) may propose converging user.md — write-back delegated to the bb-track write contract, after user confirmation; a single 'got it' writes nothing, a single 'did not get it' does not mark unfamiliar"
+  - "Profile posture: verify user.md stale first (conservative tier before verification); absence (cold start) → explain everything thoroughly at the unanchored tier — never refuse to explain for lack of a profile"
+  - "log discipline: explanation conversations write no log (no behavioral signals collected); after a significant Q&A lands in notes/, write one line (other --domain bb); cognition convergence goes through the bb-track post-write pipeline (log profile --domain bb + verify)"
 checks:
-  - "语义项（v0.1 人工，附检后置）：未读 user.md 即讲解 → warning；术语超已锚点集且未当场解释 → warning；对「掌握」档仍长篇灌输 → info；未经确认即写 user.md → error；单轮「懂了」即写「掌握」入 user.md → error；讲解缺 courseware 锚点回链 → info；ai 笔记落 notes/ 之外 → error；ai 笔记缺 origin: ai 或缺锚点回链 → warning；覆写已有 ai 笔记 → error"
+  - "Semantic items (v0.1 manual, attached audit deferred): explaining without reading user.md → warning; a term beyond the anchored set left unexplained on the spot → warning; long lectures at the 'mastered' tier → info; writing user.md without confirmation → error; a single 'got it' written as 'mastered' into user.md → error; an explanation missing courseware anchor backlinks → info; ai notes landed outside notes/ → error; ai notes missing origin: ai or anchor backlinks → warning; overwriting an existing ai note → error"

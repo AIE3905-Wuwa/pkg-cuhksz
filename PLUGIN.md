@@ -1,43 +1,43 @@
-# bb-teach：提问即解惑
+# bb-teach: Question-Driven Teaching
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：bb-track 的 **teaching 消费侧**——认知档案若无消费面则是死数据，teach 让「已知略讲、未知讲透」成为可能。零领地纯工作流件，域生长路径的最薄形态，见 mechanics 第 8 节；用法经源侧路由挂 bb-track 命令现场
-- **关键裁定**：
-  - 二维伸缩而非静态受众模型——熟练度乘概念难度。资料整理 Demo 写死「大一/大二、先修有限」；本件对同一知识点对不同人讲不同深度，且主动对齐短期目标与历史错题
-  - 术语门槛动态化：允许出现的术语 = 用户**已锚点集**，不是「本课前面出现」的静态文件序——零先验纪律在教学面的应用
-  - 三层反馈闭环防单轮噪声污染画像：单轮反馈不落盘；显著答疑沉淀 ai 笔记，弱证据；仅显著信号——跨会话稳定、主动应用、machine 验证——经确认收敛 user.md
-  - 产物归素材层，2026-10-04 改造：显著答疑落 notes/ ai 笔记，origin: ai，只增；认知结论才回 wiki——素材与档案分层
-  - 语言分层（2026-10-04 中性化批）：讲解语言**读者对齐**——取行文声明页 `wiki/language.md` 的 teaching 键，页面或缺席键跟会话语言；隐含的「中文讲解」硬编码拆除，国际生实例零改动可用。术语双层——锚点集优先、全局 terms 表兜底（锚点集未收才查）；跨域读取不立 depends（user-profile 先例）
-- **弃案**：纯对话不落盘——v0.1 形态；v0.2 改造，显著答疑有跨会话沉淀价值
+- **Why it exists**: bb-track's **teaching consumption side** — a cognition profile without a consumption surface is dead data; teach makes 'brief on the known, thorough on the unknown' possible. A zero-territory pure-workflow plugin, the thinnest form of the domain-growth path, see mechanics section 8; usage routed source-side onto the bb-track command site
+- **Key rulings**:
+  - two-dimensional scaling instead of a static audience model — proficiency times concept difficulty. The material-curation Demo hard-coded 'year-1/year-2, limited prerequisites'; this plugin explains the same knowledge point at different depths to different people, and proactively aligns with short-term goals and past wrong answers
+  - the terminology threshold made dynamic: terms allowed to appear = the user's **anchored set**, not the static file order of 'appeared earlier in this course' — the zero-prior discipline applied to the teaching surface
+  - a three-tier feedback loop keeps single-turn noise out of the profile: single-turn feedback never landed; significant Q&A deposited as ai notes, weak evidence; only significant signals — stable across sessions, proactive application, machine verification — converge user.md after confirmation
+  - artifacts belong to the material layer, redesigned 2026-10-04: significant Q&A lands as notes/ ai notes, origin: ai, append-only; only cognition conclusions return to wiki — material and profile layered
+  - language layering (2026-10-04 neutralization batch): explanation language **reader-aligned** — take the teaching key of the language declaration page `wiki/language.md`; page or key absent → session language; the implicit 'explain in Chinese' hard-coding removed, international-student instances work with zero changes. Two-layer terminology — the anchored set first, the global terms table as fallback (consulted only when the anchored set lacks the term); cross-domain reads erect no depends (user-profile precedent)
+- **Rejected alternatives**: pure conversation, nothing landed — the v0.1 shape; redesigned in v0.2, significant Q&A has cross-session deposit value
 
 ## Structure
 
-- 无自有页面，零自有字段；产物 = ai 笔记落 `cuhksz/bb/<term>/<course>/notes/`——一篇一问，origin: ai，只增；认知回写经 bb-track 契约
-- 工作流三主步：一，定位知识点——query 检索加 courseware sm-N 收窄；二，读用户认知——读数、证据、目标，stale 先核对，差距与错题现算；三，按二维矩阵讲解——伸缩、术语门槛、错题目标注入、锚点回链
-- 可选第四步：三层反馈闭环，见下
+- No pages of its own, zero fields of its own; artifacts = ai notes landed in `cuhksz/bb/<term>/<course>/notes/` — one per question, origin: ai, append-only; cognition write-back via the bb-track contract
+- Workflow in three main steps: first, locate the knowledge point — query retrieval plus courseware sm-N narrowing; second, read the user's cognition — readings, evidence, goals, stale verified first, gaps and wrong answers computed on the fly; third, explain by the two-dimensional matrix — scaling, terminology threshold, wrong-answer and goal injection, anchor backlinks
+- An optional fourth step: the three-tier feedback loop, below
 
 ## Invariants
 
-- 二维伸缩：熟练度——未锚点、生疏、熟悉、熟练、掌握，状态词开放；乘概念难度——简单、抽象硬核。已知不灌输，未知讲透；篇幅与深度随两者伸缩
-- 术语门槛动态化：允许出现的专业名词 = 用户**已锚点集**，不是「本课前面出现」的静态文件序；超出者当场解释；锚点集未收的全局术语查 language 页 terms 表兜底，冲突锚点集优先
-- 讲解语言读者对齐：取 language 页 teaching 键，页面或缺席键跟会话语言——框架不预设具体语言
-- 目标层优先：短期优先带时效，命中者篇幅升一档标「近期重点」，过期降级；命中 assessments 复盘错题点，易错点升一档并点出
-- 三层反馈闭环，防单轮噪声污染画像：**单轮反馈不落盘**，只调当轮讲法；**显著答疑**——结构化沉淀价值，或用户明示「记下来」——沉淀 ai 笔记落 notes/，一篇一问：问题、讲解骨架、易错点、锚点回链，origin: ai，只增；仅**显著信号**才提议收敛 user.md——判据：跨会话稳定，至少两次会话独立表现理解；主动正确应用——解题、举反例、正确类比；machine 验证——成绩刷新。写中间态如「熟悉——初步」不强行跳满档；档位提升与证据强度匹配
-- 单轮「懂了」= 日常，不算显著；单轮「没懂」不判生疏，可能是讲解责任
-- 档案姿态：stale 未核对前保守档；冷启动即无档案，全场按未锚点档讲透，不拒答
-- 写边界：不写 bb/ 拉取物与 courseware、assessments 纯代理；不碰 notes/ 中人的笔记，只读 origin、form、stage 作信号；本插件 ai 产物落 notes/ 只增不覆写，删改自由属人
-- 写回委托：user.md 收敛与画像 `## 域认知` 维护走 bb-track 写契约——追加证据流，收敛读数，新值取代旧值、证据流不动，认知桥；经用户确认后执行
-- log 纪律：讲解对话不写 log，呼应 bb-track「行为信号不采集」红线；笔记落盘与认知收敛走写后管道
-- 隐私：讲解内容与认知结论属实例数据，不入框架仓库与 test-repo
+- Two-dimensional scaling: proficiency — unanchored, unfamiliar, familiar, proficient, mastered, status words open; times concept difficulty — simple, abstract-hardcore. The known gets no lecturing, the unknown gets full depth; length and depth scale with both
+- The terminology threshold made dynamic: technical terms allowed to appear = the user's **anchored set**, not the static file order of 'appeared earlier in this course'; anything beyond is explained on the spot; global terms not in the anchored set fall back to the language page's terms table, the anchored set winning on conflict
+- Reader-aligned explanation language: take the language page's teaching key; page or key absent → session language — the framework presumes no specific language
+- Goal-layer priority: time-scoped short-term priorities — hits get one depth tier up, marked 'recent focus', expired ones downgraded; hits on assessments-review wrong-answer points get their pitfalls one tier up and called out
+- Three-tier feedback loop, keeping single-turn noise out of the profile: **single-turn feedback never landed**, only adjusting the current turn's delivery; **significant Q&A** — structured deposit value, or user-explicit 'note it down' — deposited as ai notes in notes/, one per question: question, explanation skeleton, pitfalls, anchor backlinks, origin: ai, append-only; only **significant signals** may propose converging user.md — criteria: stable across sessions, independent demonstrations of understanding in at least two sessions; proactive correct application — solving, counterexamples, correct analogies; machine verification — grade refreshes. Writing intermediate states like 'familiar — tentative' without forcing full-tier jumps; tier rises match evidence strength
+- A single 'got it' = the daily routine, not significant; a single 'did not get it' does not mark unfamiliar — the explanation may be at fault
+- Profile posture: before stale verification, the conservative tier; cold start, i.e. no profile, everything explained thoroughly at the unanchored tier, never refusing to answer
+- Write boundary: never write bb/ pulled artifacts or the courseware/assessments pure proxies; never touch human notes in notes/, reading only origin, form, stage as signals; this plugin's ai artifacts land in notes/ append-only, never overwritten; deletion and editing are human freedom
+- Write-back delegation: user.md convergence and the profile's `## Domain Cognition` maintenance go through the bb-track write contract — append the evidence stream, converge the readings, new values replacing old, the evidence stream untouched, the cognition bridge; executed after user confirmation
+- log discipline: explanation conversations write no log, echoing bb-track's 'no behavioral signals collected' red line; note deposits and cognition convergence go through the post-write pipeline
+- Privacy: explanation content and cognition conclusions are instance data, never entering the framework repository or test-repo
 
 ## Changelog
 
-- 0.6（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
+- 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
-- 0.5（2026-10-05）cuhksz 域迁移：路径改写，机制不变
+- 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged
 
-- 0.4 2026-10-04：语言中性化——讲解语言读者对齐（language 页 teaching 键，缺席跟会话语言），拆除隐含「中文讲解」硬编码；术语双层：锚点集优先、全局 terms 表兜底；与 language v0.2 同批
-- 0.3 2026-10-04：立 usage_routes: [bb-track]——用法经源侧路由落枢纽命令，装卸无需改 bb-track frontmatter
-- 0.2 2026-10-04：素材层归位，改造裁定。产物从「纯对话不落盘」改为显著答疑沉淀 ai 笔记落 notes/，bb v0.7 共居；stale 保守档与冷启动姿态写明；术语与灌输类语义检查维持，产物位置与只增性入检查
-- 0.1 2026-10-04：立设——教学消费侧插件加命令；二维伸缩矩阵、术语门槛动态化、三层反馈闭环、显著信号判据；log 只记收敛不记过程
+- 0.4 2026-10-04: language neutralization — reader-aligned explanation language (the language page's teaching key, absent → session language), removing the implicit 'explain in Chinese' hard-coding; two-layer terminology: the anchored set first, the global terms table as fallback; same batch as language v0.2
+- 0.3 2026-10-04: established usage_routes: [bb-track] — usage routed source-side into the hub command, (un)installing needs no bb-track frontmatter change
+- 0.2 2026-10-04: artifacts homed in the material layer, redesign ruling. Output changed from 'pure conversation, nothing landed' to significant Q&A deposited as ai notes in notes/, the bb v0.7 coexistence; the stale conservative tier and cold-start posture spelled out; terminology and lecturing-class semantic checks kept, artifact location and append-only-ness added to checks
+- 0.1 2026-10-04: established — teaching consumption-side plugin plus command; the two-dimensional scaling matrix, the dynamic terminology threshold, the three-tier feedback loop, significant-signal criteria; log records only convergence, never process
