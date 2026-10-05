@@ -6,17 +6,17 @@ depends:
   - wiki
   - trust
   - log
-updated: 2026-10-05
+updated: 2026-10-06
 attachment:
-  - "cuhksz/sis/ —— 官方个人文件物化区（transcript/在读证明/课程描述 PDF；sis-cli transcript 下载经用户明示落此，只增）"
-  - "wiki/cuhksz/sis/ —— 学籍制度属地：inbox.md（学籍速写页，整页可再生短 TTL，**缺席即建**）+ docs/<名>.md 代理页（raw_file/raw_sha256 指物化区，自持字段同 registry 代理）；详情页涌现制不预立"
+  - "cuhksz/sis/ — official personal document materialization zone (transcript/certificate-of-enrollment/course-description PDFs; sis-cli transcript downloads land here after explicit user instruction, append-only)"
+  - "wiki/cuhksz/sis/ — student records territory: inbox.md (student-records digest page, whole page regenerable with short TTL, **created when absent**) + docs/<name>.md proxy pages (raw_file/raw_sha256 pointing into the materialization zone, self-held fields same as registry proxies); detail pages are emergence-based, never pre-created"
 fields:
-  sis_inbox: "块映射（速写页可选）——term（现役学期名）/ ttl（TTL 覆写，天）；缺席跟默认"
-inject: "学籍制度子域 `wiki/cuhksz/sis/`（外源 sis.cuhk.edu.cn，Oracle PeopleSoft CS，连接器 sis-cli 纯只读，用法与命令面见 connectors/sis-cli/SKILL.md）：速写页 inbox.md（近窗蒸馏——本学期课表概要/注册窗口/holds/最新成绩快照，行标学期，整页可再生短 TTL 默认 1 天，**缺席即建**）；**查询即答不默认投影**——成绩/历史/课表/考试现拉即答（term 交互与只读红线见 sis-cli skill），高价值结论涌现入 notes 回链；单向派生只出不回：注册窗口临期 → todo、课表/考试安排 → calendar 日程行（补 bb 挂缺的课表源）、学期成绩（终态事实）→ bb-track 证据流（域内直引免桥，经用户确认）；个人官方 PDF（在读证明/非官方成绩单）经用户明示下载落 `cuhksz/sis/` 域内物化 + 属地代理页（域有自立容器则域内落地，vault 仅兜底无容器域）；官方成绩单申请等写操作**永不入本域**（真实学籍后果）；trust 天花板 machine-confirmed，stale_after = 拉取日 + TTL（日期粒度），agent 即同步器"
+  sis_inbox: "block mapping (optional on the digest page) — term (active term name) / ttl (TTL override, days); absent → default"
+inject: "Student records subdomain `wiki/cuhksz/sis/` (external source sis.cuhk.edu.cn, Oracle PeopleSoft CS, connector sis-cli purely read-only, usage and command surface in connectors/sis-cli/SKILL.md): digest page inbox.md (recent-window distillation — this term's schedule overview/registration windows/holds/latest grade snapshot, rows tagged with term, whole page regenerable with short TTL default 1 day, **created when absent**); **query-and-answer, no default projection** — grades/history/schedule/exams answered from a fresh pull (term interaction and the read-only red line in the sis-cli skill), high-value conclusions emerge into notes with backlinks; one-way derivation (out-only): registration windows nearing → todo, schedule/exam arrangements → calendar schedule rows (filling the schedule source bb lacks), term grades (terminal facts) → bb-track evidence stream (intra-domain direct reference, bridge-exempt, after user confirmation); personal official PDFs (certificate of enrollment/unofficial transcript) downloaded after explicit user instruction land in `cuhksz/sis/` as in-domain materialization + a territory proxy page (when a domain has its own self-standing container, materialization lands in-domain; vault is only the fallback for containerless domains); write operations such as official transcript requests **never enter this domain** (real enrollment consequences); trust ceiling machine-confirmed, stale_after = pull date + TTL (date granularity), the agent is the synchronizer"
 usage:
-  - 进域先读 wiki/cuhksz/sis/inbox.md（缺席即建：sis-cli grades/appt/schedule 现拉蒸馏重写速写 + log 行）；stale 同此（agent 即同步器）
-  - 查询经 sis-cli skill：成绩（--term 学期子串）/ 历史 / 课表（--days 星期归属）/ 注册窗口 / 考试安排；会话分钟级短寿、命令自动重登，无需手动 login（凭据经环境变量或 ~/.sis-cli/）
-  - 学期成绩沉淀：学期结束后 grades --term 全量拉取 → 速写页快照节 + bb-track 证据流追加（经用户确认，machine 证据）
-  - 学籍身份变更（转专业/毕业）→ 更新域根 identity.md 的 sis 块映射
+  - Enter the domain by first reading wiki/cuhksz/sis/inbox.md (created when absent: fresh-pull sis-cli grades/appt/schedule, distill and rewrite the digest + a log line); staleness follows the same flow (the agent is the synchronizer)
+  - Query via the sis-cli skill: grades (--term term substring) / history / schedule (--days weekday scoping) / registration windows / exam arrangements; sessions are minute-scale and short-lived, commands auto-relogin, no manual login needed (credentials via environment variables or ~/.sis-cli/)
+  - Term-grade sedimentation: after the term ends, full pull of grades --term → the digest page's snapshot section + an append to the bb-track evidence stream (after user confirmation, machine evidence)
+  - Enrollment identity changes (major transfer/graduation) → update the sis block mapping of the domain-root identity.md
 checks:
-  - 语义项（v0.1 人工，附检后置）：type: sis 页落 wiki/cuhksz/sis/ 之外 → error；速写页手编痕迹 → warning；stale 清单（信息级）
+  - Semantic items (v0.1 manual, attached audit deferred): a type: sis page outside wiki/cuhksz/sis/ → error; manual-edit traces on the digest page → warning; stale list (info level)

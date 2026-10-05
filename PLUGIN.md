@@ -1,30 +1,30 @@
-# sis：学籍制度子域
+# sis: Student Records Subdomain
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：学籍信息（成绩/历史/注册/考试/身份）是学子的制度性事实，源在 SIS（PeopleSoft CS），查询即答、全可再生。与 bb（课程运行）同属学校域、互补成图景：bb 管过程，sis 管制度事实
-- **族内位置**：cuhksz 域内子系统，与 bb 族平级；身份数据反哺域根 identity.md；成绩作为 machine 证据域内直引 bb-track（免跨域桥——合一收益首例）
-- **关键裁定**：
-  - **查询即答不默认投影**（2026-10-05）：SIS 连接器在场、term 交互已通，wiki 侧只留速写页——不预立 grades.md 等枚举页，详情页涌现制（对齐"架构不枚举"）
-  - 课表源补缺：log 挂缺的"课表源与课后触发"由本域补上——sis schedule → calendar 派生
-  - 官方文件分治（2026-10-05 修正）：学校出具的官方个人 PDF（成绩单/在读证明/课程描述）落 `cuhksz/sis/` 域内物化——域有自立容器则域内落地；官方成绩单申请是写操作，永不入域
-- **弃案**：逐学期成绩落档页——数据全量可再生（连接器随时重拉），落档徒增维护；借 vault 物化——0.1 曾裁定，0.2 修正（域有自立容器则域内落地，所有者裁定）
+- **Why it exists**: student-record information (grades/history/registration/exams/identity) is a student's institutional facts; the source is SIS (PeopleSoft CS), query-and-answer, fully regenerable. With bb (course operations) it belongs to the same school domain and completes the picture: bb runs the process, sis holds the institutional facts
+- **Position in the family**: a subsystem inside the cuhksz domain, peer of the bb family; identity data feeds back into the domain-root identity.md; grades, as machine evidence, are directly referenced in-domain by bb-track (no cross-domain bridge — the first payoff of unification)
+- **Key rulings**:
+  - **query-and-answer, no default projection** (2026-10-05): with the SIS connector present and term interaction working, the wiki side keeps only the digest page — no pre-created enumeration pages like grades.md; detail pages are emergence-based (aligned with 'the architecture does not enumerate')
+  - schedule-source gap filled: the 'schedule source and post-class triggers' left missing by the log are supplied here — sis schedule → calendar derivation
+  - official-document split rule (2026-10-05 revision): school-issued official personal PDFs (transcripts/certificates/course descriptions) land in `cuhksz/sis/` as in-domain materialization — when a domain has its own self-standing container, materialization lands in-domain; official transcript requests are write operations, never entering the domain
+- **Rejected alternatives**: per-term grade archive pages — the data is fully regenerable (the connector re-pulls anytime), archiving only adds maintenance; borrowing vault for materialization — ruled in 0.1, revised in 0.2 (in-domain landing when the domain has a container, owner ruling)
 
 ## Structure
 
-- 物化区 `cuhksz/sis/`：官方个人文件 PDF 只增（区别于 bb 课件工作区——本区仅收学校出具的学籍文件）
-- 属地 `wiki/cuhksz/sis/`：inbox.md 速写页（近窗：课表概要/注册窗口/holds/成绩快照；行标学期；整页可再生短 TTL，缺席即建）+ docs/ 代理页（raw_file/raw_sha256 指物化区）
-- 连接器 sis-cli（connectors/sis-cli/）：ADFS OAuth2 同源 + PeopleSoft PIA 适配（PS_DEVICEFEATURES 破壳、psc+PTCNAV 组件直击、term radio POST），全只读
+- Materialization zone `cuhksz/sis/`: official personal PDFs, append-only (unlike the bb courseware workspace — this zone receives only school-issued enrollment documents)
+- Territory `wiki/cuhksz/sis/`: inbox.md digest page (recent window: schedule overview/registration windows/holds/grade snapshot; rows tagged with term; whole page regenerable with short TTL, created when absent) + docs/ proxy pages (raw_file/raw_sha256 pointing into the materialization zone)
+- The connector sis-cli (connectors/sis-cli/): ADFS OAuth2 same-source + PeopleSoft PIA adaptation (PS_DEVICEFEATURES shell-breaking, direct psc+PTCNAV component hits, term radio POST), fully read-only
 
 ## Invariants
 
-- 只读红线：选课/退课/换课/提交/官方申请类写操作永不入域（真实学籍后果）；唯一 POST 是 term 选择的 Continue 查询
-- trust 天花板 machine-confirmed；stale_after = 拉取日 + TTL（默认 1 天速写；日期粒度）；agent 即同步器
-- 单向派生只出不回：注册窗口临期 → todo；课表/考试安排 → calendar；学期成绩 → bb-track 证据流（域内直引，经用户确认）；高价值结论 → notes 回链
-- 隐私红线：成绩与学籍数据属实例数据不入框架仓库；CLI 输出只在终端与对话
-- 凭据纪律：~/.sis-cli/ 本机存放，绝不入库
+- Read-only red line: write operations — course add/drop/swap, submissions, official requests — never enter the domain (real enrollment consequences); the only POST is the Continue of term selection for querying
+- Trust ceiling machine-confirmed; stale_after = pull date + TTL (default 1 day for the digest; date granularity); the agent is the synchronizer
+- One-way derivation (out-only): registration windows nearing → todo; schedule/exam arrangements → calendar; term grades → bb-track evidence stream (intra-domain direct reference, after user confirmation); high-value conclusions → notes with backlinks
+- Privacy red line: grade and enrollment data are instance data, never entering the framework repository; CLI output stays in the terminal and the conversation
+- Credential discipline: stored locally at ~/.sis-cli/, never in the repository
 
 ## Changelog
 
-- 0.2（2026-10-05）官方个人文件改域内物化（cuhksz/sis/ + 属地 docs/ 代理页，所有者裁定修正——原借 vault 是 device 无容器先例的惯性）
-- 0.1（2026-10-05）立设：随 cuhksz 域首立；sis-cli v0.2 连接器先行在场
+- 0.2 (2026-10-05) official personal documents switched to in-domain materialization (cuhksz/sis/ + the territory's docs/ proxy pages, owner-ruling revision — the old vault route was inertia from the device containerless precedent)
+- 0.1 (2026-10-05) established: first established with the cuhksz domain; the sis-cli v0.2 connector present beforehand
