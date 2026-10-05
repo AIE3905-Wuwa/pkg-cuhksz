@@ -1,46 +1,46 @@
-# bb-track：认知档案
+# bb-track: Cognition Profile
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：组会裁定，2026-10-02——笔记与认知的价值不在教会 agent 知识，预训练已备，原文可经 bb-map 检索；而在告知 agent **用户的认知状态**：知道什么、熟练度如何、接下来要掌握什么。本件是 bb 族的**认知枢纽**：wiki 侧 user.md 档案契约，加素材层只读消费契约。teach 教与 quiz 考两条采集通道围绕它成环；用法经源侧路由挂 bb-track 命令，见 mechanics 第 4 节
-- **关键裁定**：
-  - 属地**域内原生页**首例，wiki v0.7 两形：真身在 wiki，无外源可对账——认知档案不是任何外源的投影，是 wiki 自己的写作物
-  - 两区制：读数收敛覆写，证据流只增——结论可变、证据不可变，每条读数可溯
-  - 应知不存、差距现算：知识点全集在 courseware，课程要求在 info；user.md 只存已知与目标，差集消费时现算，不立双份事实源
-  - 信号权重 human 大于 machine，machine 大于 ai 笔记：ai 产物是弱证据，人复核方升权，防 LLM 自我强化
-  - 建档懒惰式，学期即边界：缺席不报错，消费侧降级处理；term_status 冻结随学期
-- **非目标**，立设时裁定：不建笔记，人的造物；不教知识，teach 的事；不落统计，派生现算；不采集行为信号如查阅频次。课表触发悬置，课表源缺口
+- **Why it exists**: ruled at the team meeting, 2026-10-02 — the value of notes and cognition is not in teaching the agent knowledge (pretraining already provides it; originals are retrievable via bb-map) but in telling the agent **the user's cognitive state**: what they know, how proficient they are, what to master next. This plugin is the bb family's **cognition hub**: the wiki-side user.md profile contract plus a read-only consumption contract over the material layer. The teach and quiz collection channels form a loop around it; usage is routed source-side onto the bb-track command, see mechanics section 4
+- **Key rulings**:
+  - the first **domain-native territory page**, wiki v0.7's two forms: the body lives in wiki, with no external source to reconcile against — a cognition profile is the projection of no external source, it is wiki's own writing
+  - two-region system: readings converge-and-overwrite, the evidence stream is append-only — conclusions are mutable, evidence is not, every reading traceable
+  - what-should-be-known is not stored, gaps computed on the fly: the full knowledge-point set lives in courseware, course requirements in info; user.md stores only the known and the goals, the difference computed at consumption time — no duplicate sources of truth
+  - signal weights human over machine, machine over ai notes: ai artifacts are weak evidence, promoted only by human review, guarding against LLM self-reinforcement
+  - lazy profile creation, the term is the boundary: absence does not error, the consumption side degrades; freezing follows term_status with the term
+- **Non-goals**, ruled at establishment: no note-writing — human creations; no knowledge teaching — teach's business; no statistics landed — derived, computed on the fly; no behavioral signals collected such as view counts. Timetable-triggered handling suspended, the timetable source missing
 
 ## Structure
 
-- 认知档案 `wiki/cuhksz/bb/<term>/<course>/user.md`：每课一份，课程根落位，不入四桶——桶归代理页；属地**域内原生页**，wiki v0.7 两形首例：真身在此，无外源可对账
-- 建档懒惰式：首个显著信号或用户明示时建，不随新课强制立页；缺席 = 尚无认知数据，消费侧降级处理不报错
-- 两区制正文：`## 认知读数` 收敛覆写，新值取代旧值；`## 证据流` 只增不改写
-- 学期即边界：term 在路径中，学期冻结随 term_status；新学期新档，旧档只读可作初始参考
-- 笔记消费契约：`cuhksz/bb/<term>/<course>/notes/` 只读——bb v0.7 共居区，收人的笔记、ai 笔记、testing/ 考卷；可选 frontmatter 三属性见 manifest fields；stage 标记属人，agent 只读不写
+- Cognition profile `wiki/cuhksz/bb/<term>/<course>/user.md`: one per course, placed at the course root, outside the four buckets — buckets belong to proxy pages; a **domain-native territory page**, the first of wiki v0.7's two forms: the body lives here, no external source to reconcile
+- Lazy profile creation: created on the first significant signal or user instruction, never forced per new course; absence = no cognition data yet, the consumption side degrades without erroring
+- Two-region body: `## Cognition Readings` converge-and-overwrite, new values replacing old; `## Evidence Stream` append-only, never rewritten
+- The term is the boundary: the term is in the path, freezing follows term_status; a new term gets a new profile, old ones are read-only and usable as initial reference
+- Notes consumption contract: `cuhksz/bb/<term>/<course>/notes/` read-only — the bb v0.7 coexistence zone, holding human notes, ai notes, testing/ papers; the three optional frontmatter attributes in the manifest fields; stage markings belong to the human, the agent reads but never writes
 
 ## Invariants
 
-- 读数锚定：条目锚 courseware 知识点，sm-N 锚点 wikilink；粗粒度自陈合法，混合粒度共存；状态词开放——生疏、熟悉、熟练、掌握等，不立封闭词表
-- 证据可溯：读数每条可溯证据；证据流行必带日期、出处、回链——assessments 页、notes 文件、session 页
-- 信号权重：human 最高——用户原话、human 笔记、人复核；machine 次之——grades 与 submission 快照；ai 最低——origin: ai 笔记，弱证据，人复核方升权
-- 应知不存：课程要求在 info.md，知识点全集在 courseware；user.md 只存已知、熟练、目标；差距消费时现算
-- 目标层入读数：课程目标，加短期优先——带时效，过期即失效
-- 错题分层：题级事实归 assessments 复盘区，可选行约定带知识点 wikilink 供反向索引；点级结论入读数；统计现算不落盘
-- 更新双轨：agent 识别显著信号自发——成绩刷新后、笔记 stage 变更后；加用户明示——自述即认知输入。显著纪律：记显著不记日常
-- 采集通道，v0.3 起，素材层 = bb v0.7 共居区：bb-teach 讲解落 notes/ ai 笔记，弱证据；bb-quiz 自测落 notes/testing/ 判分，machine 证据。两者是认知数据的主动采集面；产物落 bb 侧素材层，证据入流经用户确认；用法经源侧路由挂 bb-track 命令，装卸自动同步
-- trust 复用：generated 随手写；读数天花板 machine-confirmed，证据流含 human 事件则 human-reviewed；stale_after 默认 14 天，页面可覆写；stale 时消费前先核对近窗证据或询问用户
-- 不打 tags：单课路径直读，同 user-profile 先例
-- 认知桥注册，v0.2 起，宪法准则 11：建档时若 user-profile 画像在场，维护其 `## 域认知` 节一行——bb 加 user.md 路径形；画像缺席跳过不代建，按需桥缺席容错
-- 隐私：认知内容属实例数据，不入框架仓库与 test-repo
+- Reading anchoring: entries anchor on courseware knowledge points, sm-N anchor wikilinks; coarse-grained self-assessment allowed, mixed granularities coexist; status words open — unfamiliar, familiar, proficient, mastered, etc., no closed vocabulary
+- Evidence traceability: every reading traceable to evidence; evidence-stream lines must carry date, source, backlink — assessments pages, notes files, session pages
+- Signal weights: human highest — the user's own words, human notes, human review; machine next — grades and submission snapshots; ai lowest — origin: ai notes, weak evidence, promoted only by human review
+- What-should-be-known is not stored: course requirements in info.md, the full knowledge-point set in courseware; user.md stores only the known, the proficient, the goals; gaps computed at consumption time
+- The goal layer goes into readings: the course goal plus short-term priorities — time-scoped, expiring when past due
+- Wrong answers layered: question-level facts go to the assessments review region, the optional line convention carrying knowledge-point wikilinks for reverse indexing; point-level conclusions go into readings; statistics computed on the fly, never landed
+- Two-track updates: agent-spontaneous on significant signals — after grade refreshes, after note stage changes; plus user-explicit — self-report is cognition input. Significance discipline: record the significant, not the daily
+- Collection channels, since v0.3, the material layer = the bb v0.7 coexistence zone: bb-teach explanations deposited as notes/ ai notes, weak evidence; bb-quiz self-tests landed in notes/testing/ with grading, machine evidence. The two are the active collection surface of cognition data; artifacts land on the bb-side material layer, evidence enters the stream after user confirmation; usage routed source-side onto the bb-track command, (un)installing syncs automatically
+- trust reuse: generated written as you go; the readings' ceiling machine-confirmed, human-reviewed if the evidence stream contains human events; stale_after default 14 days, overridable per page; when stale, verify against recent-window evidence or ask the user before consuming
+- No tags: read directly by single-course path, same precedent as user-profile
+- Cognition-bridge registration, since v0.2, constitution principle 11: at profile creation, if the user-profile page is present, maintain one line in its `## Domain Cognition` section — bb plus the user.md path form; if the profile is absent, skip, never create on its behalf; on-demand bridges tolerate absence
+- Privacy: cognition content is instance data, never entering the framework repository or test-repo
 
 ## Changelog
 
-- 0.6（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
+- 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
-- 0.5（2026-10-05）cuhksz 域迁移：路径改写；成绩 machine 证据新增域内直引源（sis，经用户确认）
+- 0.5 (2026-10-05) cuhksz domain migration: paths rewritten; grades as machine evidence gain a new intra-domain direct-reference source (sis, after user confirmation)
 
-- 0.4 2026-10-04：命令接线升源侧路由——teach 与 quiz 的用法经其 manifest usage_routes 落入本枢纽命令，consumes 只余自属与工具；命令 Steps 收敛为骨架，细则归 usage 块
-- 0.3 2026-10-04：采集通道披露与命令立设，teach/quiz 改造配套。notes/ 消费扩为共居区——ai 笔记弱证据，testing/ 考卷判分 machine 证据；stale 未核对前保守档消费；bb-track 命令立设为认知枢纽，teach 与 quiz 用法经 cmd-inject 挂载其注入区，装卸自动同步
-- 0.2 2026-10-02：全局域批三——挂 user-profile 认知桥注册行，建档时维护画像 `## 域认知` 节，缺席容错；log 行带域标 --domain bb
-- 0.1 2026-10-02：立设，组会裁定加两轮详谈收敛——认知档案两区制、笔记只读消费契约三属性、属地原生页首例；携 wiki v0.7 属地两形、bb-map v0.12 四桶豁免
+- 0.4 2026-10-04: command wiring upgraded to source-side routing — teach's and quiz's usage lands in this hub command via their manifest usage_routes, consumes keeps only its own and tools; the command's Steps converge to a skeleton, details belong to the usage block
+- 0.3 2026-10-04: collection channels disclosed and command established, accompanying the teach/quiz redesign. notes/ consumption widened to the coexistence zone — ai notes as weak evidence, testing/ paper grading as machine evidence; conservative-tier consumption before stale verification; the bb-track command established as the cognition hub, teach's and quiz's usage mounted into its injection region via cmd-inject, (un)installing syncs automatically
+- 0.2 2026-10-02: global-domain batch three — attaching the user-profile cognition-bridge registration line, maintaining the profile's `## Domain Cognition` section at profile creation, tolerating absence; log line carries the domain tag --domain bb
+- 0.1 2026-10-02: established, team-meeting ruling plus two rounds of detailed discussion converged — the cognition profile's two-region system, the notes read-only consumption contract's three attributes, the first domain-native territory page; riding wiki v0.7's territory two forms and bb-map v0.12's four-bucket exemption
