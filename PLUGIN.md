@@ -13,7 +13,7 @@
 
 ## Structure
 
-- 零自有领地，考卷子区除外：考卷落 `bb/<term>/<course>/notes/testing/`；每测一组两份——`<名>-试题.md` 收题目（语言跟源），`<名>-答案.md` 收解析（语言跟读者配置）加 `## 判分` 追记区；ai 产物只增；重测出新卷，旧卷留档，有复盘价值
+- 零自有领地，考卷子区除外：考卷落 `cuhksz/bb/<term>/<course>/notes/testing/`；每测一组两份——`<名>-试题.md` 收题目（语言跟源），`<名>-答案.md` 收解析（语言跟读者配置）加 `## 判分` 追记区；ai 产物只增；重测出新卷，旧卷留档，有复盘价值
 - 工作流：解析输入；读知识点全集；读用户认知；定题型与难度中值；读教学纪要 best-effort；选题；出题；写解析；落盘；判分，作答后；回写
 
 ## Invariants
@@ -30,7 +30,9 @@
 
 ## Changelog
 
+- 0.5（2026-10-05）cuhksz 域迁移：路径改写，机制不变
+
 - 0.4 2026-10-04：语言中性化——「英文试题 + 中文解析」硬编码拆除：题干源对齐（跟样例/已知作业/材料）、解析读者对齐（language 页 annotation 键，缺席跟会话语言）；与 language v0.2 同批
 - 0.3 2026-10-04：立 usage_routes: [bb-track]——同 bb-teach，用法经源侧路由落枢纽命令
-- 0.2 2026-10-04：改造，自 bb-exam v0.1 更名重构。exams/ 根容器废除，考卷落 bb/<term>/<course>/notes/testing/，bb v0.7 素材层，term 维度恢复；更名 quiz——informal 自测，与 bb-map assessments 管的 formal exam 划界；判分回流立设，machine 证据经确认入 user.md，闭环补全；越界与字段检查降 warning；教学纪要改读 notes/ ai 笔记，best-effort
+- 0.2 2026-10-04：改造，自 bb-exam v0.1 更名重构。exams/ 根容器废除，考卷落 cuhksz/bb/<term>/<course>/notes/testing/，bb v0.7 素材层，term 维度恢复；更名 quiz——informal 自测，与 bb-map assessments 管的 formal exam 划界；判分回流立设，machine 证据经确认入 user.md，闭环补全；越界与字段检查降 warning；教学纪要改读 notes/ ai 笔记，best-effort
 - 0.1 2026-10-04，bb-exam 名下：立设——testing 消费侧插件加命令加 exams/ 容器；五要求落地：题型难度对齐、术语一致、不越界、解析回链、参照认知档案
