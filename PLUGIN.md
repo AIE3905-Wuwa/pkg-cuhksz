@@ -12,7 +12,7 @@
 
 ## Structure
 
-- 双侧同构 `<term>/<course>/`。外侧 `cuhksz/bb/<term>/<course>/`：课件保留源侧目录树；提交件住 `submissions/`；笔记住子区 `notes/`，为人的学习笔记居所，与 submissions/ 同法先例。内侧 `wiki/cuhksz/cuhksz/bb/<term>/<course>/`
+- 双侧同构 `<term>/<course>/`。外侧 `cuhksz/bb/<term>/<course>/`：课件保留源侧目录树；提交件住 `submissions/`；笔记住子区 `notes/`，为人的学习笔记居所，与 submissions/ 同法先例。内侧 `wiki/cuhksz/bb/<term>/<course>/`
 - 目录名人类可读：term 名如 `2610UG`，加课程代码如 `AIE3005`——恰为 bbcli 查询参数形态，人机两用。machine id 即 term_id 与 course_id 落属地身份页 frontmatter；同期同代码以 course_id 尾缀消歧；停用课标 status: deprecated，不删
 - 域根速写页 `wiki/cuhksz/bb/inbox.md`：近窗公告蒸馏、临近截止、未交提醒。提醒双源——作业列表无提交，或成绩册有 due 无 attempt；行标课程。整页可再生，短 TTL；frontmatter 兼域配置，`terms` 块映射放现役学期与冻结标记，2026-10-01 裁定不另立声明页。刷新流程：现拉公告与 dues，蒸馏速写，再分拣派生；**缺席即建**，bb-map 命令锚点触发或 agent 自发
 - 属地页面形态：课程身份页每课必有，身份证明载体即 bb-map info.md——`bb` 块映射 term_id、course_id、term_status，学期状态落页，消除 inbox 单点。公告不立页，见 Invariants。其余内容页形态随真实使用浮现
@@ -30,6 +30,8 @@
 - **物化分层**：文档类全量物化；媒体类即 video 与 audio 默认指针化——不落 `cuhksz/bb/`，属地单元页清单登记未物化条目，记名称与源侧标识，按需 `--match` 单取；同名变更件 `--refresh` 重拉，内容哈希尾缀落新件，旧件保留即修订史。fetch 能力见 bbcli skill
 
 ## Changelog
+
+- 0.9（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
 
 - 0.8（2026-10-05）属域迁移：BB 独立域降为 cuhksz 域内子系统族（所有者裁定——bb/sis/registry 同校同认证共域）；depends 补 cuhksz，属地 wiki/bb/ → wiki/cuhksz/bb/、工作区 bb/ → cuhksz/bb/，契约与族内结构不变
 
