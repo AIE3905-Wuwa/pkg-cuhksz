@@ -7,13 +7,13 @@
 - **关键裁定**：
   - **查询即答不默认投影**（2026-10-05）：SIS 连接器在场、term 交互已通，wiki 侧只留速写页——不预立 grades.md 等枚举页，详情页涌现制（对齐"架构不枚举"）
   - 课表源补缺：log 挂缺的"课表源与课后触发"由本域补上——sis schedule → calendar 派生
-  - 官方文件分治：非官方成绩单 PDF 可拉（View Report 纯查询）但属个人资产走 vault；官方成绩单申请是写操作，永不入域
-- **弃案**：逐学期成绩落档页——数据全量可再生（连接器随时重拉），落档徒增维护；本地 sis 数据区——无物化需求
+  - 官方文件分治（2026-10-05 修正）：学校出具的官方个人 PDF（成绩单/在读证明/课程描述）落 `cuhksz/sis/` 域内物化——域有自立容器则域内落地；官方成绩单申请是写操作，永不入域
+- **弃案**：逐学期成绩落档页——数据全量可再生（连接器随时重拉），落档徒增维护；借 vault 物化——0.1 曾裁定，0.2 修正（域有自立容器则域内落地，所有者裁定）
 
 ## Structure
 
-- 属地 `wiki/cuhksz/sis/`：inbox.md 速写页（近窗：课表概要/注册窗口/holds/成绩快照；行标学期；整页可再生短 TTL，缺席即建）
-- 无数据区：不物化（区别于 bb 的课程工作区）
+- 物化区 `cuhksz/sis/`：官方个人文件 PDF 只增（区别于 bb 课件工作区——本区仅收学校出具的学籍文件）
+- 属地 `wiki/cuhksz/sis/`：inbox.md 速写页（近窗：课表概要/注册窗口/holds/成绩快照；行标学期；整页可再生短 TTL，缺席即建）+ docs/ 代理页（raw_file/raw_sha256 指物化区）
 - 连接器 sis-cli（connectors/sis-cli/）：ADFS OAuth2 同源 + PeopleSoft PIA 适配（PS_DEVICEFEATURES 破壳、psc+PTCNAV 组件直击、term radio POST），全只读
 
 ## Invariants
@@ -26,4 +26,5 @@
 
 ## Changelog
 
+- 0.2（2026-10-05）官方个人文件改域内物化（cuhksz/sis/ + 属地 docs/ 代理页，所有者裁定修正——原借 vault 是 device 无容器先例的惯性）
 - 0.1（2026-10-05）立设：随 cuhksz 域首立；sis-cli v0.2 连接器先行在场
