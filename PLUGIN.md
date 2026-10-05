@@ -13,11 +13,11 @@
 
 ## Structure
 
-- 认知档案 `wiki/bb/<term>/<course>/user.md`：每课一份，课程根落位，不入四桶——桶归代理页；属地**域内原生页**，wiki v0.7 两形首例：真身在此，无外源可对账
+- 认知档案 `wiki/cuhksz/cuhksz/bb/<term>/<course>/user.md`：每课一份，课程根落位，不入四桶——桶归代理页；属地**域内原生页**，wiki v0.7 两形首例：真身在此，无外源可对账
 - 建档懒惰式：首个显著信号或用户明示时建，不随新课强制立页；缺席 = 尚无认知数据，消费侧降级处理不报错
 - 两区制正文：`## 认知读数` 收敛覆写，新值取代旧值；`## 证据流` 只增不改写
 - 学期即边界：term 在路径中，学期冻结随 term_status；新学期新档，旧档只读可作初始参考
-- 笔记消费契约：`bb/<term>/<course>/notes/` 只读——bb v0.7 共居区，收人的笔记、ai 笔记、testing/ 考卷；可选 frontmatter 三属性见 manifest fields；stage 标记属人，agent 只读不写
+- 笔记消费契约：`cuhksz/bb/<term>/<course>/notes/` 只读——bb v0.7 共居区，收人的笔记、ai 笔记、testing/ 考卷；可选 frontmatter 三属性见 manifest fields；stage 标记属人，agent 只读不写
 
 ## Invariants
 
@@ -35,6 +35,8 @@
 - 隐私：认知内容属实例数据，不入框架仓库与 test-repo
 
 ## Changelog
+
+- 0.5（2026-10-05）cuhksz 域迁移：路径改写；成绩 machine 证据新增域内直引源（sis，经用户确认）
 
 - 0.4 2026-10-04：命令接线升源侧路由——teach 与 quiz 的用法经其 manifest usage_routes 落入本枢纽命令，consumes 只余自属与工具；命令 Steps 收敛为骨架，细则归 usage 块
 - 0.3 2026-10-04：采集通道披露与命令立设，teach/quiz 改造配套。notes/ 消费扩为共居区——ai 笔记弱证据，testing/ 考卷判分 machine 证据；stale 未核对前保守档消费；bb-track 命令立设为认知枢纽，teach 与 quiz 用法经 cmd-inject 挂载其注入区，装卸自动同步
