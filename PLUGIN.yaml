@@ -1,0 +1,22 @@
+id: registry
+version: 0.1
+depends:
+  - cuhksz
+  - domain
+  - wiki
+  - trust
+  - log
+updated: 2026-10-05
+attachment:
+  - "cuhksz/registry/ —— 教务制度物化区（registry.cuhk.edu.cn 官网公开 PDF 只增物化；制度公开文件非个人资产）"
+  - "wiki/cuhksz/registry/ —— 制度属地：schemes.md（全校培养方案索引页——学院→专业→方案页指针，人机共维护）+ <方案名>.md（代理页：raw 指针 + 要点蒸馏 + 版本对版）"
+fields:
+  registry: "块映射（索引/代理页）——source（官网页 URL）/ edition（版本锚：入学年级批次 + 公文/Senate 编号，如 AB2025_C037）/ raw_file / raw_sha256"
+inject: "教务制度子域（外源 registry.cuhk.edu.cn 教务处官网，**无连接器**——人工下载经用户明示、半自动物化）：物化区 `cuhksz/registry/`（官网 PDF 只增，版本批次进位不覆写）+ 属地 `wiki/cuhksz/registry/`——索引页 schemes.md（全校学院→专业→方案页 URL 指针；建页源：本科专业清单 registry.cuhk.edu.cn/page/20 与本科生手册 /page/22 族，含双主修/联合课程/副修；人机共维护、公开制度导航）与代理页（raw_file/raw_sha256 + 要点蒸馏只增 + 版本对版记录）；**对版节奏** = 学期初与 Senate 公文日人工核对（页面无日期，以 PDF Last-Modified 抽查）；制度对照双源——本区规则 PDF 为制度源、sis-cli 学位进度报告（DPR）为动态源，对照结论涌现入 notes 回链；trust human-reviewed（人工核对）+ 版本锚，无 TTL（制度变更靠对版不靠过期）；停招专业（如电子信息工程 2015-2021）如实标注不删"
+usage:
+  - 索引页建立/维护：按 registry.cuhksz.edu.cn 本科专业清单（/page/20 中文、/en/page/20 英文）逐学院列专业（中英文名 + 开设年）与方案页 URL；新设/停招如实增删标注
+  - 物化：用户指定或对版发现的 PDF 下载落 cuhksz/registry/<原名>.pdf（下载经用户明示）+ 建代理页（registry 块映射 source/edition/raw_file/raw_sha256 + 要点蒸馏）
+  - 版本对版：新学年批次 PDF 上线（官网 2026-08/09 目录批次规律）→ 索引页更新指针、旧版代理页保持（只增不覆写）
+  - 幩养方案对照：用户问"还差什么课/能不能毕业"——DPR 现算（sis-cli）为主、本区 PDF 制度条文为辅，结论经确认入 notes 回链
+checks:
+  - 语义项（v0.1 人工，附检后置）：代理页缺 raw_file/raw_sha256 → error；索引页指针 URL 抽查失效 → warning；物化区文件无对应代理页 → warning
