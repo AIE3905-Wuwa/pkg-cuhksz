@@ -7,12 +7,12 @@
   - 2026-10-05 所有者裁定：bb 由独立域**降为域内插件族**——迁移成本在单学期数据时点最低；伞域挂靠（域挂域）被否，语义分裂
   - bb 族五件**保留原名不冠前缀**（bb、bb-map……）——全链改名（manifest/命令/skill/changelog）零收益；"结构由插件各自规范"，命名惯例非强制
   - 域根只持身份页与子系统导航，速写归各子域（bb inbox / sis inbox）——避免双层维护
-  - 个人官方 PDF（在读证明/非官方成绩单）是个人资产：走 vault 物化 + 域内 wikilink，不入 registry（制度文件区）
+  - 个人官方 PDF（在读证明/非官方成绩单）落 `cuhksz/sis/` 域内物化（2026-10-05 所有者裁定修正）：域有自立容器则域内落地，vault 仅兜底无容器域——原走 vault 是 device 先例（无容器）的惯性，cuhksz 有容器后不适用；不入 registry（制度文件区）
 - **弃案**：cuhksz 与 sis 二名之争——域取 cuhksz（学校域，源不止 SIS）；bb 伞域挂靠——域挂域语义怪；bb 族冠前缀更名——改名爆炸
 
 ## Structure
 
-- 数据区 `cuhksz/`（root 容器）：`bb/`（课程运行工作区，bb 域件辖）+ `registry/`（教务制度物化区，registry 域件辖）。sis 无数据区——查询即答不物化
+- 数据区 `cuhksz/`（root 容器）：`bb/`（课程运行工作区，bb 域件辖）+ `sis/`（官方个人文件物化区，sis 域件辖——仅收学校出具的学籍文件，不收一般数据）+ `registry/`（教务制度物化区，registry 域件辖）
 - 属地 `wiki/cuhksz/`：`identity.md`（域声明页）+ `bb/` + `sis/` + `registry/`（各域件辖）
 - 身份证明：identity.md 的 `sis` 块映射（student_id/college/school/major/admitted/status）与连接器身份一比一；数据源 sis-cli transcript
 
@@ -25,4 +25,5 @@
 
 ## Changelog
 
+- 0.2（2026-10-05）个人官方文件物化改域内（cuhksz/sis/，所有者裁定）：落地判据定为「域有自立容器则域内落地，vault 兜底无容器域」
 - 0.1（2026-10-05）立设：域基座，bb 族五件挂靠迁入（wiki/bb/ → wiki/cuhksz/bb/，bb/ → cuhksz/bb/），sis/registry 子域首立

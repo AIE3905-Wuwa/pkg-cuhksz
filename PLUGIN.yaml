@@ -1,5 +1,5 @@
 id: cuhksz
-version: 0.1
+version: 0.2
 depends:
   - domain
   - wiki
@@ -7,11 +7,11 @@ depends:
   - log
 updated: 2026-10-05
 attachment:
-  - "cuhksz/ —— 学校域数据区（root 容器，与 vault/projects 平级）：bb/（课程运行工作区，bb 域件辖）+ registry/（教务制度物化区，registry 域件辖）"
+  - "cuhksz/ —— 学校域数据区（root 容器，与 vault/projects 平级）：bb/（课程运行工作区，bb 域件辖）+ sis/（官方个人文件物化区，sis 域件辖）+ registry/（教务制度物化区，registry 域件辖）"
   - "wiki/cuhksz/ —— 域属地：identity.md（域声明页兼学籍身份页）+ bb/（课程运行属地，bb 域件辖）+ sis/（学籍制度属地，sis 域件辖）+ registry/（教务制度属地，registry 域件辖）"
 fields:
   sis: "块映射（学籍身份页 identity.md）——student_id / college / school / major / admitted / status（数据源 sis-cli transcript；与连接器身份一比一，即域身份证明）"
-inject: "CUHK-SZ 学校域 `wiki/cuhksz/`（外领地 = cuhk.edu.cn 学校系统族：bb.cuhk.edu.cn 课程运行 · sis.cuhk.edu.cn 学籍制度 · registry.cuhk.edu.cn 教务制度；统一认证 STS ADFS，连接器 bb-cli / sis-cli 纯只读）：域声明页 identity.md（type: cuhksz + sis 块映射学籍身份，**缺席即建**——数据源 sis-cli transcript）；域根只持身份与子系统导航，速写归各子域；子系统族（bb 五件 / sis / registry）经 depends 挂靠、经传递属域；域内互引免桥（宪法准则 11 同域直引）；个人官方 PDF（证明/成绩单）走 vault 物化 + 域内页面 wikilink"
+inject: "CUHK-SZ 学校域 `wiki/cuhksz/`（外领地 = cuhk.edu.cn 学校系统族：bb.cuhk.edu.cn 课程运行 · sis.cuhk.edu.cn 学籍制度 · registry.cuhk.edu.cn 教务制度；统一认证 STS ADFS，连接器 bb-cli / sis-cli 纯只读）：域声明页 identity.md（type: cuhksz + sis 块映射学籍身份，**缺席即建**——数据源 sis-cli transcript）；域根只持身份与子系统导航，速写归各子域；子系统族（bb 五件 / sis / registry）经 depends 挂靠、经传递属域；域内互引免桥（宪法准则 11 同域直引）；个人官方 PDF（证明/成绩单）落 cuhksz/sis/ 域内物化——**域有自立容器则域内落地，vault 仅兜底无容器域**（2026-10-05 所有者裁定修正，弃 device 先例的借 vault 惯性）"
 usage:
   - 域内插件契约：depends cuhksz 即属域；子系统各管各的属地与数据区（bb → wiki/cuhksz/bb/ + cuhksz/bb/，sis → wiki/cuhksz/sis/，registry → wiki/cuhksz/registry/ + cuhksz/registry/），域基座不持内容
   - 身份页建档：sis-cli transcript 现拉，identity.md 落 sis 块映射 + generated/trust；学籍变更（转专业/毕业/状态变化）时更新
