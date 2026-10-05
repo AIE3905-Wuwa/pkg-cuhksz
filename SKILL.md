@@ -19,11 +19,11 @@ description: "提问即解惑：定位 courseware 知识点 → 读 bb-track 认
 1. **定位知识点**：问题 → 提取关键词 → query 分层检索（hot→index→grep→读页）→ courseware `sm-N` 锚点与 `## 专有名词` 对照表收窄；命中可能横跨多个 sm-N / 多个课程，皆列
 2. **读用户认知**：读 user.md 认知读数（锚点→状态词）+ 证据流 + 目标层；`stale_after` 过期先核对近窗证据或询问（不拿旧态误判）；差距 = courseware 全集 − 已锚点集现算；错题点级结论自 assessments 复盘
 3. **按二维矩阵讲解**：按注入区 bb-teach 块的伸缩规则输出（术语门槛 + 错题/目标注入 + 锚点回链）
-4. **[可选] 三层反馈闭环**：单轮反馈只调当轮讲法不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 `bb/<term>/<course>/notes/` ai 笔记（一篇一问：问题+讲解骨架+易错点+锚点回链；origin: ai、`<日期>-<主题>.md`、只增）+ log 行（other --domain bb）；仅显著信号（跨会话稳定/主动应用/machine 验证）才提议收敛 user.md，确认后走 bb-track 写契约 + pipeline
+4. **[可选] 三层反馈闭环**：单轮反馈只调当轮讲法不落盘；显著答疑（结构化沉淀价值或用户明示「记下来」）落 `cuhksz/bb/<term>/<course>/notes/` ai 笔记（一篇一问：问题+讲解骨架+易错点+锚点回链；origin: ai、`<日期>-<主题>.md`、只增）+ log 行（other --domain bb）；仅显著信号（跨会话稳定/主动应用/machine 验证）才提议收敛 user.md，确认后走 bb-track 写契约 + pipeline
 
 ## Prohibitions
 
-- 不写 `bb/` 拉取物；不改 courseware / assessments 纯代理页；不碰 notes/ 中人的笔记（只读 origin/form/stage 作信号）；ai 笔记只增不覆写
+- 不写 `cuhksz/bb/` 拉取物；不改 courseware / assessments 纯代理页；不碰 notes/ 中人的笔记（只读 origin/form/stage 作信号）；ai 笔记只增不覆写
 - 单轮「懂了」不写 user.md；未经用户确认不写 user.md；讲解对话不写 log
 - 隐私：认知 / 讲解内容属实例数据，不入框架仓库与 test-repo
 
@@ -61,6 +61,6 @@ description: "提问即解惑：定位 courseware 知识点 → 读 bb-track 认
 - 笔记消费：读 notes/ 概览与 stage/origin 属性作信号；不改不删不代标 stage；ai 笔记仅弱证据
 - 采集通道（bb-teach / bb-quiz，用法投影挂 bb-track 命令注入区）：讲解沉淀 = notes/ ai 笔记（origin: ai，弱证据）；自测判分 = notes/testing/ 考卷（machine 证据，出处标 machine 自测）——两者经用户确认入证据流、按收敛纪律改读数
 - 写后管道：verify；log 行（类型 profile，--domain bb）
-- 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
+- 认知桥注册（user-profile 按需桥）：建档时若画像页在场，维护其 `## 域认知` 节一行 `- bb：wiki/cuhksz/cuhksz/bb/<term>/<course>/user.md`（路径形通配多课多档）；画像缺席跳过不代建（按需桥缺席容错）
 <!-- /usage:bb-track -->
 <!-- cmd-inject:end -->
