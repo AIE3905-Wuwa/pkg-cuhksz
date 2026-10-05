@@ -1,7 +1,8 @@
-"""传输层：curl_cffi 会话 + 浏览器 TLS 指纹 + 会话持久化 + 401 自动重登。
+"""Transport layer: curl_cffi session + browser TLS fingerprint + session persistence + automatic re-login on 401.
 
-借鉴 bbwatch 的实证：impersonate="chrome124" 可过站点指纹检测，
-无需真浏览器；cookie jar 可序列化到用户目录供跨进程复用。
+Following bbwatch's empirical findings: impersonate="chrome124" passes the
+site's fingerprint checks — no real browser needed; the cookie jar can be
+serialized to the user directory for reuse across processes.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ class TransportError(Exception):
 
 
 class TooLarge(TransportError):
-    """下载超过大小上限（--max-size 断路），部分写入已清理。"""
+    """Download exceeded the size cap (--max-size breaker); partial writes already cleaned up."""
 
 
 class ApiError(Exception):
@@ -35,10 +36,10 @@ class ApiError(Exception):
 class Transport:
     def __init__(self, relogin=None):
         self._sess = creq.Session(impersonate=config.IMPERSONATE)
-        self._relogin = relogin  # 无参回调，成功后会话焕新；None 则 401 直抛
+        self._relogin = relogin  # no-arg callback; on success the session is renewed; if None, a 401 propagates as-is
         self._in_relogin = False
 
-    # ---- 会话持久化 ----
+    # ---- Session persistence ----
     def export_cookies(self) -> list[dict]:
         return [
             {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path}
@@ -71,7 +72,7 @@ class Transport:
         self.import_cookies(jar)
         return True
 
-    # ---- 请求 ----
+    # ---- Requests ----
     def request(self, method: str, url: str, *, absolute: bool = False, **kw):
         if not absolute:
             url = urljoin(config.BB_HOST + "/", url.lstrip("/"))
@@ -84,7 +85,7 @@ class Transport:
             self._in_relogin = True
             try:
                 self.clear_cookies()
-                self._relogin()  # 重登一次后重放；重登途中或再 401 则如实上抛
+                self._relogin()  # re-login once, then replay; a failure or another 401 during re-login propagates as-is
             finally:
                 self._in_relogin = False
             r = self._sess.request(method, url, **kw)
@@ -102,7 +103,7 @@ class Transport:
     def download(self, url: str, dest: Path, max_bytes: int | None = None) -> int:
         if not url.startswith("http"):
             url = urljoin(config.BB_HOST + "/", url.lstrip("/"))
-        r = self.request("GET", url, stream=True)  # curl_cffi 须请求时启用流式才能 iter_content
+        r = self.request("GET", url, stream=True)  # curl_cffi needs streaming enabled at request time for iter_content
         if r.status_code != 200:
             raise ApiError(r.status_code, url, r.text or "")
         dest.parent.mkdir(parents=True, exist_ok=True)
@@ -115,7 +116,7 @@ class Transport:
                         written += len(chunk)
                         if max_bytes and written > max_bytes:
                             raise TooLarge(
-                                f"超过上限 {max_bytes // 1048576}MB（已写 {written} 字节）")
+                                f"Exceeded cap of {max_bytes // 1048576}MB (wrote {written} bytes)")
                         f.write(chunk)
         except TooLarge:
             tmp.unlink(missing_ok=True)

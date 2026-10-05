@@ -1,7 +1,8 @@
-"""配置与路径：一切可变项集中于此。
+"""Configuration and paths: every tunable lives here.
 
-凭据/会话只存用户目录（默认 ~/.bb-cli，BB_CLI_HOME 可覆写），
-绝不写入当前工作目录或任何仓库。环境变量优先于配置文件。
+Credentials/sessions live only in the user directory (default ~/.bb-cli,
+BB_CLI_HOME overrides); never written into the working directory or any
+repository. Environment variables take precedence over the config file.
 """
 
 from __future__ import annotations
@@ -20,14 +21,14 @@ ADFS_AUTHORIZE_URL = (
     f"&client_id={ADFS_CLIENT_ID}"
     f"&redirect_uri={ADFS_REDIRECT_URI}"
 )
-IMPERSONATE = "chrome124"  # 站点做 TLS 客户端指纹检测，普通 OpenSSL 握手会被拒
+IMPERSONATE = "chrome124"  # the site does TLS client fingerprinting; plain OpenSSL handshakes get rejected
 REQUEST_TIMEOUT = 30
 
 ENV_HOME = "BB_CLI_HOME"
 ENV_USERNAME = "BB_CLI_USERNAME"
 ENV_PASSWORD = "BB_CLI_PASSWORD"
 ENV_PROXY = "BB_CLI_PROXY"
-ENV_DEBUG = "BB_CLI_DEBUG"  # 设为目录路径则落调试 HTML
+ENV_DEBUG = "BB_CLI_DEBUG"  # set to a directory path to dump debug HTML
 
 
 def bb_home() -> Path:
@@ -46,7 +47,7 @@ def session_path() -> Path:
 
 
 def _restrict(path: Path) -> None:
-    """best-effort 收紧权限（POSIX 0600；Windows 仅继承用户目录 ACL）。"""
+    """Best-effort permission tightening (POSIX 0600; Windows merely inherits the user-directory ACL)."""
     try:
         path.chmod(stat.S_IRUSR | stat.S_IWUSR)
     except OSError:
@@ -70,7 +71,7 @@ def save_config(cfg: dict) -> None:
 
 
 def resolve_credentials(cfg: dict, cli_user: str | None, password_env: str | None) -> tuple[str, str]:
-    """凭据解析优先级：命令行/环境变量 > 配置文件。密码永不在日志中回显。"""
+    """Credential resolution priority: CLI/env vars > config file. The password is never echoed into logs."""
     username = cli_user or os.environ.get(ENV_USERNAME) or cfg.get("username")
     password = None
     if password_env:
@@ -81,8 +82,8 @@ def resolve_credentials(cfg: dict, cli_user: str | None, password_env: str | Non
         password = cfg.get("password")
     if not username or not password:
         raise SystemExit(
-            "缺少凭据：用 `bb-cli login` 交互录入，或设 "
-            f"{ENV_USERNAME}/{ENV_PASSWORD}，或 --password-env 指定变量名"
+            "Missing credentials: use `bb-cli login` to enter them interactively, or set "
+            f"{ENV_USERNAME}/{ENV_PASSWORD}, or pass --password-env to name a variable"
         )
     return username, password
 

@@ -1,7 +1,9 @@
-"""Learn REST API 封装（/learn/api/public/v1，全部 GET，学生会话 cookie 鉴权）。
+"""Learn REST API wrappers (/learn/api/public/v1, all GET, authenticated by the student-session cookie).
 
-分页：跟随 paging.nextPage，防自指与失控（上限 10000 页）。
-课程定位：resolve_course 接受课程 id（_18038_1）、课程代码或名称子串。
+Pagination: follows paging.nextPage, guarding against self-reference and
+runaway loops (cap of 10000 pages).
+Course lookup: resolve_course accepts a course id (_18038_1), a course code,
+or a name substring.
 """
 
 from __future__ import annotations
@@ -19,7 +21,7 @@ class BBClient:
         self.t = transport
         self._me = None
 
-    # ---- 基础 ----
+    # ---- Basics ----
     def get(self, path: str, params: dict | None = None) -> dict:
         return self.t.get_json(path, params=params)
 
@@ -41,7 +43,7 @@ class BBClient:
             url = urljoin(config.BB_HOST + "/", nxt.lstrip("/"))
         return results
 
-    # ---- 身份与课程 ----
+    # ---- Identity and courses ----
     def me(self) -> dict:
         if self._me is None:
             self._me = self.get(f"{API}/users/me")
@@ -77,12 +79,12 @@ class BBClient:
         if len(hits) == 1:
             return hits[0]
         if not hits:
-            raise SystemExit(f"未匹配到课程：{arg}（先 `bb-cli courses` 查看清单）")
-        raise SystemExit("课程匹配歧义，请用更长子串或课程 id：\n" + "\n".join(
+            raise SystemExit(f"No course matched: {arg} (run `bb-cli courses` to see the list)")
+        raise SystemExit("Ambiguous course match; use a longer substring or the course id:\n" + "\n".join(
             f"  {c['id']}  {c.get('name')}" for c in hits
         ))
 
-    # ---- 内容树与附件 ----
+    # ---- Content tree and attachments ----
     def contents(self, cid: str) -> list[dict]:
         return self._paginate(f"{API}/courses/{cid}/contents")
 
@@ -90,7 +92,7 @@ class BBClient:
         return self._paginate(f"{API}/courses/{cid}/contents/{content_id}/children")
 
     def walk(self, cid: str, max_depth: int = 12):
-        """生成 (路径段列表, 节点)；防环 + 深度限制。"""
+        """Yield (path-segment list, node); cycle guard + depth limit."""
         seen: set[str] = set()
 
         def rec(parent_ids: list[str], nodes: list[dict], depth: int):
@@ -110,20 +112,20 @@ class BBClient:
         try:
             return self._paginate(f"{API}/courses/{cid}/contents/{content_id}/attachments")
         except Exception:
-            return []  # 无附件资源节点返回 4xx，视为空
+            return []  # attachment-less resource nodes return 4xx; treat as empty
 
     @staticmethod
     def download_url(cid: str, content_id: str, attachment_id: str) -> str:
         return f"{API}/courses/{cid}/contents/{content_id}/attachments/{attachment_id}/download"
 
-    # ---- 公告 ----
+    # ---- Announcements ----
     def announcements(self, cid: str | None = None) -> list[dict]:
         if cid:
             return self._paginate(f"{API}/courses/{cid}/announcements")
-        return self._paginate(f"{API}/announcements")  # 机构级
+        return self._paginate(f"{API}/announcements")  # institution-level
 
     def course_announcements_all(self) -> tuple[list[dict], list[dict]]:
-        """逐课拉公告；单课失败（如公告工具关闭 400）跳过记入 skipped，不连坐整体。"""
+        """Pull announcements course by course; a single course failing (e.g. announcements tool disabled, 400) is skipped into skipped — without failing the whole run."""
         out, skipped = [], []
         for c in self.my_courses():
             try:
@@ -136,7 +138,7 @@ class BBClient:
                 out.append(a)
         return out, skipped
 
-    # ---- 成绩册 ----
+    # ---- Gradebook ----
     def grade_columns(self, cid: str) -> list[dict]:
         return self._paginate(f"{API}/courses/{cid}/gradebook/columns")
 
@@ -144,7 +146,7 @@ class BBClient:
         uid = self.me()["id"]
         r = self.t.request("GET", f"{API}/courses/{cid}/gradebook/columns/{col_id}/users/{uid}")
         if r.status_code == 404:
-            return {"status": "None", "score": None}  # 未提交（bbwatch 语义化）
+            return {"status": "None", "score": None}  # not submitted (bbwatch semantics)
         if r.status_code != 200:
             return None
         try:
@@ -153,7 +155,7 @@ class BBClient:
             return None
 
     def column_attempts(self, cid: str, col_id: str) -> list[dict]:
-        """按列拉 attempt（学生会话只返回自己的）。"""
+        """Pull attempts per column (a student session only returns one's own)."""
         return self._paginate(f"{API}/courses/{cid}/gradebook/columns/{col_id}/attempts")
 
     def attempt_files(self, cid: str, attempt_id: str) -> list[dict]:
@@ -161,11 +163,11 @@ class BBClient:
 
     @staticmethod
     def attempt_download_url(cid: str, attempt_id: str, file_id: str, file_name: str) -> str:
-        # REST /download 404（学生会话），Classic 路由可达（2026-09-30 实证）
+        # REST /download is 404 (student session); the Classic route works (verified 2026-09-30)
         return (f"/webapps/assignment/download?course_id={cid}&attempt_id={attempt_id}"
                 f"&file_id={file_id}&fileName={quote(file_name)}")
 
-    # ---- 日历 / 花名册 ----
+    # ---- Calendar / roster ----
     def calendar_items(self) -> list[dict]:
         return self._paginate(f"{API}/calendars/items")
 

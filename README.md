@@ -1,65 +1,65 @@
-# bb-cli — CUHK-SZ Blackboard 只读 CLI 连接器
+# bb-cli — CUHK-SZ Blackboard Read-Only CLI Connector
 
-`bb.cuhk.edu.cn`（Blackboard Learn Classic 3900.39）的命令行连接器：**纯只读数据面，无 agent 逻辑、无 MCP、无监控**——给上层（wiki 域插件 / 人工 / 脚本）当事实接口用。技术路线承 bbwatch 的实证（curl_cffi 指纹 + ADFS OAuth2 + 官方 REST API），登录细节按 2026-09-29 实地逆向重写。
+A command-line connector for `bb.cuhk.edu.cn` (Blackboard Learn Classic 3900.39): **a purely read-only data plane — no agent logic, no MCP, no monitoring** — serving as a fact interface for upper layers (wiki domain plugins / humans / scripts). The technical route follows bbwatch's empirical findings (curl_cffi fingerprint + ADFS OAuth2 + the official REST API); login details were rewritten from live reverse engineering on 2026-09-29.
 
-## 安装
+## Installation
 
 ```bash
 cd connectors/bb-cli
 python -m venv .venv
-.venv/Scripts/pip install -e .   # Windows；*nix 为 .venv/bin/pip
+.venv/Scripts/pip install -e .   # Windows; on *nix use .venv/bin/pip
 .venv/Scripts/bb-cli --help
 ```
 
-依赖仅 `curl_cffi`（Chrome TLS 指纹——站点拒绝普通 OpenSSL 握手）与 `beautifulsoup4`。
+Dependencies are only `curl_cffi` (Chrome TLS fingerprint — the site rejects plain OpenSSL handshakes) and `beautifulsoup4`.
 
-## 认证
+## Authentication
 
-- `bb-cli login`：交互录入学号与密码（密码不回显）。学号自动补 `cuhksz\` 域前缀（对齐登录页定制 JS）；已含 `@` 或 `\` 的输入不改写。
-- 凭据与会话只存本机用户目录 `~/.bb-cli/`（`BB_CLI_HOME` 可覆写）：`config.json`（凭据，权限 0600）+ `session.json`（cookie jar）。**绝不写入任何仓库。**
-- 免落盘：`--password-env VAR`（或环境变量 `BB_CLI_PASSWORD`）+ `--no-store`。
-- 会话过期自动重登一次并重放（401 触发，凭据来自配置/环境）。
-- `bb-cli logout` 登出并清本地会话。
+- `bb-cli login`: interactively enter your student id and password (the password is not echoed). The student id automatically gets the `cuhksz\` domain prefix appended (matching the login page's custom JS); input already containing `@` or `\` is left unchanged.
+- Credentials and sessions live only in the local user directory `~/.bb-cli/` (`BB_CLI_HOME` can override): `config.json` (credentials, permission 0600) + `session.json` (cookie jar). **Never written into any repository.**
+- Off-disk option: `--password-env VAR` (or the `BB_CLI_PASSWORD` environment variable) + `--no-store`.
+- An expired session automatically re-logs in once and replays the request (triggered by 401, credentials taken from config/environment).
+- `bb-cli logout` logs out and clears the local session.
 
-## 命令（全只读，JSON 默认，`--format text` 人读）
+## Commands (all read-only, JSON by default, `--format text` for humans)
 
-| 命令 | 用途 |
+| Command | Purpose |
 |---|---|
-| `whoami` / `status` / `terms` | 身份、会话状态、学期表 |
-| `courses [--term 子串]` | 我的课程（`--format text` 一行一课） |
-| `tree <课程> [--depth N] [--no-attachments]` | 内容树（folder/lesson/assignment，叶带附件名） |
-| `files <课程> [--match 正则]` | 课件清单（全路径 + 附件 id/文件名/mime；`--match` 作用路径与文件名） |
-| `fetch <课程> [--match 正则] [--since YYYY-MM-DD] [-o 目录] [--dest 目录] [--dry-run]` | 下载课件，保留 `课程/目录树` 结构；`--match` 作用路径与文件名；已存在跳过；同名附件尾缀附件 id；`--dest` 直接落指定目录（不拼课程名） |
-| `announcements [--course 子串\|all] [--limit N] [--html]` | 公告（默认扫全部课程，正文转纯文本；单课拉取失败跳过并在结果报 `skipped` 清单） |
-| `dues [--from D] [--to D] [--course C]` | 跨课程截止：日历端点 + 每课成绩册列**双源合并去重**（日历会漏项，成绩册兜底；条目带 `source`，同课同题保留日历条目；请求量 ≈ 课程数） |
-| `assignments <课程>` | 作业清单：截止 × 满分 × 我的提交状态（NeedsGrading/Graded/None） |
-| `submission <课程> [--match 正则] [--download] [-o 目录] [--dest 目录]` | 我的提交明细：状态 × 提交时刻 × 文件清单；`--download` 落盘 `课程/submissions/作业/文件`（Classic 路由）；`--dest` 直接落指定目录（不拼课程名/submissions） |
-| `grades [课程] [--due-only]` | 成绩册列 × 我的状态（默认全部课程） |
-| `roster <课程>` | 课程成员（含 lastAccessed，注意隐私） |
-| `raw GET <路径> [--q k=v]...` | 任意 REST GET 透传——新需求先走这里，验证后再封命令 |
+| `whoami` / `status` / `terms` | Identity, session status, term list |
+| `courses [--term substring]` | My courses (`--format text` prints one line per course) |
+| `tree <course> [--depth N] [--no-attachments]` | Content tree (folder/lesson/assignment, leaves carry attachment names) |
+| `files <course> [--match regex]` | Course file inventory (full paths + attachment id/file name/mime; `--match` applies to paths and file names) |
+| `fetch <course> [--match regex] [--since YYYY-MM-DD] [-o DIR] [--dest DIR] [--dry-run]` | Download course files preserving the `course/directory-tree` structure; `--match` applies to paths and file names; existing files are skipped; same-name attachments get the attachment id as a suffix; `--dest` lands directly in the given directory (no course-name prefix appended) |
+| `announcements [--course substring\|all] [--limit N] [--html]` | Announcements (scans all courses by default, bodies converted to plain text; a course that fails to pull is skipped and reported in the `skipped` list) |
+| `dues [--from D] [--to D] [--course C]` | Cross-course deadlines: calendar endpoint + per-course gradebook columns **dual-source merged and deduplicated** (the calendar misses items, the gradebook is the fallback; entries carry `source`; for the same course and title the calendar entry is kept; request volume ≈ number of courses) |
+| `assignments <course>` | Assignment list: due × points possible × my submission status (NeedsGrading/Graded/None) |
+| `submission <course> [--match regex] [--download] [-o DIR] [--dest DIR]` | My submission details: status × submission time × file list; `--download` saves to `course/submissions/assignment/file` (Classic route); `--dest` lands directly in the given directory (no course-name/submissions prefix appended) |
+| `grades [course] [--due-only]` | Gradebook columns × my status (all courses by default) |
+| `roster <course>` | Course members (includes lastAccessed — mind privacy) |
+| `raw GET <path> [--q k=v]...` | Pass-through for arbitrary REST GET — route new needs here first, wrap a dedicated command after validation |
 
-课程参数接受：课程 id（`_18030_1`）、课程代码或名称子串（`AIE3005`）；歧义时报候选清单。
+The course argument accepts: a course id (`_18030_1`), a course code, or a name substring (`AIE3005`); on ambiguity a candidate list is printed.
 
-**时刻处理**（0.1.1）：Learn REST 原值为 UTC ISO（`…Z`）；`--format text` 的时间展示与 `--from` / `--to` / `--since` 日期过滤均换算为本机时区，JSON 输出保持 API 原值。
+**Timestamp handling** (0.1.1): Learn REST raw values are UTC ISO (`…Z`); `--format text` time display and `--from` / `--to` / `--since` date filtering are converted to the local timezone, while JSON output keeps the raw API value.
 
-**dues JSON 字段**（0.1.2）：条目统一为 `course / title / source（calendar|gradebook）/ due / end / type`（旧 `start` 字段并入 `due`）；`skipped` 为成绩册拉取失败的课程清单。
+**dues JSON fields** (0.1.2): entries are normalized to `course / title / source (calendar|gradebook) / due / end / type` (the old `start` field was folded into `due`); `skipped` is the list of courses whose gradebook pull failed.
 
-**fetch 过滤与刷新**（0.1.4）：`--exclude-mime 子串,…`（mimeType 含任一子串即跳过，如 `video/,audio/`）与 `--exclude-ext mp4,mov`（扩展名跳过）在建计划时预跳过，结果报 `skipped` 清单（`--dry-run` 同样可见）；`--max-size MB` 为下载中断路（附件元数据无 size，只能边下边断）；`--refresh` 对已存在件重拉比对——内容相同记 `same` 跳过，变更以内容哈希前 8 位尾缀落新件（旧件保留 = 修订史），报 `updated` 清单。
+**fetch filtering and refresh** (0.1.4): `--exclude-mime substring,…` (skip when mimeType contains any of the substrings, e.g. `video/,audio/`) and `--exclude-ext mp4,mov` (skip by extension) are pre-skipped while building the plan, reported in the `skipped` list (also visible with `--dry-run`); `--max-size MB` is a download-time circuit breaker (attachment metadata carries no size, so it can only trip mid-download); `--refresh` re-pulls existing files and compares — identical content is reported `same` and skipped, changed content lands as a new file suffixed with the first 8 hex chars of its content hash (the old file is kept = revision history), reported in the `updated` list.
 
-**fetch 默认媒体过滤与落位**（0.1.5）：`fetch` 默认跳过常见媒体扩展名（`mts/mpg/mpeg/avi/mkv/wav/mp4/mov/mp3/m4a/webm`），`--no-media-filter` 恢复全量，`--exclude-ext` 追加到默认表。`--dest 目录` 供 `fetch` / `submission` 指定完整目标目录直接落位（不再自动拼课程名）。文件名落盘前先解码 HTML 实体、截断保留扩展名（长名不再丢 `.pdf` 等尾缀）。
+**fetch default media filtering and placement** (0.1.5): `fetch` skips common media extensions by default (`mts/mpg/mpeg/avi/mkv/wav/mp4/mov/mp3/m4a/webm`); `--no-media-filter` restores full download, `--exclude-ext` appends to the default list. `--dest DIR` lets `fetch` / `submission` target an exact destination directory directly (no automatic course-name prefix). File names are HTML-entity-decoded and truncated preserving the extension before landing on disk (long names no longer lose suffixes like `.pdf`).
 
-**Git Bash 注意**：以 `/` 开头的 raw 路径会被 MSYS 改写，用 `MSYS_NO_PATHCONV=1` 前缀或去掉首斜杠（相对路径）。
+**Git Bash note**: raw paths starting with `/` get rewritten by MSYS; prefix the command with `MSYS_NO_PATHCONV=1` or drop the leading slash (relative path).
 
-## 已知边界（2026-09-29 实测）
+## Known limits (live-tested 2026-09-29)
 
-- 学生会话下 404：`gradebook/attempts`（平铺列表）、`discussion/forums`、`users/me/memberships`、`tasks`、`gradebook/grades`。
-- 例外已实证（2026-09-30）：`gradebook/columns/{col}/attempts` 返回自己的 attempt（含提交时刻）；`attempts/{id}/files` 可列文件名；REST `/download` 仍 404，但 Classic 视图页（`/webapps/assignment/uploadAssignment?…&mode=view`）内的 `/webapps/assignment/download?course_id=…&attempt_id=…&file_id=…&fileName=…` 可下载——已封为 `submission` 命令（v0.1.3）。
-- 讨论板若要做须走 DOM 路线（参考 bb-mcp），v1 不含。
-- 仅 Classic（JSP）课程；Ultra 课程未验证。
-- 写操作（提交作业/发公告）刻意不提供——上层如需，须用户明示并另行设计。
-- 登录失败页的错误文案常驻 HTML 模板，判定只能靠状态推进；若学校改版登录页，带 `BB_CLI_DEBUG=<目录>` 重跑可留现场。
+- 404 under student sessions: `gradebook/attempts` (flat list), `discussion/forums`, `users/me/memberships`, `tasks`, `gradebook/grades`.
+- Exceptions verified (2026-09-30): `gradebook/columns/{col}/attempts` returns your own attempt (with submission time); `attempts/{id}/files` lists file names; REST `/download` is still 404, but the `/webapps/assignment/download?course_id=…&attempt_id=…&file_id=…&fileName=…` link inside the Classic view page (`/webapps/assignment/uploadAssignment?…&mode=view`) works for downloads — wrapped as the `submission` command (v0.1.3).
+- Discussion boards, if ever needed, would require the DOM route (see bb-mcp); not in v1.
+- Classic (JSP) courses only; Ultra courses unverified.
+- Write operations (submitting assignments / posting announcements) are deliberately not provided — upper layers needing them require explicit user instruction and separate design.
+- The login-failure page's error text lives permanently in HTML templates, so detection can only rely on state progression; if the school redesigns the login page, re-run with `BB_CLI_DEBUG=<dir>` to capture evidence.
 
-## 致谢
+## Acknowledgments
 
-- [jsyzlbw/bbwatch](https://github.com/jsyzlbw/bbwatch)：curl_cffi 指纹路线与 REST 端点实证。
-- [changshenhan/bb-mcp](https://github.com/changshenhan/bb-mcp)：端点与站点行为参考。
+- [jsyzlbw/bbwatch](https://github.com/jsyzlbw/bbwatch): the curl_cffi fingerprint route and REST endpoint verification.
+- [changshenhan/bb-mcp](https://github.com/changshenhan/bb-mcp): endpoint and site-behavior reference.

@@ -1,4 +1,4 @@
-"""命令面：全只读。JSON 默认输出；raw 仅允许 GET（写操作不入 v1）。"""
+"""Command surface: all read-only. JSON output by default; raw accepts GET only (write operations are out of scope for v1)."""
 
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ from .api import BBClient
 from .transport import ApiError, TooLarge, Transport, TransportError
 
 
-# ---- 输出 ----
+# ---- Output ----
 def emit(obj, fmt: str, text_fn=None):
     if fmt == "text" and text_fn:
-        lines = list(text_fn(obj)) or ["（无结果）"]
+        lines = list(text_fn(obj)) or ["(no results)"]
         for line in lines:
             print(line)
     else:
@@ -51,7 +51,7 @@ def _sanitize(name: str) -> str:
 
 
 def _local_dt(iso: str | None) -> datetime | None:
-    """API 原值为 UTC ISO（…Z）；无时区标记亦按 UTC。解析失败返回 None。"""
+    """API raw values are UTC ISO (…Z); values without a timezone mark are treated as UTC too. Returns None on parse failure."""
     if not iso:
         return None
     s = iso.strip()
@@ -63,7 +63,7 @@ def _local_dt(iso: str | None) -> datetime | None:
         return None
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone()  # 本机时区
+    return dt.astimezone()  # local timezone
 
 
 def _date_part(iso: str | None) -> str:
@@ -76,7 +76,7 @@ def _dt_part(iso: str | None) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M") if dt else (iso or "")[:16]
 
 
-# ---- 会话装配 ----
+# ---- Session assembly ----
 def build_client() -> tuple[BBClient, Transport, dict]:
     cfg = config.load_config()
     t = Transport()
@@ -95,11 +95,11 @@ def need_auth(client: BBClient):
     try:
         client.me()
     except Exception:
-        print("未登录或会话过期：先 `bb-cli login`", file=sys.stderr)
+        print("Not logged in or session expired: run `bb-cli login` first", file=sys.stderr)
         sys.exit(2)
 
 
-# ---- 命令实现 ----
+# ---- Command implementations ----
 def cmd_login(args):
     import getpass
     import os
@@ -107,22 +107,22 @@ def cmd_login(args):
     cfg = config.load_config()
     username = args.username or os.environ.get(config.ENV_USERNAME) or cfg.get("username")
     if not username:
-        username = input("学号/邮箱前缀: ").strip()
+        username = input("Student id / email prefix: ").strip()
     if args.password_env:
         password = os.environ.get(args.password_env)
         if not password:
-            sys.exit(f"环境变量 {args.password_env} 未设置")
+            sys.exit(f"Environment variable {args.password_env} is not set")
     elif os.environ.get(config.ENV_PASSWORD):
         password = os.environ[config.ENV_PASSWORD]
     else:
-        password = getpass.getpass("密码: ")
+        password = getpass.getpass("Password: ")
     t = Transport()
     me = auth.login(t, username, password)
     t.save_session()
     cfg["username"] = username
     if not args.no_store:
         cfg["password"] = password
-        print(f"凭据已存 {config.config_path()}（仅本机用户目录）", file=sys.stderr)
+        print(f"Credentials saved to {config.config_path()} (local user directory only)", file=sys.stderr)
     config.save_config(cfg)
     emit({"login": "ok", "user": me.get("name"), "id": me.get("id")}, args.format)
 
@@ -131,7 +131,7 @@ def cmd_logout(args):
     t = Transport()
     t.load_session()
     auth.logout(t)
-    print("已登出并清除本地会话")
+    print("Logged out; local session cleared")
 
 
 def cmd_whoami(args):
@@ -142,7 +142,7 @@ def cmd_whoami(args):
 
 def cmd_status(args):
     c, t, _ = build_client()
-    t._relogin = None  # 状态探测不触发自动重登，未登录如实报告
+    t._relogin = None  # status probing never triggers auto re-login; an unauthenticated state is reported as-is
     has_file = config.session_path().exists()
     try:
         me = c.me()
@@ -216,7 +216,7 @@ def _walk_files(c: BBClient, cid: str, depth: int):
 
 
 def _match_rows(rows: list[dict], pattern: str) -> list[dict]:
-    """--match 同时作用于内容路径与附件文件名（不区分大小写）。"""
+    """--match applies to both content paths and attachment file names (case-insensitive)."""
     rx = re.compile(pattern, re.I)
 
     def hay(r: dict) -> str:
@@ -279,7 +279,7 @@ def cmd_fetch(args):
                 continue
             rel = "/".join([_sanitize(p) for p in r["path"].split(" / ")[:-1]]
                            + [_sanitize(a["fileName"] or a["id"])])
-            if rel in used:  # 同目录同名附件：尾缀附件 id 防覆盖
+            if rel in used:  # same-name attachments in one directory: suffix the attachment id to prevent overwrites
                 stem, _, ext = rel.rpartition(".")
                 rel = f"{stem}_{a['id'][:8]}.{ext}" if stem else f"{rel}_{a['id'][:8]}"
             used.add(rel)
@@ -299,7 +299,7 @@ def cmd_fetch(args):
             continue
         try:
             if dest.exists() and args.refresh:
-                # 重拉比对：内容相同即弃；变更以内容哈希尾缀落新件，旧件保留（修订史）
+                # Re-pull and compare: drop if identical; changed content lands as a new file suffixed with the content hash, the old file is kept (revision history)
                 tmp = dest.with_suffix(dest.suffix + ".new")
                 c.t.download(c.download_url(course["id"], p["content_id"], p["attachment"]["id"]),
                              tmp, max_bytes=max_bytes)
@@ -348,10 +348,10 @@ def cmd_announcements(args):
             r["bodyText"] = strip_html(r.get("body") or "")
 
     def _lines(o):
-        out = [f"{_date_part(r.get('created'))}  {r.get('courseName', '(机构)')}  {r.get('title')}" for r in o["announcements"]]
+        out = [f"{_date_part(r.get('created'))}  {r.get('courseName', '(institution)')}  {r.get('title')}" for r in o["announcements"]]
         if o.get("skipped"):
-            names = "、".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
-            out.append(f"!! 跳过 {len(o['skipped'])} 课（拉取失败）：{names}")
+            names = ", ".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
+            out.append(f"!! skipped {len(o['skipped'])} course(s) (pull failed): {names}")
         return out
 
     emit({"count": len(rows), "announcements": rows, "skipped": skipped}, args.format, _lines)
@@ -360,7 +360,7 @@ def cmd_announcements(args):
 def cmd_dues(args):
     c, _, _ = build_client()
     need_auth(c)
-    # 双源合并：日历端点 + 每课成绩册列（日历会漏项，成绩册兜底；同课同题保留日历条目）
+    # Dual-source merge: calendar endpoint + per-course gradebook columns (the calendar misses items, the gradebook is the fallback; for the same course and title keep the calendar entry)
     items = [{"course": r.get("calendarName"), "title": r.get("title"), "source": "calendar",
               "due": r.get("start"), "end": r.get("end"), "type": r.get("type")}
              for r in c.calendar_items()]
@@ -384,7 +384,7 @@ def cmd_dues(args):
                 items.append({"course": course.get("name"), "title": col.get("name"),
                               "source": "gradebook", "due": due, "end": None, "type": None})
     dedup, seen = [], set()
-    for x in sorted(items, key=lambda i: i["source"] != "calendar"):  # 稳定排序：日历条目先入
+    for x in sorted(items, key=lambda i: i["source"] != "calendar"):  # stable sort: calendar entries enter first
         k = (" ".join((x["course"] or "").split()), " ".join((x["title"] or "").split()))
         if k in seen:
             continue
@@ -400,8 +400,8 @@ def cmd_dues(args):
     def _lines(o):
         out = [f"{_date_part(r['due'])}  {r['course']}  {r['title']}  [{r['source']}]" for r in o["dues"]]
         if o.get("skipped"):
-            names = "、".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
-            out.append(f"!! 跳过 {len(o['skipped'])} 课成绩册（拉取失败）：{names}")
+            names = ", ".join(s.get("course") or s.get("id") or "?" for s in o["skipped"])
+            out.append(f"!! skipped {len(o['skipped'])} course gradebook(s) (pull failed): {names}")
         return out
 
     emit({"count": len(items), "dues": items, "skipped": skipped}, args.format, _lines)
@@ -467,7 +467,7 @@ def cmd_submission(args):
                     dl.append({"file": f.get("name"), "error": str(e)[:200]})
     emit({"course": course.get("name"), "submissions": rows, "downloaded": dl}, args.format,
          lambda o: [f"{_dt_part(r['due']) or '-'}  {r['name']}  [{r['status']}]  "
-                    f"提交于 {_dt_part(r['submitted_at']) or '-'}  "
+                    f"submitted {_dt_part(r['submitted_at']) or '-'}  "
                     f"{', '.join(f['name'] or '' for f in r['files'])}" for r in o["submissions"]])
 
 
@@ -503,7 +503,7 @@ def cmd_roster(args):
 
 def cmd_raw(args):
     if args.method.upper() != "GET":
-        sys.exit("v1 只读：raw 仅接受 GET")
+        sys.exit("v1 is read-only: raw accepts GET only")
     c, _, _ = build_client()
     need_auth(c)
     params = {}
@@ -513,98 +513,98 @@ def cmd_raw(args):
     emit(c.get(args.path, params or None), args.format)
 
 
-# ---- 参数解析 ----
+# ---- Argument parsing ----
 def build_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="bb-cli", description="CUHK-SZ Blackboard 只读 CLI 连接器")
+    p = argparse.ArgumentParser(prog="bb-cli", description="CUHK-SZ Blackboard read-only CLI connector")
     p.add_argument("--version", action="version", version=__version__)
     p.add_argument("--format", choices=["json", "text"], default="json")
-    common = argparse.ArgumentParser(add_help=False)  # 让 --format 也接受子命令后置
+    common = argparse.ArgumentParser(add_help=False)  # lets --format be accepted after the subcommand too
     common.add_argument("--format", choices=["json", "text"], default=argparse.SUPPRESS)
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def cmd(name: str, help_: str):
         return sub.add_parser(name, help=help_, parents=[common])
 
-    s = cmd("login", "登录并保存会话")
+    s = cmd("login", "log in and save the session")
     s.add_argument("--username")
-    s.add_argument("--password-env", help="从该环境变量读密码")
-    s.add_argument("--no-store", action="store_true", help="不把密码写入本机配置")
+    s.add_argument("--password-env", help="read the password from this environment variable")
+    s.add_argument("--no-store", action="store_true", help="do not write the password into the local config")
     s.set_defaults(fn=cmd_login)
 
-    cmd("logout", "登出并清本地会话").set_defaults(fn=cmd_logout)
-    cmd("whoami", "当前用户").set_defaults(fn=cmd_whoami)
-    cmd("status", "会话状态").set_defaults(fn=cmd_status)
-    cmd("terms", "学期列表").set_defaults(fn=cmd_terms)
+    cmd("logout", "log out and clear the local session").set_defaults(fn=cmd_logout)
+    cmd("whoami", "current user").set_defaults(fn=cmd_whoami)
+    cmd("status", "session status").set_defaults(fn=cmd_status)
+    cmd("terms", "term list").set_defaults(fn=cmd_terms)
 
-    s = cmd("courses", "我的课程")
-    s.add_argument("--term", help="按学期名过滤（子串）")
+    s = cmd("courses", "my courses")
+    s.add_argument("--term", help="filter by term name (substring)")
     s.set_defaults(fn=cmd_courses)
 
-    s = cmd("tree", "课程内容树")
+    s = cmd("tree", "course content tree")
     s.add_argument("course")
     s.add_argument("--depth", type=int, default=12)
     s.add_argument("--no-attachments", action="store_true")
     s.set_defaults(fn=cmd_tree)
 
-    s = cmd("files", "课件文件清单")
+    s = cmd("files", "course file inventory")
     s.add_argument("course")
-    s.add_argument("--match", help="路径正则过滤（不区分大小写）")
+    s.add_argument("--match", help="regex filter on paths (case-insensitive)")
     s.add_argument("--depth", type=int, default=12)
     s.set_defaults(fn=cmd_files)
 
-    s = cmd("fetch", "下载课件（保留目录结构）")
+    s = cmd("fetch", "download course files (preserving the directory structure)")
     s.add_argument("course")
     s.add_argument("--match")
-    s.add_argument("--since", help="只取内容修改日 >= YYYY-MM-DD")
+    s.add_argument("--since", help="only items whose content was modified on or after YYYY-MM-DD")
     s.add_argument("-o", "--out", default=".")
-    s.add_argument("--dest", help="完整目标目录：直接落此目录，不再拼课程名")
-    s.add_argument("--exclude-mime", help="跳过 mimeType 含任一子串的附件（逗号分隔，如 video/,audio/）")
-    s.add_argument("--exclude-ext", help="跳过指定扩展名附件（逗号分隔，如 mp4,mov）")
+    s.add_argument("--dest", help="exact target directory: land directly here, no course-name prefix appended")
+    s.add_argument("--exclude-mime", help="skip attachments whose mimeType contains any substring (comma-separated, e.g. video/,audio/)")
+    s.add_argument("--exclude-ext", help="skip attachments with these extensions (comma-separated, e.g. mp4,mov)")
     s.add_argument("--no-media-filter", action="store_true",
-                   help="关闭默认媒体扩展名过滤（仅按 --exclude-mime/--exclude-ext）")
-    s.add_argument("--max-size", type=float, help="单件大小上限 MB，下载中断路跳过")
+                   help="disable the default media-extension filter (only --exclude-mime/--exclude-ext apply)")
+    s.add_argument("--max-size", type=float, help="per-file size cap in MB; trips mid-download and skips")
     s.add_argument("--refresh", action="store_true",
-                   help="已存在件重拉比对：相同跳过、变更以内容哈希尾缀落新件（旧件保留）")
+                   help="re-pull existing files and compare: identical ones are skipped; changed content lands as a new file suffixed with the content hash (old file kept)")
     s.add_argument("--dry-run", action="store_true")
     s.set_defaults(fn=cmd_fetch)
 
-    s = cmd("announcements", "公告（默认全部课程）")
-    s.add_argument("--course", help="课程子串/id，或 all")
+    s = cmd("announcements", "announcements (all courses by default)")
+    s.add_argument("--course", help="course substring/id, or all")
     s.add_argument("--limit", type=int)
-    s.add_argument("--html", action="store_true", help="保留原始 HTML 正文")
+    s.add_argument("--html", action="store_true", help="keep the raw HTML body")
     s.set_defaults(fn=cmd_announcements)
 
-    s = cmd("dues", "跨课程截止（日历端点）")
+    s = cmd("dues", "cross-course deadlines (calendar endpoint)")
     s.add_argument("--course")
     s.add_argument("--from", dest="from_")
     s.add_argument("--to")
     s.set_defaults(fn=cmd_dues)
 
-    s = cmd("assignments", "作业清单（列×我的状态）")
+    s = cmd("assignments", "assignment list (columns x my status)")
     s.add_argument("course")
     s.set_defaults(fn=cmd_assignments)
 
-    s = cmd("submission", "我的提交：状态×时刻×文件（--download 落盘）")
+    s = cmd("submission", "my submissions: status x time x files (--download saves them)")
     s.add_argument("course")
-    s.add_argument("--match", help="作业名正则过滤（不区分大小写）")
-    s.add_argument("--download", action="store_true", help="下载提交文件至 课程/submissions/作业/")
+    s.add_argument("--match", help="regex filter on assignment names (case-insensitive)")
+    s.add_argument("--download", action="store_true", help="download submitted files to course/submissions/assignment/")
     s.add_argument("-o", "--out", default=".")
-    s.add_argument("--dest", help="完整目标目录：直接落此目录（其下仍按 作业/文件 分），不再拼课程名/submissions")
+    s.add_argument("--dest", help="exact target directory: land directly here (still grouped assignment/file underneath), no course-name/submissions prefix appended")
     s.set_defaults(fn=cmd_submission)
 
-    s = cmd("grades", "成绩册（默认全部课程）")
+    s = cmd("grades", "gradebook (all courses by default)")
     s.add_argument("course", nargs="?")
     s.add_argument("--due-only", action="store_true")
     s.set_defaults(fn=cmd_grades)
 
-    s = cmd("roster", "课程成员列表")
+    s = cmd("roster", "course member list")
     s.add_argument("course")
     s.set_defaults(fn=cmd_roster)
 
-    s = cmd("raw", "任意 REST GET 透传（/learn/api/public/v1/...）")
+    s = cmd("raw", "arbitrary REST GET pass-through (/learn/api/public/v1/...)")
     s.add_argument("method")
     s.add_argument("path")
-    s.add_argument("--q", action="append", help="查询参数 k=v（可重复）")
+    s.add_argument("--q", action="append", help="query parameter k=v (repeatable)")
     s.set_defaults(fn=cmd_raw)
 
     return p
@@ -615,13 +615,13 @@ def main(argv=None):
     try:
         args.fn(args)
     except (auth.CredentialError,) as e:
-        print(f"凭据错误：{e}", file=sys.stderr)
+        print(f"Credential error: {e}", file=sys.stderr)
         sys.exit(2)
     except auth.AuthError as e:
-        print(f"登录失败：{e}", file=sys.stderr)
+        print(f"Login failed: {e}", file=sys.stderr)
         sys.exit(2)
     except (TransportError, ApiError) as e:
-        print(f"请求失败：{e}", file=sys.stderr)
+        print(f"Request failed: {e}", file=sys.stderr)
         sys.exit(1)
 
 
