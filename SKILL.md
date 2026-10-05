@@ -2,12 +2,12 @@
 name: bb-map
 owner: bb-map
 consumes: [bb, bb-map, trust, index, hot, log]
-description: "把 bb/ 拉取物与成绩册快照映射为 wiki/cuhksz/cuhksz/bb/<term>/<course>/ 规范形四桶页：拉取核对 → info/courseware/assessments/attachments 落位 → 对账 → 写后管道。Triggers on: bb-map, 映射课程, bb 落位, 落位这门课, map bb course."
+description: "把 bb/ 拉取物与成绩册快照映射为 wiki/cuhksz/bb/<term>/<course>/ 规范形四桶页：拉取核对 → info/courseware/assessments/attachments 落位 → 对账 → 写后管道。Triggers on: bb-map, 映射课程, bb 落位, 落位这门课, map bb course."
 ---
 
 # bb-map：课程域映射
 
-把 `cuhksz/bb/` 拉取物与成绩册快照映射为 `wiki/cuhksz/cuhksz/bb/<term>/<course>/` 规范形四桶页——映射与理解解耦，登记 + courseware 知识点摘要（粗粒度蒸馏）+ 对账动作（四桶契约与对账字段见注入区 bb-map 块）。数据拉取经 bbcli skill（`connectors/bb-cli/SKILL.md`——会话纪律与命令速查）；深度讲解不属本命令（高价值复盘走 save 进 notes，回链属地页）。
+把 `cuhksz/bb/` 拉取物与成绩册快照映射为 `wiki/cuhksz/bb/<term>/<course>/` 规范形四桶页——映射与理解解耦，登记 + courseware 知识点摘要（粗粒度蒸馏）+ 对账动作（四桶契约与对账字段见注入区 bb-map 块）。数据拉取经 bbcli skill（`connectors/bb-cli/SKILL.md`——会话纪律与命令速查）；深度讲解不属本命令（高价值复盘走 save 进 notes，回链属地页）。
 
 ## Scope
 
