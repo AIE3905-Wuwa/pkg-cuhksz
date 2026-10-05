@@ -10,8 +10,8 @@ Pull information from sis.cuhk.edu.cn via `connectors/sis-cli/` (a purely read-o
 
 ## Scope
 
-Read: SIS student self-service pages (weekly schedule / grades summary / course history / enrollment dates / student center)
-Write: none — read-only by design. **Enrollment actions (add/drop/swap classes) and any state-changing transaction are deliberately NOT provided**; the user risks academic penalties for misuse, so never attempt them via raw or any other route.
+Read: SIS student self-service pages (weekly schedule with day-of-week / per-term grades / course history / enrollment dates / exam schedule / student center)
+Write: none — read-only by design. **Enrollment actions (add/drop/swap classes) and any state-changing transaction are deliberately NOT provided**; the user risks academic penalties for misuse, so never attempt them via raw or any other route. The only POST the CLI ever makes is the term-selection "Continue" query on search pages — a pure query action equivalent to clicking Continue in the browser.
 
 ## Prerequisites (install / auth)
 
@@ -29,21 +29,25 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 
 | Need | Command |
 |---|---|
-| Weekly schedule (events + term course list) | `sis-cli schedule --format text` |
-| Grades (v0.1 text summary) | `sis-cli grades` |
-| Course history / Student center / Enrollment dates | `sis-cli history` / `sis-cli center` / `sis-cli appt` |
+| Weekly schedule + day-of-week timetable | `sis-cli schedule --days --format text` |
+| My grades for a term | `sis-cli grades [--term 'Term 2']` (default = newest term; term list is reverse-chronological) |
+| Full course history | `sis-cli history` |
+| Enrollment dates / registration window | `sis-cli appt [--term 'Summer']` |
+| Exam schedule | `sis-cli exam` (empty when not yet published) |
+| Student center / per-assignment grades | `sis-cli center` / `sis-cli assignments` (text summaries) |
 | Any page as HTML (probe before wrapping) | `sis-cli raw <url> --file out.html` |
 
 Component URLs take the form `/psc/csprd/EMPLOYEE/HRMS/c/<COMPONENT>?PORTALPARAM_PTCNAV=<NAV>` — both parts are registered in `siscli/config.py`; use `raw` for anything not yet wrapped.
 
 ## Status values
 
-Schedule events carry `type` (Lecture / Tutorial / Supervision …), `time` (e.g. `8:30AM - 9:50AM`), `location` (building + room). `grades` may print "There is no information for the transaction you requested" — the component needs a term-selection interaction that is v0.2 scope; report this to the user instead of retrying.
+Schedule `--days` rows carry `days` (Mo/Tu/We/Th/Fr/Sa/Su combos), `time` (e.g. `10:30AM - 11:50AM`), `location`; supervision sections may have no fixed meeting (empty days/time). Grades rows carry course/units/grading basis (Graded, Pass/Fail, Distinction/Pass/Failure)/grade/grade points; Pass-type grades have empty points. `--term` accepts a substring (e.g. `Term 2`, `Summer`) matched against term labels like `2025-26 Term 2` / `2025-26 Summer Session`.
 
 ## Known limits
 
-- Weekly grid day-attribution not implemented (v0.2); events are a deduplicated flat list
-- Tuition / exam schedule / enrollment cart components are menu-visible but not registered — explore via `raw` first, then wrap
+- `exam` returns empty until the school publishes the term's exam schedule (mechanism verified)
+- `assignments` (per-assignment gradebook) usually shows "no information" — use `grades` for per-term grades
+- Tuition / Finances and enrollment-cart read views are not registered — explore via `raw` first, then wrap
 - PIA upgrades or sign-in page changes will break the chain: re-run with `SIS_CLI_DEBUG=<dir>` to capture evidence
 - Page bodies contain the student's real name and personal data: relay in conversation only, never commit CLI output into any repo
 

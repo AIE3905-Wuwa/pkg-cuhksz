@@ -38,12 +38,20 @@ PS_DEVICEFEATURES = (
 # 学生角色可用组件（2026-10-05 双实证：浏览器菜单导航 + HTTP psc+PTCNAV 直击）。
 # PTCNAV 是权限判定的导航上下文——缺它即报 not authorized。
 COMPONENTS = {
+    # 直出组件（GET 即内容）
     "schedule": ("SA_LEARNER_SERVICES.SSR_SSENRL_SCHD_W.GBL", "HC_SSR_SSENRL_SCHD_W_GBL"),
-    "grades": ("SA_LEARNER_SERVICES.SS_LAM_STD_GR_LST.GBL", "HC_SS_LAM_STD_GR_LST_GBL1"),
     "center": ("SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL", "HC_SSS_STUDENT_CENTER"),
     "history": ("SA_LEARNER_SERVICES_2.SSS_MY_CRSEHIST.GBL", "HC_SSS_MY_CRSEHIST_GBL2"),
+    # term 交互组件（GET 搜索页 → POST 学期 radio + Continue）
+    "grades": ("SA_LEARNER_SERVICES.SSR_SSENRL_GRADE.GBL", "HC_SSR_SSENRL_GRADE_GBL"),
     "appt": ("SA_LEARNER_SERVICES.SSR_SSENRL_APPT.GBL", "HC_SSR_SSENRL_APPT"),
+    "exam": ("SA_LEARNER_SERVICES.SSR_SSENRL_EXAM_L.GBL", "HC_SSR_SSENRL_EXAM_L_GBL"),
+    "list_schedule": ("SA_LEARNER_SERVICES.SSR_SSENRL_LIST.GBL", "HC_SSR_SSENRL_LIST_GBL"),
+    # 按作业查成绩（View My Assignments）——实证常显 "no information"，留观察
+    "assignments": ("SA_LEARNER_SERVICES.SS_LAM_STD_GR_LST.GBL", "HC_SS_LAM_STD_GR_LST_GBL1"),
 }
+# 需要选学期再 Continue 的组件（统一交互：radio SSR_DUMMY_RECV1$sels$0 + DERIVED_SSS_SCT_SSR_PB_GO）
+TERM_COMPONENTS = {"grades", "appt", "exam", "list_schedule"}
 
 ENV_HOME = "SIS_CLI_HOME"
 ENV_USERNAME = "SIS_CLI_USERNAME"

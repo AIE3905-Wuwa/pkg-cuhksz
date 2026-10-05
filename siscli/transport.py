@@ -145,5 +145,33 @@ class Transport:
             return html
         raise DeadSession("unreachable")
 
+    # ---- term 搜索页提交（查询动作，等同网页上选学期点 Continue） ----
+    def submit_search(self, search_html: str, radio_value: str,
+                      action: str = "DERIVED_SSS_SCT_SSR_PB_GO") -> str:
+        """从搜索页 HTML 收集 win0 表单，设学期 radio + ICAction 后 POST，返回结果页。
+
+        只用于查询类按钮（Continue/Change Term）；任何数据变更按钮禁止传入。
+        """
+        soup = BeautifulSoup(search_html, "html.parser")
+        form = soup.find("form", attrs={"name": "win0"})
+        if form is None or not form.get("action"):
+            raise TransportError("未找到 win0 表单（搜索页结构变化）")
+        fields: dict[str, str] = {}
+        for i in form.find_all("input"):
+            n = i.get("name")
+            if n and i.get("type") in (None, "hidden", "text"):
+                fields[n] = i.get("value") or ""
+        for sel in form.find_all("select"):
+            if sel.get("name") and sel.find("option"):
+                fields[sel.get("name")] = sel.find("option").get("value") or ""
+        fields["SSR_DUMMY_RECV1$sels$0"] = str(radio_value)
+        fields["ICAction"] = action
+        r = self._sess.post(form["action"], data=fields, allow_redirects=True,
+                            timeout=config.REQUEST_TIMEOUT)
+        self.save_session()
+        if self.is_signon_shell(r.text):
+            raise DeadSession("term 提交后会话死亡")
+        return r.text
+
     def download(self, url: str, dest: Path) -> int:
         raise NotImplementedError("v0.1 未含下载；报表导出走 raw 手工验证后再封")

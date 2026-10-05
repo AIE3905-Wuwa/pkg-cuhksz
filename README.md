@@ -38,16 +38,21 @@ python -m venv .venv
 |---|---|
 | `status` | 会话状态与可用组件清单 |
 | `login` / `logout` | 交互登录（`--no-store` 免落盘）/ 登出清本地 |
-| `schedule` | 我的每周课程表：本周事件（编号/类型/时段/教室）+ 学期课程总表（**全解析**） |
-| `grades` | 查看作业与成绩（v0.1 文本摘要；组件需 term 交互，结构化解析 v0.2） |
-| `center` / `history` / `appt` | 学生中心 / 课程历史 / 注册日期（v0.1 文本摘要） |
+| `schedule [--days]` | 我的每周课程表：本周事件 + 学期课程总表；`--days` 附学生中心页的**星期归属课表**（Mo/Tu/We…） |
+| `grades [--term 子串]` | 查看我的成绩：按学期课程行（课号/学分/评分制/等级/绩点），缺省取最新学期 |
+| `history` | 课程历史全量：课号/课名/学期/等级/学分（页面直出，无需交互） |
+| `appt [--term 子串]` | 注册日期：选课窗口（起止时刻）+ 学分上下限 |
+| `exam [--term 子串]` | 考试安排（当前学期未发布时为空） |
+| `center` / `assignments` | 学生中心页 / 按作业查成绩（文本摘要，assignments 常无数据） |
 | `raw <url> [--file F]` | 任意 GET 透传——新需求先走这里验证，再封命令 |
+
+**term 交互机制**（grades/appt/exam）：GET 搜索页 → 解析学期 radio（`SSR_DUMMY_RECV1$sels$0`，页面倒序最新在前）→ POST `win0` 表单（ICAction=Continue 按钮 `DERIVED_SSS_SCT_SSR_PB_GO`）→ 结果页。此 POST 是查询动作（等同网页上点"继续"），不改变任何数据。
 
 ## 已知边界（2026-10-05 实测）
 
-- `schedule` 的星期网格归属未做（PeopleSoft 周视图 DOM 无列锚点，v0.2 议）；事件清单已按四元组去重。
-- `grades`（SS_LAM_STD_GR_LST）当前直接访问显示 "There is no information"——需 term 查询交互（POST ICSID 表单），v0.2 补。
-- 学费账单、考试计划、购物车等组件未登记（菜单可见，`raw` 可先行探路）。
+- `exam` 考试安排：机制与 grades 同款（term POST），当前学期未发布时结果为空——发布后自然出数据。
+- `assignments`（按作业查成绩）直击显示 "There is no information"，留观察；按学期成绩走 `grades`。
+- 学费账单（Finances 类）与购物车只读视图未登记（菜单可见，`raw` 可先行探路）。
 - 页面正文含学生真实姓名等隐私——CLI 输出仅落终端/本机，**绝不入仓库**。
 - 学校升级 PIA 或改登录页会断链：带 `SIS_CLI_DEBUG=<目录>` 重跑可留现场。
 - **写操作（选课/退课/换课/提交）刻意不提供**——误操作有真实学籍后果；如确需，须用户明示并另行设计。

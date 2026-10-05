@@ -10,6 +10,150 @@ import re
 from bs4 import BeautifulSoup
 
 _COURSE_CODE = re.compile(r"^[A-Z]{2,4}\s\d{3,4}\s-\s[A-Z]\d{2}")
+_COURSE_CODE_TIGHT = re.compile(r"^[A-Z]{2,4}\s\d{3,4}$")
+_TERM_LABEL = re.compile(r"\d{4}-\d{2}\s+(?:Term\s+\d|Summer Session)")
+
+
+def parse_terms(html: str) -> list[dict]:
+    """term 搜索页的学期清单：radio idx → 学期名（页面倒序，最新在前）。"""
+    soup = BeautifulSoup(html, "html.parser")
+    out: list[dict] = []
+    seen: set[str] = set()
+    for row in soup.find_all("tr"):
+        rad = row.find("input", {"type": "radio", "name": "SSR_DUMMY_RECV1$sels$0"})
+        if rad is None:
+            continue
+        m = _TERM_LABEL.search(row.get_text(" ", strip=True))
+        if not m:
+            continue
+        label = m.group(0)
+        if label in seen:
+            continue
+        seen.add(label)
+        out.append({"idx": rad.get("value"), "term": label})
+    return out
+
+
+def parse_grade_report(html: str) -> dict:
+    """View My Grades 结果页：Class Grades 表 + GPA（嵌套表重复命中，按键去重）。"""
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text(" ", strip=True)
+    term = ""
+    m = _TERM_LABEL.search(text)
+    if m:
+        term = m.group(0)
+    rows, seen = [], set()
+    for tb in soup.find_all("table"):
+        headers = [th.get_text(strip=True) for th in tb.find_all("th")]
+        if "Grading" not in headers or "Grade Points" not in headers:
+            continue
+        for row in tb.find_all("tr"):
+            cells = [c.get_text(" ", strip=True) for c in row.find_all("td")]
+            if len(cells) >= 6 and _COURSE_CODE_TIGHT.match(cells[0]):
+                key = tuple(cells[:6])
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append({"course": cells[0], "description": cells[1],
+                             "units": cells[2], "grading": cells[3],
+                             "grade": cells[4], "points": cells[5]})
+    gpa = {}
+    flat = soup.get_text("\n", strip=True)
+    for m2 in re.finditer(r"(Cumulative GPA|Term GPA)\s*:?\s*([\d.]+)", flat):
+        gpa[m2.group(1)] = m2.group(2)
+    return {"term": term, "rows": rows, "gpa": gpa}
+
+
+def parse_history(html: str) -> list[dict]:
+    """课程历史（页面直接含全表）：Course/Description/Term/Grade/Units/Status。"""
+    soup = BeautifulSoup(html, "html.parser")
+    out = []
+    for td in soup.find_all("td"):
+        if not _COURSE_CODE_TIGHT.match(td.get_text(strip=True)):
+            continue
+        row = td.find_parent("tr")
+        if row is None:
+            continue
+        cells = [c.get_text(" ", strip=True) for c in row.find_all("td")]
+        if len(cells) >= 6 and _TERM_LABEL.search(cells[2] or ""):
+            out.append({"course": cells[0], "description": cells[1], "term": cells[2],
+                        "grade": cells[3], "units": cells[4], "status": cells[5]})
+    # 去重（嵌套表可能重复命中）
+    seen, dedup = set(), []
+    for r in out:
+        key = (r["course"], r["term"])
+        if key not in seen:
+            seen.add(key)
+            dedup.append(r)
+    return dedup
+
+
+def parse_appt(html: str) -> dict:
+    """Enrollment Dates 结果页：学期名 + 注册窗口 + 学分上下限。"""
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text("\n", strip=True)
+    term = ""
+    m = _TERM_LABEL.search(text)
+    if m:
+        term = m.group(0)
+    appts = []
+    lines = text.split("\n")
+    for i, l in enumerate(lines):
+        if l.strip() == "Regular Academic Session" and i + 4 < len(lines):
+            appts.append({"session": "Regular Academic Session",
+                          "begins": lines[i + 1], "begin_time": lines[i + 2],
+                          "ends": lines[i + 3], "end_time": lines[i + 4]})
+    limits = {}
+    for m2 in re.finditer(r"(Max Total Units|Min Total Units)\s*\n\s*([\d.]+)", text):
+        limits[m2.group(1)] = m2.group(2)
+    return {"term": term, "appointments": appts, "limits": limits}
+
+
+def parse_exam(html: str) -> list[dict]:
+    """考试安排结果页：按表头锚定（Class/Date/Time/Room…，以实页为准）。"""
+    soup = BeautifulSoup(html, "html.parser")
+    out = []
+    for tb in soup.find_all("table"):
+        headers = [th.get_text(strip=True) for th in tb.find_all("th")]
+        if not headers or "Class" not in headers:
+            continue
+        for row in tb.find_all("tr"):
+            cells = [c.get_text(" ", strip=True) for c in row.find_all("td")]
+            if cells and any(cells) and _COURSE_CODE.match(cells[0].split(" - ")[0].split(" (")[0]):
+                out.append(dict(zip([h or f"c{i}" for i, h in enumerate(headers)], cells)))
+    return out
+
+
+_CENTER_EVENT = re.compile(
+    r"^([A-Z]{2,4}\s\d{3,4}-[A-Z]\d{2})\s+(LEC|TUT|SUP|LAB|SEM)\s+\((\d+)\)"
+    r"(?:\s+((?:Mo|Tu|We|Th|Fr|Sa|Su){1,4})\s+(\d{1,2}:\d{2}(?:AM|PM))\s*-\s*(\d{1,2}:\d{2}(?:AM|PM)))?"
+    r"\s+(.*)$")
+
+
+def parse_center_schedule(html: str) -> list[dict]:
+    """学生中心页 This Week's Schedule：课程-节次/类型/classNbr/星期/时段/教室。
+
+    星期缩写（Mo/Tu/We/Th/Fr/Sa/Su）直接在行内——周视图 DOM 无列锚点，此页是
+    星期归属的权威源。SUP 型无固定 meeting（星期/时段缺省）。
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    out = []
+    for tr in soup.find_all("tr"):
+        t = tr.get_text(" ", strip=True)
+        m = _CENTER_EVENT.match(t)
+        if not m:
+            continue
+        out.append({"class": m.group(1), "type": m.group(2), "class_nbr": m.group(3),
+                    "days": m.group(4) or "", "time": (m.group(5) + " - " + m.group(6)) if m.group(5) else "",
+                    "location": m.group(7).strip()})
+    # 大容器行会以更长文本重复命中（前缀带页头），保留最短匹配集：按 class+type 去重
+    seen, dedup = set(), []
+    for r in out:
+        key = (r["class"], r["type"], r["days"], r["time"])
+        if key not in seen:
+            seen.add(key)
+            dedup.append(r)
+    return dedup
 
 
 def parse_weekly(html: str) -> dict:
