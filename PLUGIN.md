@@ -1,44 +1,44 @@
-# bb：课程运行子域（cuhksz 域内）
+# bb: Course Operations Subdomain (inside the cuhksz domain)
 
-## 设计概要
+## Design Summary
 
-- **为什么存在**：把 LMS 接为 wiki 外信息源，Blackboard 是首例，即 CUHK-SZ。本件是 bb 族五件的**域基座**，只立契约六问的答案——外领地、落地策略、身份证明、wiki 属地、写模型、信任模型。投影细则归 bb-map；CLI 用法归 bb-cli skill；本件不固化。基石的 email 形：契约活在 manifest，无命令无脚本
-- **关键裁定**：
-  - 自立容器而非借 vault，2026-10-02 组会裁定。理由两条：写模型分叉——拉取物只增，笔记区全权；层级由源硬性规定——term/course 结构不可协商。这是域生长判断法的首个完整实例，见 mechanics 第 8 节
-  - 真相在 BB 服务器；本地 `cuhksz/bb/` 是课程工作区，不是档案。文档类全量物化，落地即终态资产，豁免 TTL；媒体类默认指针化——录播是流式点播消费，非文件持有。wiki 侧属地只收蒸馏密度，不逐文件立页
-  - notes/ 两治：2026-10-02 立设，2026-10-04 扩为共居。课程笔记按人类使用逻辑归课程目录，不归 wiki 原生区；人为主，ai 产物共居；机器全线不触碰人的笔记
-  - 公告拆信不存档：公告是信封不是内容；原文真相在源，现拉即得；拆信分拣至既有归宿
-- **弃案**：wiki 侧逐文件代理——否，wiki 只收蒸馏物；roster 拉取——他人隐私，非本域对象；提交作业等写动作——连接器纯只读
+- **Why it exists**: adapt an LMS as a wiki-external information source; Blackboard is the first case, namely CUHK-SZ. This plugin is the **domain base** of the bb family's five plugins, establishing only the answers to the six contract questions — external territory, landing strategy, identity proof, wiki territory, write model, trust model. Projection details belong to bb-map; CLI usage to the bb-cli skill; this plugin hard-codes nothing further. The cornerstone takes the email form: the contract lives in the manifest, no commands, no scripts
+- **Key rulings**:
+  - a self-standing container rather than borrowing vault, ruled at the 2026-10-02 team meeting, for two reasons: the write model forks — pulled artifacts are append-only while the notes zone is fully writable; the hierarchy is rigidly imposed by the source — the term/course structure is non-negotiable. This is the first complete instance of the domain-growth judgment method, see mechanics section 8
+  - truth lives on the BB server; local `cuhksz/bb/` is a course workspace, not an archive. Documents are fully materialized and become terminal assets on landing, exempt from TTL; media defaults to pointers — recorded lectures are streamed on demand, not held as files. The wiki-side territory receives distillation density only, no per-file pages
+  - notes/ two regimes: established 2026-10-02, widened to coexistence 2026-10-04. Course notes belong to the course directory by human usage logic, not to the wiki native zone; human-owned, ai artifacts coexist; the machine never touches human notes anywhere
+  - announcements are triaged, not archived: an announcement is an envelope, not the content; the original's truth is at the source, pull-fresh on demand; triage sorts into existing destinations
+- **Rejected alternatives**: per-file proxies on the wiki side — no, wiki receives distillates only; roster pulling — others' privacy, not this domain's object; write actions such as submitting assignments — the connector is purely read-only
 
 ## Structure
 
-- 双侧同构 `<term>/<course>/`。外侧 `cuhksz/bb/<term>/<course>/`：课件保留源侧目录树；提交件住 `submissions/`；笔记住子区 `notes/`，为人的学习笔记居所，与 submissions/ 同法先例。内侧 `wiki/cuhksz/bb/<term>/<course>/`
-- 目录名人类可读：term 名如 `2610UG`，加课程代码如 `AIE3005`——恰为 bbcli 查询参数形态，人机两用。machine id 即 term_id 与 course_id 落属地身份页 frontmatter；同期同代码以 course_id 尾缀消歧；停用课标 status: deprecated，不删
-- 域根速写页 `wiki/cuhksz/bb/inbox.md`：近窗公告蒸馏、临近截止、未交提醒。提醒双源——作业列表无提交，或成绩册有 due 无 attempt；行标课程。整页可再生，短 TTL；frontmatter 兼域配置，`terms` 块映射放现役学期与冻结标记，2026-10-01 裁定不另立声明页。刷新流程：现拉公告与 dues，蒸馏速写，再分拣派生；**缺席即建**，bb-map 命令锚点触发或 agent 自发
-- 属地页面形态：课程身份页每课必有，身份证明载体即 bb-map info.md——`bb` 块映射 term_id、course_id、term_status，学期状态落页，消除 inbox 单点。公告不立页，见 Invariants。其余内容页形态随真实使用浮现
+- Two-sided, same structure `<term>/<course>/`. Outer side `cuhksz/bb/<term>/<course>/`: courseware keeps the source-side directory tree; submissions live in `submissions/`; notes live in the subzone `notes/`, the home of human study notes, on the same precedent as submissions/. Inner side `wiki/cuhksz/bb/<term>/<course>/`
+- Human-readable directory names: term names like `2610UG`, plus course codes like `AIE3005` — exactly the bbcli query-parameter shape, machine-and-human dual use. Machine ids, i.e. term_id and course_id, land in the territory identity page frontmatter; same-term same-code cases disambiguated by a course_id suffix; deactivated courses marked status: deprecated, never deleted
+- Domain-root digest page `wiki/cuhksz/bb/inbox.md`: recent-window announcement distillation, upcoming deadlines, unsubmitted-assignment reminders. Reminders are dual-source — the assignment list lacks a submission, or the gradebook has a due without an attempt; rows tagged with course. Whole page regenerable, short TTL; frontmatter doubles as domain config, with the `terms` block mapping holding active terms and frozen flags — ruled 2026-10-01 not to erect a separate declaration page. Refresh flow: fresh-pull announcements and dues, distill the digest, then sort into derivations; **created when absent**, triggered by the bb-map command anchor or agent initiative
+- Territory page shapes: a course identity page per course, its identity-proof carrier being bb-map info.md — the `bb` block mapping term_id, course_id, term_status, term status landed on the page, eliminating the inbox single point. Announcements get no pages, see Invariants. Other content-page shapes emerge with real use
 
 ## Invariants
 
-- 契约六问：外领地是 bb.cuhk.edu.cn，连接器 bb-cli 可达；落地是自立容器 `cuhksz/bb/`；身份证明是身份页 `bb` 块映射与属地目录一比一；属地是 `wiki/cuhksz/bb/`；写模型两治——外侧拉取物只增、笔记区全权，内侧机械区可再生覆写、沉淀区只增；信任天花板 machine-confirmed，速写与快照挂 stale_after = 拉取日 + TTL，默认 1 天，速写页可覆写，日期粒度，过期判定以当日为限，agent 即同步器
-- **笔记区**：2026-10-02 组会立设，2026-10-04 v0.7 扩为共居。`cuhksz/bb/<term>/<course>/notes/` 是学习笔记住所。**人为主、ai 产物共居**：人的笔记机器永不写入、删除、重命名——fetch、--refresh、对账、四桶映射全线不触碰；ai 产物经采集通道落放——teach 讲解沉淀 ai 笔记平铺，带 origin: ai，quiz 考卷住 `testing/` 子区，只增不覆写；删改自由属于人，对 ai 产物亦然。笔记文件不属内容单元、不参与映射完整性；**读取与分析合法**，是认知消费的口粮，属性词表归 bb-track。fetch 落放遇保留名冲突——源侧目录树撞 notes/——改名落放并提示
-- 课件物化后即本地终态资产：豁免 TTL，vault 式不可变；失配以哈希对账
-- 只读纪律：连接器纯只读数据面；提交作业等写动作不入本域
-- 凭据纪律：会话与凭据只存本机，住 `~/.bb-cli/`，BB_CLI_HOME 可覆写；绝不入库
-- 隐私红线：课程、成绩与提交数据属实例数据，不入框架仓库与 test-repo；roster 不拉，他人隐私，非本域对象
-- 单向派生只出不回：行动项进 todo；课业日程进 calendar；高价值结论进 notes，回链属地页。三桥；格式权威在各全局件 usage，经投影到消费现场——宪法准则 11 分工裁定
-- **公告拆信**：公告是信封不是内容——不存档、不立页；原文真相在 BB，现拉即得。拆信分拣至既有归宿：作业变更进 assessments 机械区；考试调课、政策师资分组进 info 基本信息；行动项进 todo；资源发布触发 fetch 即弃；高价值长文走 notes 涌现回链
-- **物化分层**：文档类全量物化；媒体类即 video 与 audio 默认指针化——不落 `cuhksz/bb/`，属地单元页清单登记未物化条目，记名称与源侧标识，按需 `--match` 单取；同名变更件 `--refresh` 重拉，内容哈希尾缀落新件，旧件保留即修订史。fetch 能力见 bbcli skill
+- Six contract questions: external territory is bb.cuhk.edu.cn, reachable via the bb-cli connector; landing is the self-standing container `cuhksz/bb/`; identity proof is the identity page's `bb` block mapping one-to-one with the territory directory; territory is `wiki/cuhksz/bb/`; write model has two regimes — outer pulled artifacts append-only and the notes zone fully writable, inner mechanical region regenerable-and-overwritten and the accumulation region append-only; trust ceiling machine-confirmed, digest and snapshots carry stale_after = pull date + TTL, default 1 day, overridable on the digest page, date granularity, expiry judged against the current day, the agent is the synchronizer
+- **Notes zone**: established by the 2026-10-02 team meeting, widened to coexistence in v0.7 on 2026-10-04. `cuhksz/bb/<term>/<course>/notes/` is the home of study notes. **Human-owned, ai artifacts coexisting**: the machine never writes, deletes, or renames human notes — fetch, --refresh, reconciliation, and four-bucket mapping never touch them; ai artifacts are placed through collection channels — teach explanations deposit flat ai notes marked origin: ai, quiz papers live in the `testing/` subzone, append-only, never overwritten; deletion and editing are human freedom, for ai artifacts too. Note files are not content units and do not count toward mapping completeness; **reading and analysis are legitimate**, the fodder of cognition consumption, their attribute vocabulary belonging to bb-track. When fetch placement hits a reserved-name conflict — the source-side tree colliding with notes/ — rename on landing and notify
+- Courseware, once materialized, is a local terminal asset: exempt from TTL, vault-style immutable; mismatches reconciled by hash
+- Read-only discipline: the connector is purely read-only on the data plane; write actions such as submitting assignments never enter this domain
+- Credential discipline: sessions and credentials stay on the local machine, at `~/.bb-cli/`, BB_CLI_HOME overridable; never into the repository
+- Privacy red line: course, grade, and submission data are instance data, never entering the framework repository or test-repo; roster never pulled — others' privacy, not this domain's object
+- One-way derivation (out-only): action items go to todo; course schedules go to calendar; high-value conclusions go to notes with backlinks to territory pages. Three bridges; format authority lives in each global plugin's usage, projected to the consumption site — the constitution principle 11 division of labor ruling
+- **Announcement triage**: an announcement is an envelope, not the content — no archiving, no pages; the original's truth is on BB, pull-fresh on demand. Triage sorts into existing destinations: assignment changes go to the assessments mechanical region; exam rescheduling, policies, faculty, grouping go to info basic information; action items go to todo; resource releases trigger fetch then discard; high-value long texts go through notes emergence with backlinks
+- **Materialization layering**: documents fully materialized; media, i.e. video and audio, default to pointers — not landed in `cuhksz/bb/`; the territory unit-page list registers unmaterialized entries with names and source-side identifiers, single-fetch on demand via `--match`; changed files with the same name are re-pulled via `--refresh` and landed as new files with a content-hash suffix, old files kept as revision history. fetch capabilities in the bbcli skill
 
 ## Changelog
 
-- 0.9（2026-10-05）修复：迁移替换的双重路径笔误 wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/（实例侧首报，规范单层为准）
+- 0.9 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
-- 0.8（2026-10-05）属域迁移：BB 独立域降为 cuhksz 域内子系统族（所有者裁定——bb/sis/registry 同校同认证共域）；depends 补 cuhksz，属地 wiki/bb/ → wiki/cuhksz/bb/、工作区 bb/ → cuhksz/bb/，契约与族内结构不变
+- 0.8 (2026-10-05) domain migration: BB demoted from an independent domain to an in-domain subsystem family of cuhksz (owner ruling — bb/sis/registry share one school and one authentication, one domain); depends gains cuhksz, territory wiki/bb/ → wiki/cuhksz/bb/, workspace bb/ → cuhksz/bb/, contract and in-family structure unchanged
 
-- 0.7 2026-10-04：notes/ 共居扩设，teach/quiz 改造裁定。学习笔记住所从纯人区扩为人为主、ai 产物共居；ai 笔记平铺带 origin: ai；考卷住 testing/ 子区；ai 只增；删改自由属人。采集通道是 bb-teach 与 bb-quiz
-- 0.6 2026-10-02：全局域批二，派生句加桥指针
-- 0.5 2026-10-02：全局域批一，挂 log 必依桥边——宪法准则 11，kernel 校验完备性
-- 0.4 2026-10-02：笔记区立设，组会裁定。外容器定位从拉取物仓储扩为课程工作区；每课程目录保留子区 notes/ 归人全权；机器写边界显式化；读取留给下游认知消费
-- 0.3 2026-10-02：域规则批 D1~D3 落地。未交提醒双源；身份页增 term_status 消除学期状态单点；stale_after 日期粒度语义写明
-- 0.2 2026-10-01：P0 补缺。公告拆信分拣，信封不存档路由至既有归宿；inbox 刷新流程与缺席即建，解首跑先后问题；物化分层，媒体默认指针化、按需单取；同名变更件哈希尾缀。契约与 fetch 实现漂移修正，bb-cli 0.1.4 配套
-- 0.1 2026-10-01：立设。基石声明，email 形——契约活 manifest，无命令无脚本；速写页兼域配置、全量物化放行均用户裁定；投影细则归 bb-map 后议
+- 0.7 2026-10-04: notes/ widened to coexistence, teach/quiz redesign ruling. The study-notes home widened from a purely human zone to human-owned with ai artifacts coexisting; ai notes lie flat with origin: ai; papers live in the testing/ subzone; ai append-only; deletion and editing are human freedom. The collection channels are bb-teach and bb-quiz
+- 0.6 2026-10-02: global-domain batch two, derivation sentences gain bridge pointers
+- 0.5 2026-10-02: global-domain batch one, attaching the log mandatory-bridge edge — constitution principle 11, kernel validates completeness
+- 0.4 2026-10-02: notes zone established, team-meeting ruling. The outer container's role widened from pulled-artifact storage to course workspace; each course directory keeps a subzone notes/ under full human authority; the machine write boundary made explicit; reading left to downstream cognition consumption
+- 0.3 2026-10-02: domain-rule batch D1~D3 landed. Dual-source unsubmitted reminders; the identity page gains term_status, eliminating the term-status single point; stale_after date-granularity semantics spelled out
+- 0.2 2026-10-01: P0 gap-fill. Announcement triage, envelopes not archived but routed to existing destinations; inbox refresh flow and create-when-absent, resolving the first-run ordering problem; materialization layering, media pointer-based by default with on-demand single fetch; hash suffix for same-name changed files. Contract-vs-fetch implementation drift fixed, bb-cli 0.1.4 accompanying
+- 0.1 2026-10-01: established. Cornerstone declaration, email form — the contract lives in the manifest, no commands, no scripts; the digest page doubling as domain config and allowing full materialization were both user rulings; projection details deferred to bb-map for later
