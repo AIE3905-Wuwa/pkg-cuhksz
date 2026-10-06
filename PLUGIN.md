@@ -30,6 +30,8 @@
 
 ## Changelog
 
+- 0.7 (2026-10-06) inject_tier: member — exits the AGENTS.md injection region per the issue #12 layer discipline (exposure: family-root roster line + skill catalog + on-demand manifest reads)
+
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
 - 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged
