@@ -34,6 +34,8 @@
 
 ## Changelog
 
+- 0.9 (2026-10-07): source citation — each claim cites its raw source (courseware/textbook) via the mapping's raw_path, in addition to the sm-N backlink; same batch as bb-map v0.17
+- 0.8 (2026-10-07): map-first — step 0 ensures the course is fully mapped before explaining, the explanation bases directly on mapped sm-N; same batch as bb v0.10
 - 0.7 (2026-10-07): audience register — the explanation register defaults to first/second-year undergraduates (intuition before formalism, one concept per step, concrete examples, terms explained at first use, plain prose, "brief" never "obscure"), orthogonal to the two-dimensional scaling and overridable via the language page's register key; same batch as language v0.3
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
