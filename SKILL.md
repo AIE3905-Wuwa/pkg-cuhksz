@@ -46,6 +46,7 @@ Question-stem language follows the source — samples → known assignments → 
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-quiz -->
+- Map-first: step 0 = ensure the course is fully mapped (bb-map full); questions and explanations base directly on the mapped sm-N + the `## Terminology` glossary, never on raw source or ad-hoc reading
 - Parse input: scope (chapter/unit/sm-N list) + sample (optional); the course is located via the bb directory structure (<term>/<course>, the active term may be omitted)
 - Read the full knowledge-point set: courseware sm-N + the `## Terminology` glossary, take the in-scope subset
 - Read the user's cognition: user.md proficiency/goal layer/evidence stream; verify stale first (conservative tier before verification), cold start treated as unanchored (discipline in the injection region's bb-track block)
@@ -53,7 +54,7 @@ Question-stem language follows the source — samples → known assignments → 
 - Read teaching minutes (best-effort): notes/ ai notes (origin: ai) — what was recently taught / where the user got stuck — avoiding repetition or emphasizing what was just taught; silently skip when absent or empty
 - Select points: in-scope knowledge points covered in the order unfamiliar / unanchored / wrong answers / short-term priorities
 - Generate questions: stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware glossary, types aligned to the sample, difficulty around M
-- Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language) and the register (audience reading level, default first/second-year undergraduates — intuition before formalism, one concept per step, a concrete example, each term explained at first use, plain prose), each question marked with its knowledge point + sm-N wikilink; grading in the same language and register
+- Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language) and the register (audience reading level, default first/second-year undergraduates — intuition before formalism, one concept per step, a concrete example, each term explained at first use, plain prose), each question marked with its knowledge point + sm-N wikilink and citing its source (courseware/textbook) via the mapping's raw_path; grading in the same language and register
 - Land: notes/testing/<name>-questions.md + -answers.md (quiz block mapping + origin: ai + generated; the questions page contains no answers); old papers never deleted or overwritten
 - Grade (after the user answers): judge per question against the answers page → append `## Grading` on the answers page (date + per-question correctness + score); wrong-answer points and overall performance written back into user.md's evidence stream after user confirmation (source machine self-test) — the significant ones adjust readings per the convergence discipline; the paper itself is material, the profile takes only conclusions
 - No out-of-scope: terminology/knowledge points drawn only from in-scope courseware sm-N; out-of-scope questions are discarded and regenerated (unless the user says so; the semantic constraint is self-checked on the generation side)
@@ -68,11 +69,14 @@ Question-stem language follows the source — samples → known assignments → 
 - Placement criteria (see the injection line)
 - Rebuild discipline: the mechanical region is reconciled and overwritten; the accumulation regions (info notes / assessments review) are append-only, rebuilds must not touch them; attachments proxies are whole-page regenerable
 - stale handling: assessments results and info basic information carry stale_after; when stale, refresh via a fresh bbcli pull (the agent is the synchronizer); courseware/attachments are purely local reconciliation, no TTL
+- Map-first prerequisite: bb-map is the prerequisite for all course tasks (teaching/quiz/review/Q&A) — run full-course mapping before any of them; the mapping is their single basis (sm-N/info/assessments), never raw source or ad-hoc reading
+- Source citation: raw_path + sm-N are the citation anchors — derived content (notes/reviews/answers) cites its source (courseware/textbook) through them
 - Post-write pipeline (mechanical, automatic): python .meta/scripts/pipeline.py index + tags + hot + log + verify (rebuild the derived layer first, then validate — validation closes at the end, avoiding premature false drift reports from the derived zones)
 - Derivation out-only: action items → todo, high-value reviews → notes (backlinks to assessments pages) — the todo/notes bridges
 <!-- /usage:bb-map -->
 
 <!-- usage:bb-track -->
+- Map-first: ensure the course is fully mapped (bb-map) before any cognition read/write; the profile anchors directly on the mapped sm-N + evidence, never on raw source or ad-hoc reading
 - Profile creation: create user.md on the first significant signal or user instruction (type: bb + generated/updated/stale_after); absence simply means no cognition data — the consumption side degrades gracefully without erroring
 - Append evidence: `- MM-DD source (human conversation|machine grades|human note|ai note|human review): assertion → [[backlink]]`; the source vocabulary is open
 - Converge readings: new evidence arrives → rewrite the reading line (the new value replaces the old, the line keeps a recent evidence digest and date); the evidence stream is untouched
