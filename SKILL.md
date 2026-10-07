@@ -42,6 +42,7 @@ Output language takes the default key of the language declaration page `wiki/lan
 
 <!-- cmd-inject:start -->
 <!-- usage:bb-track -->
+- Map-first: ensure the course is fully mapped (bb-map) before any cognition read/write; the profile anchors directly on the mapped sm-N + evidence, never on raw source or ad-hoc reading
 - Profile creation: create user.md on the first significant signal or user instruction (type: bb + generated/updated/stale_after); absence simply means no cognition data — the consumption side degrades gracefully without erroring
 - Append evidence: `- MM-DD source (human conversation|machine grades|human note|ai note|human review): assertion → [[backlink]]`; the source vocabulary is open
 - Converge readings: new evidence arrives → rewrite the reading line (the new value replaces the old, the line keeps a recent evidence digest and date); the evidence stream is untouched
@@ -53,6 +54,7 @@ Output language takes the default key of the language declaration page `wiki/lan
 <!-- /usage:bb-track -->
 
 <!-- usage:bb-quiz -->
+- Map-first: step 0 = ensure the course is fully mapped (bb-map full); questions and explanations base directly on the mapped sm-N + the `## Terminology` glossary, never on raw source or ad-hoc reading
 - Parse input: scope (chapter/unit/sm-N list) + sample (optional); the course is located via the bb directory structure (<term>/<course>, the active term may be omitted)
 - Read the full knowledge-point set: courseware sm-N + the `## Terminology` glossary, take the in-scope subset
 - Read the user's cognition: user.md proficiency/goal layer/evidence stream; verify stale first (conservative tier before verification), cold start treated as unanchored (discipline in the injection region's bb-track block)
@@ -60,7 +62,7 @@ Output language takes the default key of the language declaration page `wiki/lan
 - Read teaching minutes (best-effort): notes/ ai notes (origin: ai) — what was recently taught / where the user got stuck — avoiding repetition or emphasizing what was just taught; silently skip when absent or empty
 - Select points: in-scope knowledge points covered in the order unfamiliar / unanchored / wrong answers / short-term priorities
 - Generate questions: stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware glossary, types aligned to the sample, difficulty around M
-- Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language) and the register (audience reading level, default first/second-year undergraduates — intuition before formalism, one concept per step, a concrete example, each term explained at first use, plain prose), each question marked with its knowledge point + sm-N wikilink; grading in the same language and register
+- Write explanations: reader-aligned language (the language page's annotation key, page or key absent → session language) and the register (audience reading level, default first/second-year undergraduates — intuition before formalism, one concept per step, a concrete example, each term explained at first use, plain prose), each question marked with its knowledge point + sm-N wikilink and citing its source (courseware/textbook) via the mapping's raw_path; grading in the same language and register
 - Land: notes/testing/<name>-questions.md + -answers.md (quiz block mapping + origin: ai + generated; the questions page contains no answers); old papers never deleted or overwritten
 - Grade (after the user answers): judge per question against the answers page → append `## Grading` on the answers page (date + per-question correctness + score); wrong-answer points and overall performance written back into user.md's evidence stream after user confirmation (source machine self-test) — the significant ones adjust readings per the convergence discipline; the paper itself is material, the profile takes only conclusions
 - No out-of-scope: terminology/knowledge points drawn only from in-scope courseware sm-N; out-of-scope questions are discarded and regenerated (unless the user says so; the semantic constraint is self-checked on the generation side)
@@ -68,6 +70,7 @@ Output language takes the default key of the language declaration page `wiki/lan
 <!-- /usage:bb-quiz -->
 
 <!-- usage:bb-teach -->
+- Map-first: step 0 = ensure the course is fully mapped (bb-map full); the explanation bases directly on the mapped sm-N anchors + terminology, never on raw source or ad-hoc reading
 - Locate: question → extract keywords → layered query retrieval (hot → index → grep → read pages) → narrow via bb-map courseware sm-N anchors and the `## Terminology` glossary; list all across pages and points
 - Read state: read user.md cognition readings (anchor → status word) + evidence stream + goal layer; verify stale, compute gaps on the fly (courseware full set − anchored set), point-level conclusions from wrong answers — discipline in the injection region's bb-track block
 - Two-dimensional scaling (proficiency × difficulty): unanchored/unfamiliar → explain thoroughly (hardcore concepts get analogies + numeric examples + prerequisite-chain completion); familiar → focus on how to use + pitfalls; proficient → why + pitfalls + cross-point links + open questions; mastered → ask back / challenge questions / guided self-check (no lecturing)
@@ -75,7 +78,7 @@ Output language takes the default key of the language declaration page `wiki/lan
 - Register (audience reading level): the writing register defaults to first/second-year undergraduates — intuition and motivation before formalism, one concept per step, a concrete example for each abstraction, every term explained at first use (never presumed known), plain short-sentence prose instead of dense bullet-lists, and 'brief' never meaning 'obscure' (a short answer still states the intuition); the register is orthogonal to the two-dimensional scaling (scaling adjusts depth, the register keeps it readable at every tier); take the language page's register key, key absent → the program default
 - Terminology threshold: terms allowed to appear = the user's anchored set (not 'appeared earlier in this course'); anything beyond is explained on the spot, never presumed known; global terms not in the anchored set fall back to the language page's terms table, the anchored set wins on conflict
 - Goal and wrong-answer injection: hits on time-scoped short-term priorities get one depth tier up, marked 'recent focus', expired ones downgraded; hits on assessments-review wrong-answer points get their pitfalls one tier up and called out
-- Output: an inline bold-label skeleton (intuition/what/why/how-to-use/analogy/pitfalls/prerequisites) scaled by the matrix, each item backlinking courseware sm-N
+- Output: an inline bold-label skeleton (intuition/what/why/how-to-use/analogy/pitfalls/prerequisites) scaled by the matrix, each item backlinking courseware sm-N and citing its raw source (courseware/textbook) via the mapping's raw_path
 - Three-tier feedback loop: single-turn feedback (got it / follow-up / wrong answer) only adjusts the current turn's delivery, never landed; significant Q&A (structured deposit value or user-explicit 'note it down') lands as notes/ ai notes — one per question (question + explanation skeleton + pitfalls + anchor backlinks), origin: ai / form: text, named <date>-<topic>.md, append-only never overwritten; only significant signals (stable across sessions / proactive correct application / machine verification) may propose converging user.md — write-back delegated to the bb-track write contract, after user confirmation; a single 'got it' writes nothing, a single 'did not get it' does not mark unfamiliar
 - Profile posture: verify user.md stale first (conservative tier before verification); absence (cold start) → explain everything thoroughly at the unanchored tier — never refuse to explain for lack of a profile
 - log discipline: explanation conversations write no log (no behavioral signals collected); after a significant Q&A lands in notes/, write one line (other --domain bb); cognition convergence goes through the bb-track post-write pipeline (log profile --domain bb + verify)
