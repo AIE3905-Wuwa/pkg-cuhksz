@@ -20,6 +20,7 @@
 
 - Types follow the sample — single choice, multiple choice, fill-in, short answer, calculation, proof, etc., never enumerated; difficulty = cognitive level 1-5: remember, understand, apply, analyze, synthesize; the median M aligns to the sample, fallbacks in order being known assignments, user habits. M is an LLM semantic judgment, a soft constraint of three-layer approximate overlap; the effective guarantee granularity: unfamiliar leans easy, mastered leans challenging
 - Stem language source-aligned (sample → known assignments → course materials), terminology aligned to the courseware `## Terminology` glossary; explanation and grading language reader-aligned (the language page's annotation key, absent → session)
+- Register (audience reading level): answer explanations and grading are written at the first/second-year undergraduate register — intuition before formalism, one concept per step, a concrete example, each term explained at first use, plain prose, "brief" never "obscure" — taken from the language page's register key (absent → program default, AGENTS principle 12)
 - No out-of-scope: the full set = courseware sm-N intersected with the user scope; out-of-scope questions discarded and regenerated, unless the user says so — a semantic constraint, self-checked on the generation side, attached-audit warning level
 - Explanations mark the knowledge point with an sm-N wikilink; the position is the birth certificate
 - Following bb-track: proficiency drives selection and difficulty distribution; conservative tier before stale verification; cold start, i.e. no profile, everything unanchored, uniform question generation
@@ -30,6 +31,7 @@
 
 ## Changelog
 
+- 0.7 (2026-10-07): audience register — answer explanations and grading default to the first/second-year undergraduate register (intuition before formalism, one concept per step, concrete examples, terms explained at first use, plain prose), overridable via the language page's register key; same batch as language v0.3
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
 - 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged
