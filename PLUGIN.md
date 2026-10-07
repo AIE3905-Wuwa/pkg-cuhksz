@@ -22,6 +22,7 @@
 - Two-dimensional scaling: proficiency — unanchored, unfamiliar, familiar, proficient, mastered, status words open; times concept difficulty — simple, abstract-hardcore. The known gets no lecturing, the unknown gets full depth; length and depth scale with both
 - The terminology threshold made dynamic: technical terms allowed to appear = the user's **anchored set**, not the static file order of 'appeared earlier in this course'; anything beyond is explained on the spot; global terms not in the anchored set fall back to the language page's terms table, the anchored set winning on conflict
 - Reader-aligned explanation language: take the language page's teaching key; page or key absent → session language — the framework presumes no specific language
+- Register (audience reading level): the explanation register defaults to first/second-year undergraduates — intuition and motivation before formalism, one concept per step, a concrete example for each abstraction, every term explained at first use (never presumed known), plain prose instead of dense bullet-lists, and "brief" never meaning "obscure"; the register is orthogonal to the two-dimensional scaling (scaling adjusts depth, the register keeps it readable at every tier), taken from the language page's register key (absent → program default, AGENTS principle 12)
 - Goal-layer priority: time-scoped short-term priorities — hits get one depth tier up, marked 'recent focus', expired ones downgraded; hits on assessments-review wrong-answer points get their pitfalls one tier up and called out
 - Three-tier feedback loop, keeping single-turn noise out of the profile: **single-turn feedback never landed**, only adjusting the current turn's delivery; **significant Q&A** — structured deposit value, or user-explicit 'note it down' — deposited as ai notes in notes/, one per question: question, explanation skeleton, pitfalls, anchor backlinks, origin: ai, append-only; only **significant signals** may propose converging user.md — criteria: stable across sessions, independent demonstrations of understanding in at least two sessions; proactive correct application — solving, counterexamples, correct analogies; machine verification — grade refreshes. Writing intermediate states like 'familiar — tentative' without forcing full-tier jumps; tier rises match evidence strength
 - A single 'got it' = the daily routine, not significant; a single 'did not get it' does not mark unfamiliar — the explanation may be at fault
@@ -33,6 +34,7 @@
 
 ## Changelog
 
+- 0.7 (2026-10-07): audience register — the explanation register defaults to first/second-year undergraduates (intuition before formalism, one concept per step, concrete examples, terms explained at first use, plain prose, "brief" never "obscure"), orthogonal to the two-dimensional scaling and overridable via the language page's register key; same batch as language v0.3
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
 - 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged
