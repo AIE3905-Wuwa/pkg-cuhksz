@@ -31,6 +31,8 @@
 
 ## Changelog
 
+- 0.9 (2026-10-07): source citation — each question/answer cites its source (courseware/textbook) via the mapping's raw_path, in addition to the sm-N mark; same batch as bb-map v0.17
+- 0.8 (2026-10-07): map-first — step 0 ensures the course is fully mapped before generating, questions base directly on mapped sm-N; same batch as bb v0.10
 - 0.7 (2026-10-07): audience register — answer explanations and grading default to the first/second-year undergraduate register (intuition before formalism, one concept per step, concrete examples, terms explained at first use, plain prose), overridable via the language page's register key; same batch as language v0.3
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
