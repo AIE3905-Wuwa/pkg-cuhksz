@@ -34,9 +34,9 @@
 
 ## Changelog
 
-- 0.9 (2026-10-07): source citation — each claim cites its raw source (courseware/textbook) via the mapping's raw_path, in addition to the sm-N backlink; same batch as bb-map v0.17
-- 0.8 (2026-10-07): map-first — step 0 ensures the course is fully mapped before explaining, the explanation bases directly on mapped sm-N; same batch as bb v0.10
-- 0.7 (2026-10-07): audience register — the explanation register defaults to first/second-year undergraduates (intuition before formalism, one concept per step, concrete examples, terms explained at first use, plain prose, "brief" never "obscure"), orthogonal to the two-dimensional scaling and overridable via the language page's register key; same batch as language v0.3
+- 0.8 (2026-10-07): audience register + map-first + source citation — explanation register defaults to first/second-year undergraduates (intuition before formalism, one concept per step, concrete examples, terms explained at first use; overridable via the language page's register key, same batch as language v0.4), step 0 ensures the course is fully mapped (same batch as bb v0.11), and each claim cites its raw source via the mapping's raw_path (same batch as bb-map v0.17) (PR #23, collapsed past master's 0.7 inject_tier entry)
+- 0.7 (2026-10-06) inject_tier: member — exits the AGENTS.md injection region per the issue #12 layer discipline (exposure: family-root roster line + skill catalog + on-demand manifest reads)
+
 - 0.6 (2026-10-05) fix: the double-path typo in migration replacement wiki/cuhksz/cuhksz/bb/ → wiki/cuhksz/bb/ (first reported on the instance side; the spec's single layer prevails)
 
 - 0.5 (2026-10-05) cuhksz domain migration: paths rewritten, mechanism unchanged

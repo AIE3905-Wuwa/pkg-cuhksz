@@ -1,5 +1,5 @@
 id: bb-teach
-version: 0.9
+version: 0.8
 depends:
   - bb-track
   - bb-map
@@ -14,6 +14,7 @@ attachment:
   - "wiki/cuhksz/bb/<term>/<course>/courseware/, assessments/ — bb-map's own; this plugin read-only locates and backlinks (sm-N/req-N anchors)"
 fields: {}
 inject: "Teaching consumption side bb-teach (bb-track's teaching consumer): a question triggers an explanation — step 0: ensure the course is fully mapped (bb-map), then locate the question's courseware sm-N (query retrieval + bb-map narrowing) → read the bb-track cognition profile (readings/evidence/goals, stale verified first, conservative tier before verification) → explain with two-dimensional scaling by proficiency × difficulty (known: brief/ask back; unknown: thorough) + reader-aligned explanation language (take the teaching key of the language declaration page `wiki/language.md`, page or key absent → session language) + terminology first from the user's anchored set, falling back to the language page's global terms table (the anchored set wins on conflict) + the register (audience reading level — default first/second-year undergraduates: intuition before formalism, one concept per step, a concrete example per abstraction, each term explained at first use, plain prose, 'brief' never 'obscure' — orthogonal to the two-dimensional scaling, overridable via the language page's register key) + wrong-answer/goal injection + anchor backlinks + source citation (each claim cites its raw source — courseware/textbook — via the mapping's raw_path); a three-tier feedback loop — single-turn feedback is never landed, significant Q&A deposited as ai notes in notes/ (origin: ai, weak evidence, one per question, backlinking the anchor), only significant signals (stable across sessions/proactive application/machine verification) converge user.md after confirmation (write-back delegated to the bb-track contract); explanation conversations write no log, note deposits and cognition convergence go through the post-write pipeline; when the profile is absent (cold start) explain everything at the unanchored tier, never refuse to answer"
+inject_tier: member
 usage:
   - "Map-first: step 0 = ensure the course is fully mapped (bb-map full); the explanation bases directly on the mapped sm-N anchors + terminology, never on raw source or ad-hoc reading"
   - "Locate: question → extract keywords → layered query retrieval (hot → index → grep → read pages) → narrow via bb-map courseware sm-N anchors and the `## Terminology` glossary; list all across pages and points"
