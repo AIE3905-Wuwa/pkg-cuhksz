@@ -14,3 +14,13 @@ uninstall:
   credentials: [~/.bb-cli/, ~/.sis-cli/]
   bridges: [profile#domain-cognition, language#consumers]
   processes: []
+disclosure: "Read-only scraping of bb.cuhk.edu.cn and sis.cuhk.edu.cn via ADFS SSO; processes grades, coursework and enrollment records (privacy: high); credentials only on this machine (~/.bb-cli, ~/.sis-cli); academic data never enters any git repository."
+menu:
+  cuhksz: domain root — identity page, term digest, family territory
+  bb: course-ops base — term/course identity pages
+  bb-map: course mapping — BB artifacts to canonical four-bucket pages
+  bb-track: cognition profile — per-point mastery readings + evidence stream
+  bb-teach: fine-grained teaching — mode-matrix explanations from the profile
+  bb-quiz: self-testing — generated practice, grading flows back to the profile
+  sis: student records — transcripts, timetable, enrollment windows
+  registry: academic regulations — materialized policies + index
