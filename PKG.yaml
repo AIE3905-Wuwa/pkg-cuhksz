@@ -1,6 +1,6 @@
 schema_version: 1
 id: cuhksz
-version: 0.1
+version: 0.2
 compat: ">= 0.2"
 members: [cuhksz, bb, bb-map, bb-quiz, bb-teach, bb-track, sis, registry]
 connectors:
