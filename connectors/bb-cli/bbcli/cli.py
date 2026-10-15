@@ -94,8 +94,19 @@ def build_client() -> tuple[BBClient, Transport, dict]:
 def need_auth(client: BBClient):
     try:
         client.me()
-    except Exception:
-        print("Not logged in or session expired: run `bb-cli login` first", file=sys.stderr)
+    except auth.CredentialError as e:
+        print(f"Stored credentials rejected ({e}); run `bb-cli login` again", file=sys.stderr)
+        sys.exit(2)
+    except ApiError as e:
+        if e.status == 401:
+            print("Not logged in or session expired: run `bb-cli login` first", file=sys.stderr)
+        else:
+            print(f"Auth check failed: {e}", file=sys.stderr)
+        sys.exit(2)
+    except Exception as e:
+        # Surface the real failure instead of masking it as a session problem
+        # (e.g. PermissionError writing session.json, TransportError on network).
+        print(f"Auth check failed: {type(e).__name__}: {e}", file=sys.stderr)
         sys.exit(2)
 
 
