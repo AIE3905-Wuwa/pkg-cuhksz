@@ -16,8 +16,8 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 ## Prerequisites (install / auth)
 
 1. Install (if missing): `cd connectors/sis-cli && python -m venv .venv && .venv/Scripts/pip install -e .` (deps: curl_cffi + beautifulsoup4 only; may reuse the bb-cli venv via PYTHONPATH for smoke runs)
-2. Login: `sis-cli login --username <student-id> --no-store` (password via the `SIS_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.sis-cli/session.json`). Credentials only ever live under `~/.sis-cli/`.
-3. Self-check: `sis-cli status` lists components when authenticated; sessions expire in ~5 minutes — the CLI re-logs in automatically per command, so no manual re-login is normally needed.
+2. Init (strongly recommended): run `sis-cli login` manually once to leave stored credentials (`--username <student-id>`; password via the `SIS_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.sis-cli/session.json`). The first login automatically becomes the **default account** — confirm with `sis-cli default`, switch with `sis-cli default <name>`. Credentials only ever live under `~/.sis-cli/`
+3. Self-check: `sis-cli status` lists components when authenticated; sessions expire in ~5 minutes — the CLI re-logs in automatically per command (default account only), so no manual re-login is normally needed.
 
 ## Steps
 
@@ -39,6 +39,7 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 | Degree progress report (currently needs Request Audit) | `sis-cli dpr` |
 | Student center / per-assignment grades | `sis-cli center` / `sis-cli assignments` (text summaries) |
 | Any page as HTML, GET or ICAction POST navigation | `sis-cli raw <url> [--post --action BTN --set k=v] --file out.html` |
+| Accounts / default account | `sis-cli accounts` (list, passwords never shown) / `sis-cli default [<name>]` (show or switch; switching clears the session so the next command auto-logs-in as it) |
 
 Component URLs take the form `/psc/csprd/EMPLOYEE/HRMS/c/<COMPONENT>?PORTALPARAM_PTCNAV=<NAV>` — both parts are registered in `siscli/config.py`; use `raw` for anything not yet wrapped.
 

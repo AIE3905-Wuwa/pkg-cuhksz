@@ -16,7 +16,7 @@ Write: none (read-only by design; submitting assignments or posting announcement
 ## Prerequisites (install / auth)
 
 1. Install (if missing): `cd connectors/bb-cli && python3 -m pip install --user --break-system-packages -e .` (deps: curl_cffi + beautifulsoup4 only; this machine already has 0.1.3, or use the `.venv` route per README)
-2. Login: `bb-cli login --username <student-id> --no-store` (password via the `BB_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.bb-cli/session.json`)
+2. Init (strongly recommended): run `bb-cli login` manually once to leave stored credentials (`--username <student-id>`; password via the `BB_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.bb-cli/session.json`). The first login automatically becomes the **default account** — confirm with `bb-cli default`, switch with `bb-cli default <name>`. Automatic re-login (401-triggered) only ever uses the **default account**; other stored accounts (`bb-cli login --account <name>`, list via `bb-cli accounts`) are never auto-logged-in
 3. Self-check: `bb-cli status --format text` → `authenticated=yes` means ready; on 401 run `login` again
 
 ## Steps
@@ -38,6 +38,7 @@ Write: none (read-only by design; submitting assignments or posting announcement
 | Course files / download | `bb-cli files <course>` / `bb-cli fetch <course> [-o DIR] [--dest DIR] [--exclude-mime video/,audio/] [--exclude-ext ext,…] [--no-media-filter] [--max-size MB] [--refresh]` |
 | My submissions | `bb-cli submission <course> [--download] [--dest DIR]` |
 | Identity | `bb-cli whoami` |
+| Accounts / default account | `bb-cli accounts` (list, passwords never shown) / `bb-cli default [<name>]` (show or switch; switching clears the session so the next command auto-logs-in as it) |
 
 The course argument accepts a course id (`_18027_1`), a course code, or a name substring (`AIE3905`); on ambiguity the CLI lists the candidates.
 
