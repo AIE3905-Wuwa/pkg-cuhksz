@@ -6,9 +6,10 @@ A command-line connector for `sis.cuhk.edu.cn` (Oracle PeopleSoft Campus Solutio
 
 ```bash
 cd connectors/sis-cli
-python -m venv .venv
-.venv/Scripts/pip install -e .   # Windows; on *nix use .venv/bin/pip
-.venv/Scripts/sis-cli --help
+# install editable with the host's Python package manager, e.g.:
+python -m venv .venv && .venv/bin/pip install -e .    # venv route (*nix layout; Windows: .venv/Scripts/pip)
+uv venv .venv && uv pip install -e .                  # uv route (PEP 668 hosts without pip/venv)
+.venv/bin/sis-cli --help
 ```
 
 Dependencies are only `curl_cffi` (Chrome TLS fingerprint) and `beautifulsoup4`.

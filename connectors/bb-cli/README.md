@@ -6,9 +6,10 @@ A command-line connector for `bb.cuhk.edu.cn` (Blackboard Learn Classic 3900.39)
 
 ```bash
 cd connectors/bb-cli
-python -m venv .venv
-.venv/Scripts/pip install -e .   # Windows; on *nix use .venv/bin/pip
-.venv/Scripts/bb-cli --help
+# install editable with the host's Python package manager, e.g.:
+python -m venv .venv && .venv/bin/pip install -e .    # venv route (*nix layout; Windows: .venv/Scripts/pip)
+uv venv .venv && uv pip install -e .                  # uv route (PEP 668 hosts without pip/venv)
+.venv/bin/bb-cli --help
 ```
 
 Dependencies are only `curl_cffi` (Chrome TLS fingerprint — the site rejects plain OpenSSL handshakes) and `beautifulsoup4`.

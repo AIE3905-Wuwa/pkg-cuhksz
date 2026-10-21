@@ -15,7 +15,7 @@ Write: none (read-only by design; submitting assignments or posting announcement
 
 ## Prerequisites (install / auth)
 
-1. Install (if missing): `cd connectors/bb-cli && python3 -m pip install --user --break-system-packages -e .` (deps: curl_cffi + beautifulsoup4 only; this machine already has 0.1.3, or use the `.venv` route per README)
+1. Install (if missing): `cd connectors/bb-cli` and install editable with the host's Python package manager (deps: curl_cffi + beautifulsoup4 only; e.g. a venv + its pip on dev desktops, `uv venv .venv && uv pip install -e .` on PEP 668 hosts — instance-level environment declarations in AGENTS.md take precedence)
 2. Login: `bb-cli login --username <student-id> --no-store` (password via the `BB_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.bb-cli/session.json`)
 3. Self-check: `bb-cli status --format text` → `authenticated=yes` means ready; on 401 run `login` again
 

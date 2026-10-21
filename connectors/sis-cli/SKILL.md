@@ -15,7 +15,7 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 
 ## Prerequisites (install / auth)
 
-1. Install (if missing): `cd connectors/sis-cli && python -m venv .venv && .venv/Scripts/pip install -e .` (deps: curl_cffi + beautifulsoup4 only; may reuse the bb-cli venv via PYTHONPATH for smoke runs)
+1. Install (if missing): `cd connectors/sis-cli` and install editable with the host's Python package manager (deps: curl_cffi + beautifulsoup4 only; e.g. a venv + its pip on dev desktops, `uv venv .venv && uv pip install -e .` on PEP 668 hosts — instance-level environment declarations in AGENTS.md take precedence; may reuse the bb-cli venv via PYTHONPATH for smoke runs)
 2. Login: `sis-cli login --username <student-id> --no-store` (password via the `SIS_CLI_PASSWORD` env var or interactive prompt; `--no-store` keeps it off disk; session cookie lives in `~/.sis-cli/session.json`). Credentials only ever live under `~/.sis-cli/`.
 3. Self-check: `sis-cli status` lists components when authenticated; sessions expire in ~5 minutes — the CLI re-logs in automatically per command, so no manual re-login is normally needed.
 
