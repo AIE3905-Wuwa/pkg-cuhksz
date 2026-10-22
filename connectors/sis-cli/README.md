@@ -66,3 +66,19 @@ Credentials and sessions live only in the local `~/.sis-cli/` (`SIS_CLI_HOME` ca
 ## Git Bash note
 
 Raw paths starting with `/` get rewritten by MSYS; prefix the command with `MSYS_NO_PATHCONV=1` or drop the leading slash (relative path).
+
+## Status contract (0.3.1)
+
+`status` is an offline diagnostic. It does not attempt silent login or contact the school. Its JSON separates local evidence from facts that require a server check:
+
+- `authenticated: null`, `authentication_checked: false`: authentication is unknown, including when cached cookies exist. This changes the old boolean field; consumers must not treat null as an authenticated state.
+- `session`: `cached_unverified` when a local token loads; `absent_or_unusable` when it does not; `unreadable` when the loader raises a local parsing/read error. An absent token does not say whether credentials could establish a new session.
+- `reachable: null`, `network_checked: false`: network reachability is unknown, never inferred from cached state or missing credentials.
+- `relogin`: `credentials_available_unverified` or `blocked_missing_credentials`, using the same resolver as normal re-login (including its environment-variable policy). No credentials or raw exception messages are emitted.
+- `components` lists supported commands, not verified server permissions. Exit 0 means the diagnostic completed.
+
+A subsequent user-requested read may report a network failure (check campus network/VPN), or an expired session that cannot re-login (authenticate interactively, especially after `login --no-store`). Status does not claim to probe session validity, network health, or password validity.
+
+### Changelog
+
+- 0.3.1: replace optimistic status/silent-login behavior with explicit offline evidence, unknown authentication/reachability, and credential availability. Normal login and query behavior is unchanged.
