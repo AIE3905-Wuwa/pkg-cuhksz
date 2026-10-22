@@ -37,7 +37,7 @@ Credentials and sessions live only in the local `~/.sis-cli/` (`SIS_CLI_HOME` ca
 
 | Command | Purpose |
 |---|---|
-| `status` | Session status and the list of available components |
+| `status` | Offline session/credential evidence and registered components; no network or login |
 | `login` / `logout` | Interactive login (`--no-store` keeps credentials off disk) / logout and clear local state |
 | `schedule [--days]` | My weekly class schedule: this week's events + the term course table; `--days` adds the **day-of-week timetable** from the student center page (Mo/Tu/We…) |
 | `grades [--term substring]` | View my grades: per-term course rows (course/units/grading basis/grade/grade points); defaults to the newest term |
