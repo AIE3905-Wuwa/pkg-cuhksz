@@ -72,10 +72,11 @@ Raw paths starting with `/` get rewritten by MSYS; prefix the command with `MSYS
 `status` is an offline diagnostic. It does not attempt silent login or contact the school. Its JSON separates local evidence from facts that require a server check:
 
 - `authenticated: null`, `authentication_checked: false`: authentication is unknown, including when cached cookies exist. This changes the old boolean field; consumers must not treat null as an authenticated state.
-- `session`: `cached_unverified` when a local token loads; `absent_or_unusable` when it does not; `unreadable` when the loader raises a local parsing/read error. An absent token does not say whether credentials could establish a new session.
+- `session`: `cached_unverified` when a local token loads; `absent_or_unusable` when it does not; `unreadable` when a local error escapes the loader (for example, malformed cookie entries). The loader itself handles invalid JSON, unreadable bytes/files and empty/non-list jars by returning no usable session, so those cases report `absent_or_unusable`; `unreadable` is not a complete inventory of damaged files. An absent token does not say whether credentials could establish a new session.
 - `reachable: null`, `network_checked: false`: network reachability is unknown, never inferred from cached state or missing credentials.
 - `relogin`: `credentials_available_unverified` or `blocked_missing_credentials`, using the same resolver as normal re-login (including its environment-variable policy). No credentials or raw exception messages are emitted.
 - `components` lists supported commands, not verified server permissions. Exit 0 means the diagnostic completed.
+- A non-object JSON configuration is treated as empty, just like missing or invalid JSON; the original file is not rewritten. Constructing the client may create an empty local home directory, but status does not write configuration or session files.
 
 A subsequent user-requested read may report a network failure (check campus network/VPN), or an expired session that cannot re-login (authenticate interactively, especially after `login --no-store`). Status does not claim to probe session validity, network health, or password validity.
 

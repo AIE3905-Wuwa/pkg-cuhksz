@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
+from curl_cffi import requests as creq
 from siscli import cli, config
 from siscli.transport import Transport
 
@@ -75,6 +76,78 @@ class StatusTests(unittest.TestCase):
             data = self.run_status(cfg={"username": "test-user", "password": "test-secret"})
         self.assertEqual(data["session"], "unreadable")
         self.assertEqual(data["relogin"], "credentials_available_unverified")
+
+
+class StatusIntegrationTests(unittest.TestCase):
+    """Exercise real Sis construction and config loading in a synthetic home."""
+
+    def run_status(self, config_bytes=None, session_bytes=None, absent_home=False):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp) / "synthetic-home"
+            if not absent_home:
+                home.mkdir()
+            for name, content in (("config.json", config_bytes), ("session.json", session_bytes)):
+                if content is not None:
+                    (home / name).write_bytes(content)
+
+            def snapshot():
+                return {str(p.relative_to(home)): p.read_bytes() for p in home.rglob("*") if p.is_file()}
+
+            before = snapshot()
+            with patch.dict(os.environ, {"SIS_CLI_HOME": str(home)}, clear=True), \
+                    patch.object(creq.Session, "request", side_effect=AssertionError("network forbidden")) as request, \
+                    patch("socket.socket.connect", side_effect=AssertionError("network forbidden")) as connect, \
+                    patch.object(cli.Sis, "_relogin", side_effect=AssertionError("login forbidden")) as login, \
+                    contextlib.redirect_stdout(io.StringIO()) as output, \
+                    contextlib.redirect_stderr(io.StringIO()) as errors:
+                result = cli.main(["status"])
+            self.assertEqual(result, 0)
+            request.assert_not_called()
+            connect.assert_not_called()
+            login.assert_not_called()
+            self.assertEqual(before, snapshot())
+            text = output.getvalue() + errors.getvalue()
+            for secret in ("test-user", "test-secret", "test-token"):
+                self.assertNotIn(secret, text)
+            self.assertEqual(errors.getvalue(), "")
+            data = json.loads(output.getvalue())
+            self.assertIsNone(data["authenticated"])
+            self.assertIsNone(data["reachable"])
+            self.assertFalse(data["authentication_checked"])
+            self.assertFalse(data["network_checked"])
+            return data
+
+    def test_non_object_configs_do_not_crash(self):
+        for value in (None, [1], "test-secret", 1, True, []):
+            with self.subTest(value=value):
+                data = self.run_status(config_bytes=json.dumps(value).encode("utf-8"))
+                self.assertEqual(data["relogin"], "blocked_missing_credentials")
+
+    def test_invalid_config_json_is_unavailable_without_rewrite(self):
+        data = self.run_status(config_bytes=b'{"password": "test-secret"')
+        self.assertEqual(data["relogin"], "blocked_missing_credentials")
+
+    def test_session_errors_handled_by_loader_are_absent_or_unusable(self):
+        for content in (b"invalid-json", b"\xff", b"[]", b"{}"):
+            with self.subTest(content=content):
+                data = self.run_status(session_bytes=content)
+                self.assertEqual(data["session"], "absent_or_unusable")
+
+    def test_malformed_cookie_entry_is_unreadable(self):
+        data = self.run_status(session_bytes=b'[{"value": "test-token"}]')
+        self.assertEqual(data["session"], "unreadable")
+
+    def test_cached_session_and_stored_credentials_remain_unchanged(self):
+        data = self.run_status(
+            config_bytes=b'{"username": "test-user", "password": "test-secret"}',
+            session_bytes=b'[{"name": "PS_TOKEN", "value": "test-token"}]')
+        self.assertEqual(data["session"], "cached_unverified")
+        self.assertEqual(data["relogin"], "credentials_available_unverified")
+
+    def test_missing_home_creates_no_authentication_files(self):
+        data = self.run_status(absent_home=True)
+        self.assertEqual(data["session"], "absent_or_unusable")
+        self.assertEqual(data["relogin"], "blocked_missing_credentials")
 
 
 if __name__ == "__main__":

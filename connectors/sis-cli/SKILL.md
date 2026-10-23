@@ -21,7 +21,7 @@ Write: none — read-only by design. **Enrollment actions (add/drop/swap classes
 
 ## Steps
 
-1. `sis-cli status` to confirm the session/components
+1. `sis-cli status` to inspect local session/credential evidence and registered components; it does not confirm authentication or network reachability
 2. Pick a command per the need (see Command cheat sheet); `--format text` prints human-readable lines, JSON keeps structured values
 3. Relay the results to the user (language: see Language below)
 
